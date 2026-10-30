@@ -28044,7 +28044,694 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE[] PROG
 #endif
 
 
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericAurora
+ * @description : Flowing aurora curtains with overlapping waves and gradients.
+ *
+ * Two independently moving wave fields create horizontal colour
+ * curtains with vertical undulations and smoothly varying brightness.
+ *
+ * Speed     : Horizontal flow speed
+ * Intensity : Overall brightness
+ * Custom1   : Curtain width
+ * Custom2   : Vertical wave distortion
+ * Custom3   : Number of colour bands (1-6)
+ * Check2    : Reverse horizontal flow
+ *
+ * Palette1 supplies the aurora colours.
+ * Uses the existing effect frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericAurora()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
 
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  if (SEGENV.call == 0) SEGENV.step = 0;
+
+  const uint8_t flow_speed = 1 + (SEGMENT.speed >> 5);
+  const uint8_t brightness = SEGMENT.intensity;
+  const uint8_t curtain_width = SEGMENT.custom1;
+  const uint8_t distortion = SEGMENT.custom2;
+  const uint8_t band_count = 1 + ((uint16_t)SEGMENT.custom3 * 5U / 31U);
+  const bool reverse = SEGMENT.check2;
+
+  SEGENV.step += flow_speed;
+  const uint8_t phase = (uint8_t)SEGENV.step;
+  const uint8_t phase2 = (uint8_t)(SEGENV.step >> 1);
+  const uint8_t width_scale = 2 + ((uint16_t)curtain_width * 14U / 255U);
+
+  for (uint16_t x = 0; x < cols; x++)
+  {
+    const uint8_t x_phase = ((uint32_t)x * band_count * 256U / cols);
+    const uint8_t flow_phase = reverse ? (uint8_t)(x_phase + phase) : (uint8_t)(x_phase - phase);
+    const uint8_t primary_wave = sin8(flow_phase);
+    const uint8_t secondary_wave = sin8((uint8_t)(flow_phase * 2U + phase2));
+    const uint8_t wave_height = (primary_wave >> 3) + (secondary_wave >> 4);
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      const uint8_t y_phase = ((uint32_t)y * 256U / rows);
+      const uint8_t vertical_wave = sin8((uint8_t)(y_phase + phase2 + x_phase));
+      const uint8_t bend = ((int16_t)vertical_wave - 128) * distortion / 255;
+      const uint8_t curtain_phase = (uint8_t)(flow_phase + y_phase / width_scale + bend + wave_height);
+
+      // Build several overlapping soft curtains.
+      const uint8_t curtain1 = sin8(curtain_phase);
+      const uint8_t curtain2 = sin8((uint8_t)(curtain_phase + 85U + phase2));
+      const uint8_t curtain3 = sin8((uint8_t)(curtain_phase + 170U - phase2));
+
+      // Broad, overlapping brightness variation.
+      const uint8_t envelope = ((uint16_t)curtain1 * 3U + curtain2 + curtain3) / 5U;
+      const uint8_t vertical_brightness = 255U - ((uint32_t)y * 100U / rows);
+      const uint8_t pixel_brightness = ((uint32_t)envelope * vertical_brightness * brightness) / 65025U;
+
+      // Moving palette index changes the colour within each curtain.
+      const uint8_t palette_index = (uint8_t)(x_phase + y_phase / 3U + phase2 + secondary_wave / 4U);
+      const uint32_t colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+      SEGMENT.setPixelColorXY(x, y, color_blend(BLACK, colour, pixel_brightness));
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_AURORA[] PROGMEM =
+"Icicle Atmospheric Aurora@"
+"Flow Speed,Brightness,Width,Distortion,Bands,,Reverse,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=100,ix=180,c1=160,c2=100,c3=12,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_AURORA[] PROGMEM =
+"Flowing aurora curtains with overlapping colour waves.\n\r"
+"Horizontal motion combines with vertical distortion and soft gradients.\n\r"
+"No individual particles or independent column triggers.\n\r"
+"SX: Horizontal flow speed\n\r"
+"IX: Overall illumination\n\r"
+"C1: Curtain width\n\r"
+"C2: Vertical wave distortion\n\r"
+"C3: Number of colour bands (1-6)\n\r"
+"O2: Reverse horizontal flow\n\r"
+"Palette1: Aurora curtain colours";
+#endif
+
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericFallingComets
+ * @description : Independently moving diagonal comets with fading tails.
+ *
+ * Comets travel downward and sideways across the 2D matrix.
+ * Each comet has an independently selected position, velocity,
+ * colour and tail length.
+ *
+ * Speed     : Comet falling velocity
+ * Intensity : Active comet density
+ * Custom1   : Maximum tail length (2-12 pixels)
+ * Custom2   : Background afterglow fade rate
+ * Custom3   : Horizontal movement strength (0-31)
+ * Check2    : Reverse horizontal movement
+ *
+ * Palette1 supplies the comet colours.
+ * Uses the existing PulSar effect frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFallingComets()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct IcicleComet {
+    int32_t x;
+    int32_t y;
+    uint8_t vx;
+    uint8_t vy;
+    uint8_t length;
+    uint8_t colour;
+    uint8_t active;
+  };
+
+  const uint16_t max_comets = min<uint16_t>(32, max<uint16_t>(4, cols / 8U));
+  const size_t data_size = max_comets * sizeof(IcicleComet);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  IcicleComet* comets = reinterpret_cast<IcicleComet*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(comets, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
+  const uint8_t max_length = 2 + ((uint16_t)SEGMENT.custom1 * 10U / 255U);
+  const uint8_t fade_amount = 10 + ((uint16_t)SEGMENT.custom2 * 210U / 255U);
+  const uint8_t horizontal_strength = SEGMENT.custom3;
+  const bool reverse = SEGMENT.check2;
+
+  // Retain fading illumination from previous comet positions.
+  SEGMENT.fadeToBlackBy(fade_amount);
+
+  for (uint16_t i = 0; i < max_comets; i++)
+  {
+    IcicleComet& comet = comets[i];
+
+    if (!comet.active)
+    {
+      if (hw_random8() >= spawn_chance) continue;
+
+      comet.active = 1;
+      comet.x = (int32_t)hw_random16(cols) * 16;
+      comet.y = -16 * (1 + hw_random8(3));
+      comet.vy = base_speed + hw_random8(max<uint8_t>(1, base_speed / 2U));
+      comet.vx = (horizontal_strength == 0) ? 0 : 1 + ((uint16_t)horizontal_strength * hw_random8(16)) / 31U;
+      comet.length = 2 + hw_random8(max_length - 1U);
+      comet.colour = hw_random8();
+      continue;
+    }
+
+    // Move the comet along its independently selected diagonal trajectory.
+    const int16_t horizontal_step = reverse ? -(int16_t)comet.vx : (int16_t)comet.vx;
+    comet.x += horizontal_step;
+    comet.y += comet.vy;
+
+    // Remove comets after leaving the matrix.
+    if (comet.y >= (int32_t)(rows + comet.length) * 16 || comet.x < -(int32_t)comet.length * 16 || comet.x >= (int32_t)(cols + comet.length) * 16) {
+      comet.active = 0;
+      continue;
+    }
+
+    const uint32_t colour = SEGMENT.GetPaletteColour(comet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+    // Render the comet head followed by its diagonal tail.
+    for (uint8_t t = 0; t <= comet.length; t++)
+    {
+      const int32_t tail_x = comet.x - ((int32_t)horizontal_step * t * 16 / max<uint8_t>(1, comet.vy));
+      const int32_t tail_y = comet.y - (int32_t)t * 16;
+      const int32_t x = tail_x >> 4;
+      const int32_t y = tail_y >> 4;
+
+      if (x < 0 || x >= cols || y < 0 || y >= rows) continue;
+
+      const uint8_t brightness = (t == 0) ? 255 : ((uint16_t)(comet.length - t + 1U) * 220U) / (comet.length + 1U);
+      SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, brightness));
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS[] PROGMEM =
+"Icicle Atmospheric Falling Comets@"
+"Speed,Density,Tail,Fade,Angle,,Reverse,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=150,c1=160,c2=120,c3=20,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS[] PROGMEM =
+"Diagonal comets travel across neighbouring icicles.\n\r"
+"Each comet has a bright head, fading tail and independent velocity.\n\r"
+"Trails persist briefly after the comet moves onward.\n\r"
+"SX: Falling velocity\n\r"
+"IX: Comet generation density\n\r"
+"C1: Maximum comet tail length (2-12 pixels)\n\r"
+"C2: Background afterglow fade rate\n\r"
+"C3: Horizontal movement strength (0=vertical)\n\r"
+"O2: Reverse horizontal movement\n\r"
+"Palette1: Comet colours";
+#endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericLightning
+ * @description : Random lightning strikes with branching and fading afterglow.
+ *
+ * Lightning originates at the top of the matrix and travels downward.
+ * Individual strikes have irregular paths, optional horizontal branches,
+ * independently selected colours and short flickering lifetimes.
+ *
+ * Speed     : Flash duration (higher = faster)
+ * Intensity : Lightning generation frequency
+ * Custom1   : Branching frequency
+ * Custom2   : Afterglow persistence
+ * Custom3   : Horizontal spread (0-31)
+ * Check2    : Use Palette2 for the lightning core
+ *
+ * Palette1 supplies branching and afterglow colours.
+ * Palette2 optionally supplies the brighter lightning core.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct LightningStrike {
+    uint16_t x;
+    uint8_t seed;
+    uint8_t colour;
+    uint8_t age;
+    uint8_t duration;
+    uint8_t active;
+  };
+
+  const uint8_t max_strikes = 4;
+  const size_t data_size = max_strikes * sizeof(LightningStrike);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  LightningStrike* strikes = reinterpret_cast<LightningStrike*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(strikes, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t flash_duration = 2 + ((255U - SEGMENT.speed) / 22U);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 3);
+  const uint8_t branching = SEGMENT.custom1;
+  const uint8_t afterglow_fade = 220 - ((uint16_t)SEGMENT.custom2 * 200U / 255U);
+  const uint8_t horizontal_spread = ((uint16_t)SEGMENT.custom3 * 8U) / 31U;
+  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  // Preserve previous lightning illumination as a fading afterglow.
+  SEGMENT.fadeToBlackBy(afterglow_fade);
+
+  // Randomly generate a strike in an available slot.
+  if (hw_random8() < spawn_chance)
+  {
+    for (uint8_t i = 0; i < max_strikes; i++)
+    {
+      LightningStrike& strike = strikes[i];
+      if (strike.active) continue;
+
+      strike.x = hw_random16(cols);
+      strike.seed = hw_random8();
+      strike.colour = hw_random8();
+      strike.age = 0;
+      strike.duration = flash_duration + hw_random8(3);
+      strike.active = 1;
+      break;
+    }
+  }
+
+  for (uint8_t i = 0; i < max_strikes; i++)
+  {
+    LightningStrike& strike = strikes[i];
+    if (!strike.active) continue;
+
+    if (strike.age >= strike.duration) {
+      strike.active = 0;
+      continue;
+    }
+
+    const uint8_t remaining = strike.duration - strike.age;
+    const uint8_t lifetime_brightness = ((uint16_t)remaining * 255U) / strike.duration;
+    const uint8_t flicker = hw_random8(2) ? 255 : 170;
+    const uint8_t brightness = ((uint16_t)lifetime_brightness * flicker) / 255U;
+
+    const uint32_t branch_colour = SEGMENT.GetPaletteColour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : branch_colour;
+
+    // Reconstruct a repeatable jagged path from the strike seed.
+    uint32_t random_state = (uint32_t)strike.seed + 1U;
+    int32_t x = strike.x;
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      random_state = random_state * 1664525UL + 1013904223UL;
+      const uint8_t direction = (random_state >> 24) % 3U;
+      const int16_t shift = (direction == 0) ? -1 : (direction == 2) ? 1 : 0;
+
+      // Spread determines whether each row can change columns.
+      if (((random_state >> 16) & 0xFF) < (uint16_t)horizontal_spread * 28U) x += shift;
+      if (x < 0) x = 0;
+      if (x >= cols) x = cols - 1;
+
+      // The lightning core is brighter than its surrounding branches.
+      const uint32_t core = color_blend(BLACK, core_colour, brightness);
+      SEGMENT.addPixelColorXY(x, y, core);
+
+      // Draw occasional side branches from the main strike.
+      random_state = random_state * 1664525UL + 1013904223UL;
+      if (((random_state >> 24) & 0xFF) < branching)
+      {
+        const int16_t branch_direction = (random_state & 1U) ? 1 : -1;
+        const uint8_t branch_length = 1 + ((random_state >> 8) % 4U);
+
+        for (uint8_t b = 1; b <= branch_length; b++)
+        {
+          const int32_t branch_x = x + branch_direction * b;
+          const int32_t branch_y = y + (b >> 1);
+          if (branch_x < 0 || branch_x >= cols || branch_y >= rows) break;
+
+          const uint8_t branch_brightness = ((uint16_t)brightness * (branch_length - b + 1U)) / (branch_length + 1U);
+          SEGMENT.addPixelColorXY(branch_x, branch_y, color_blend(BLACK, branch_colour, branch_brightness));
+        }
+      }
+    }
+
+    strike.age++;
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
+"Icicle Atmospheric Lightning@"
+"Flash Speed,Frequency,Branching,Afterglow,Spread,,Pal2 Core,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=180,ix=60,c1=90,c2=110,c3=16,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
+"Random lightning strikes with irregular paths and horizontal branches.\n\r"
+"Individual strikes flicker and leave a fading afterglow.\n\r"
+"Multiple strikes can overlap across the matrix.\n\r"
+"SX: Flash speed (higher = shorter strikes)\n\r"
+"IX: Lightning generation frequency\n\r"
+"C1: Horizontal branching frequency\n\r"
+"C2: Afterglow persistence\n\r"
+"C3: Horizontal spread (0-31)\n\r"
+"O2: Use Palette2 for lightning cores\n\r"
+"Palette1: Branches and afterglow\n\r"
+"Palette2: Lightning core when O2 is enabled";
+#endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericWaterfall
+ * @description : Continuous flowing streams with turbulence and bottom foam.
+ *
+ * Vertical streams remain illuminated while travelling highlights
+ * create the impression of continuously flowing water.
+ * Columns vary in brightness and flow phase.
+ * Optional foam appears near the bottom of the matrix.
+ *
+ * Speed     : Downward flow velocity
+ * Intensity : Density of active streams
+ * Custom1   : Stream width
+ * Custom2   : Flow turbulence
+ * Custom3   : Foam strength (0-31)
+ * Check2    : Use Palette2 for bottom foam
+ *
+ * Palette1 supplies the flowing stream colours.
+ * Palette2 optionally supplies the foam colours.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  if (SEGENV.call == 0) SEGENV.step = 0;
+
+  const uint8_t flow_speed = 1 + (SEGMENT.speed >> 4);
+  const uint8_t density = SEGMENT.intensity;
+  const uint8_t stream_width = SEGMENT.custom1;
+  const uint8_t turbulence = SEGMENT.custom2;
+  const uint8_t foam_strength = SEGMENT.custom3;
+  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  // Animation phase advances through the normal effect frame scheduler.
+  SEGENV.step += flow_speed;
+  const uint32_t phase = SEGENV.step;
+
+  // Higher width values produce broader groups of flowing columns.
+  const uint8_t horizontal_frequency = 4 + ((255U - stream_width) / 12U);
+
+  // Foam occupies the lower 1-4 rows, depending on intensity.
+  const uint8_t foam_rows = foam_strength ? 1 + ((uint16_t)foam_strength * 3U / 31U) : 0;
+  const uint16_t foam_start = (foam_rows >= rows) ? 0 : rows - foam_rows;
+
+  SEGMENT.fill(BLACK);
+
+  for (uint16_t x = 0; x < cols; x++)
+  {
+    // Smooth horizontal grouping determines which columns carry water.
+    const uint8_t column_wave = sin8((uint8_t)(x * horizontal_frequency + (phase >> 4)));
+    const uint8_t density_threshold = 255U - density;
+    if (column_wave < density_threshold) continue;
+
+    // Turbulence changes the phase of the falling highlights independently.
+    const uint8_t column_offset = sin8((uint8_t)(x * 7U + (phase >> 2)));
+    const uint8_t turbulent_offset = ((uint16_t)column_offset * turbulence) / 255U;
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      // The negative phase produces downward movement as time advances.
+      const uint8_t primary_wave = sin8((uint8_t)(y * 35U - phase + turbulent_offset));
+      const uint8_t secondary_wave = sin8((uint8_t)(y * 77U - phase * 2U + x * 11U));
+
+      // Continuous illumination with moving bright and dark regions.
+      const uint8_t flow_brightness = 35 + ((uint16_t)primary_wave * 170U + (uint16_t)secondary_wave * 50U) / 255U;
+
+      const uint8_t palette_index = (uint8_t)(((uint32_t)x * 255U / max<uint16_t>(1, cols - 1U)) + (phase >> 4) + (primary_wave >> 3));
+      const uint32_t stream_colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+      uint32_t output_colour = color_blend(BLACK, stream_colour, flow_brightness);
+
+      // Optional moving foam appears near the bottom of the waterfall.
+      if (foam_rows && y >= foam_start)
+      {
+        const uint8_t foam_wave = sin8((uint8_t)(x * 29U + y * 47U - phase * 3U));
+        const uint8_t foam_brightness = ((uint16_t)foam_wave * foam_strength * 255U) / (31U * 255U);
+        const uint32_t foam_colour = palette2_ready
+          ? SEGMENT.GetPalette2Colour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
+          : WHITE;
+
+        output_colour = color_blend(output_colour, foam_colour, foam_brightness);
+      }
+
+      SEGMENT.setPixelColorXY(x, y, output_colour);
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
+"Icicle Atmospheric Waterfall@"
+"Flow Speed,Density,Stream Width,Turbulence,Foam,,Pal2 Foam,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=220,c1=180,c2=100,c3=16,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
+"Continuous vertical waterfall streams with moving highlights.\n\r"
+"Independent phase variation creates flowing water and turbulence.\n\r"
+"Optional animated foam brightens the lower rows.\n\r"
+"SX: Downward flow velocity\n\r"
+"IX: Density of active streams\n\r"
+"C1: Stream width\n\r"
+"C2: Flow turbulence\n\r"
+"C3: Bottom foam strength (0-31)\n\r"
+"O2: Use Palette2 for foam\n\r"
+"Palette1: Flowing water colours\n\r"
+"Palette2: Bottom foam when O2 is enabled";
+#endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleSpatialRipple
+ * @description : Expanding circular or elliptical waves across a 2D matrix.
+ *
+ * Independent ripples originate at random matrix positions.
+ * Each ripple expands outward, illuminating pixels near its perimeter.
+ * Multiple ripples can overlap and combine their illumination.
+ *
+ * Speed     : Ripple expansion velocity
+ * Intensity : Ripple generation frequency
+ * Custom1   : Ring thickness (1-8 pixels)
+ * Custom2   : Ring edge softness
+ * Custom3   : Elliptical distortion (0-31)
+ * Check2    : Use Palette2 for ripple centres
+ *
+ * Palette1 supplies the expanding ring colours.
+ * Palette2 optionally supplies a short flash at each ripple origin.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleSpatialRipple()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct IcicleRipple {
+    uint16_t x;
+    uint16_t y;
+    uint16_t radius;
+    uint8_t colour;
+    uint8_t active;
+  };
+
+  const uint8_t max_ripples = 4;
+  const size_t data_size = max_ripples * sizeof(IcicleRipple);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  IcicleRipple* ripples = reinterpret_cast<IcicleRipple*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(ripples, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t expansion_speed = 1 + (SEGMENT.speed >> 5);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
+  const uint8_t ring_width = 1 + ((uint16_t)SEGMENT.custom1 * 7U / 255U);
+  const uint8_t softness = SEGMENT.custom2;
+  const uint8_t distortion = SEGMENT.custom3;
+  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  // Higher distortion makes the rings wider horizontally relative to height.
+  const float vertical_scale = 1.0f + ((float)distortion * 7.0f / 31.0f);
+  const float max_radius = sqrtf((float)cols * cols + (float)rows * rows * vertical_scale * vertical_scale) + ring_width;
+  const uint16_t max_radius_fixed = (uint16_t)(max_radius * 16.0f);
+
+  // Ripples are reconstructed each frame, without residual afterglow.
+  SEGMENT.fill(BLACK);
+
+  // Randomly start a ripple when an animation slot is available.
+  if (hw_random8() < spawn_chance)
+  {
+    for (uint8_t i = 0; i < max_ripples; i++)
+    {
+      IcicleRipple& ripple = ripples[i];
+      if (ripple.active) continue;
+
+      ripple.x = hw_random16(cols);
+      ripple.y = hw_random16(rows);
+      ripple.radius = 0;
+      ripple.colour = hw_random8();
+      ripple.active = 1;
+      break;
+    }
+  }
+
+  for (uint8_t i = 0; i < max_ripples; i++)
+  {
+    IcicleRipple& ripple = ripples[i];
+    if (!ripple.active) continue;
+
+    // Expand by a fractional number of pixels per frame.
+    ripple.radius += expansion_speed;
+
+    if (ripple.radius >= max_radius_fixed) {
+      ripple.active = 0;
+      continue;
+    }
+
+    const float radius = (float)ripple.radius / 16.0f;
+    const uint32_t ring_colour = SEGMENT.GetPaletteColour(ripple.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    const uint32_t centre_colour = palette2_ready ? SEGMENT.GetPalette2Colour(ripple.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : ring_colour;
+
+    // A newly formed ripple briefly illuminates its origin.
+    if (radius < 2.0f)
+    {
+      const uint8_t centre_brightness = (uint8_t)(255.0f * (2.0f - radius) / 2.0f);
+      SEGMENT.addPixelColorXY(ripple.x, ripple.y, color_blend(BLACK, centre_colour, centre_brightness));
+    }
+
+    // Calculate the expanding ring using the distance from its origin.
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      const float dy = ((int32_t)y - ripple.y) * vertical_scale;
+      const float dy2 = dy * dy;
+
+      for (uint16_t x = 0; x < cols; x++)
+      {
+        const float dx = (int32_t)x - ripple.x;
+        const float distance = sqrtf(dx * dx + dy2);
+        const float difference = fabsf(distance - radius);
+        if (difference >= ring_width) continue;
+
+        // Softness controls the contrast between the ring core and edges.
+        const float normalized = difference / ring_width;
+        const float sharp_brightness = (normalized < 0.5f) ? 1.0f : 0.0f;
+        const float smooth_brightness = 1.0f - normalized;
+        const float blend = (float)softness / 255.0f;
+        const float brightness_float = sharp_brightness * (1.0f - blend) + smooth_brightness * blend;
+        const uint8_t brightness = (uint8_t)(255.0f * brightness_float);
+        if (!brightness) continue;
+
+        SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, ring_colour, brightness));
+      }
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_SPATIAL_RIPPLE[] PROGMEM =
+"Icicle Spatial Ripple@"
+"Speed,Frequency,Thickness,Softness,Ellipse,,Pal2 Centre,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=100,c1=100,c2=180,c3=16,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_SPATIAL_RIPPLE[] PROGMEM =
+"Expanding circular or elliptical light waves across the matrix.\n\r"
+"Each ripple originates at a random position and expands outward.\n\r"
+"Up to four ripples may overlap, combining their illumination.\n\r"
+"SX: Ripple expansion velocity\n\r"
+"IX: Ripple generation frequency\n\r"
+"C1: Ring thickness (1-8 pixels)\n\r"
+"C2: Ring edge softness\n\r"
+"C3: Elliptical distortion (0=circular, 31=maximum horizontal elongation)\n\r"
+"O2: Use Palette2 for ripple centre flashes\n\r"
+"Palette1: Expanding ring colours\n\r"
+"Palette2: Ripple centre when O2 is enabled";
+#endif
 
 
 
