@@ -27226,25 +27226,22 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
 
 
-
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleDrips
- * @description : Fine independent drips moving down individual icicles.
+ * @function    : EffectAnim__2D__IcicleMeltingDrips
+ * @description : Independent vertical drips with configurable tails.
  *
- * Each column may contain multiple falling points. The illuminated
- * trail is optional and always follows the leading pixel.
+ * Each column supports up to two independently falling points.
+ * Drips remain restricted to their originating column.
  *
- * Controls:
- *   Speed     : Falling velocity
- *   Intensity : Drip generation density
- *   Custom1   : Tail length (0-4 pixels)
- *   Custom2   : Tail mode (None / Solid / Fading)
- *   Custom3   : Velocity variation (0-31)
+ * Speed     : Falling velocity
+ * Intensity : Drip generation density
+ * Custom1   : Tail length (0-4 pixels)
+ * Custom2   : Tail mode (None / Solid / Fading)
+ * Custom3   : Velocity variation (0-31)
  *
- * Every object remains on its original column.
- * Uses the normal PulSar effect frame scheduler.
+ * Uses the existing PulSar effect frame scheduler.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleDrips()
+void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -27256,23 +27253,20 @@ void mAnimatorLight::EffectAnim__2D__IcicleDrips()
   if (!cols || !rows) return;
 
   struct IcicleDrip {
-    int16_t position;    // Vertical position, 1/16 pixel
-    uint8_t velocity;    // Individual velocity variation
-    uint8_t colour;      // Palette1 index
+    int16_t position;
+    uint8_t velocity;
+    uint8_t colour;
     uint8_t active;
   };
 
-  // Two independently falling points per column.
   const uint16_t max_drips = cols * 2U;
   const size_t data_size = max_drips * sizeof(IcicleDrip);
-
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
   IcicleDrip* drips = reinterpret_cast<IcicleDrip*>(SEGENV.data);
-
   if (SEGENV.call == 0) {
     memset(drips, 0, data_size);
     SEGMENT.fill(BLACK);
@@ -27281,11 +27275,9 @@ void mAnimatorLight::EffectAnim__2D__IcicleDrips()
   const uint8_t base_speed = 1 + (SEGMENT.speed >> 5);
   const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
   const uint8_t tail_length = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
-  const uint8_t tail_mode = (SEGMENT.custom2 <= 85) ? 0 :
-                            (SEGMENT.custom2 <= 170) ? 1 : 2;
+  const uint8_t tail_mode = (SEGMENT.custom2 <= 85) ? 0 : (SEGMENT.custom2 <= 170) ? 1 : 2;
   const uint8_t variation = SEGMENT.custom3 * 8U;
 
-  // Reconstruct only the current drops and their selected tails.
   SEGMENT.fill(BLACK);
 
   for (uint16_t i = 0; i < max_drips; i++)
@@ -27296,7 +27288,6 @@ void mAnimatorLight::EffectAnim__2D__IcicleDrips()
     if (!drip.active)
     {
       if (hw_random8() >= spawn_chance) continue;
-
       drip.active = 1;
       drip.position = -16 * (1 + hw_random8(3));
       drip.velocity = hw_random8();
@@ -27304,40 +27295,20 @@ void mAnimatorLight::EffectAnim__2D__IcicleDrips()
       continue;
     }
 
-    // Apply independent velocity variation.
-    const uint16_t velocity_scale =
-      256U - (variation / 2U) +
-      ((uint16_t)drip.velocity * variation / 255U);
-
-    const uint16_t movement =
-      max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
-
+    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)drip.velocity * variation / 255U);
+    const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
     drip.position += movement;
 
-    // The complete point and tail have passed the bottom.
-    if (drip.position >= (int16_t)((rows + tail_length) * 16U))
-    {
+    if (drip.position >= (int16_t)((rows + tail_length) * 16U)) {
       drip.active = 0;
       continue;
     }
 
     const int16_t y = drip.position >> 4;
+    const uint32_t colour = SEGMENT.GetPaletteColour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
 
-    const uint32_t colour = SEGMENT.GetPaletteColour(
-      drip.colour,
-      PALETTE_INDEX__IS_255_RANGE,
-      PALETTE_MODE__DEFAULT,
-      PALETTE_WRAP_HARDEDGE
-    );
-
-    // Single bright moving head.
-    if (y >= 0 && y < rows)
-    {
-      SEGMENT.addPixelColorXY(x, y, colour);
-    }
-
-    // Optional tail behind the head.
-    if (tail_mode == 0) continue;
+    if (y >= 0 && y < rows) SEGMENT.addPixelColorXY(x, y, colour);
+    if (tail_mode == 0 || tail_length == 0) continue;
 
     for (uint8_t t = 1; t <= tail_length; t++)
     {
@@ -27345,27 +27316,15 @@ void mAnimatorLight::EffectAnim__2D__IcicleDrips()
       if (tail_y < 0 || tail_y >= rows) continue;
 
       uint8_t brightness = 255;
-
-      if (tail_mode == 2)
-      {
-        // Progressively dimmer towards the trailing end.
-        brightness =
-          ((uint16_t)(tail_length - t + 1U) * 220U) /
-          (tail_length + 1U);
-      }
-
-      SEGMENT.addPixelColorXY(
-        x,
-        tail_y,
-        color_blend(BLACK, colour, brightness)
-      );
+      if (tail_mode == 2) brightness = ((uint16_t)(tail_length - t + 1U) * 220U) / (tail_length + 1U);
+      SEGMENT.addPixelColorXY(x, tail_y, color_blend(BLACK, colour, brightness));
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_DRIPS[] PROGMEM =
-"Icicle Drips@"
-"Speed,Density,Tail,Tail Mode,Variation,,,,,!"
+static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
+"Icicle Melting Drips@"
+"Speed,Density,Tail,Tail Mode,Variation,,,,!,!"
 ";"
 ""
 ";"
@@ -27376,10 +27335,10 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_DRIPS[] PROGMEM =
 "sx=127,ix=100,c1=127,c2=0,c3=16,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_DRIPS[] PROGMEM =
-"Fine independently falling points on vertical icicles.\n\r"
-"Multiple drips may move along the same column.\n\r"
-"All movement is strictly vertical.\n\r"
+static const char PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
+"Independent vertical drips with selectable tail rendering.\n\r"
+"Each icicle supports up to two independently moving drips.\n\r"
+"All movement remains within the originating column.\n\r"
 "SX: Falling velocity\n\r"
 "IX: Drip generation density\n\r"
 "C1: Tail length (0-4 pixels)\n\r"
@@ -27388,30 +27347,29 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_DRIPS[] PROGMEM =
 #endif
 
 
-
-
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleDroplets
- * @description : Distinct falling droplets on individual icicles.
+ * @function    : EffectAnim__2D__IcicleMeltingDroplets
+ * @description : Independently falling droplets with bright leading pixels.
  *
- * Each column has one independently triggered droplet with:
- *   - A bright leading pixel
- *   - A continuous illuminated body
- *   - Variable body length and falling velocity
- *   - Optional subpixel smoothing
+ * Each column supports one active droplet containing:
+ *   - A leading pixel at maximum brightness
+ *   - A variable-length body with progressively fading brightness
+ *   - Independent falling velocity and palette colour
+ *   - Optional subpixel interpolation for smooth movement
  *
- * Controls:
- *   Speed     : Falling velocity
- *   Intensity : Droplet generation density
- *   Custom1   : Maximum droplet length (1-5 pixels)
- *   Custom2   : Subpixel smoothing
- *   Custom3   : Velocity variation (0-31)
- *   Check2    : Use Palette2 for the leading pixel
+ * Speed     : Falling velocity
+ * Intensity : Droplet generation density
+ * Custom1   : Maximum droplet length (1-5 pixels)
+ * Custom2   : Subpixel smoothing
+ * Custom3   : Velocity variation (0-31)
+ * Check2    : Use Palette2 for the leading pixel
  *
- * The droplet body always uses Palette1.
- * All movement is restricted to one column.
+ * Palette1 supplies the droplet body.
+ * Palette2 optionally supplies the leading pixel.
+ * All movement remains within the originating column.
+ * Uses the existing PulSar effect frame scheduler.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleDroplets()
+void mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -27423,24 +27381,21 @@ void mAnimatorLight::EffectAnim__2D__IcicleDroplets()
   if (!cols || !rows) return;
 
   struct IcicleDroplet {
-    int16_t position;    // Leading edge, 1/16 pixel
-    uint8_t velocity;    // Individual velocity
-    uint8_t length;      // Body length in pixels
-    uint8_t colour;      // Shared palette index
+    int16_t position;
+    uint8_t velocity;
+    uint8_t length;
+    uint8_t colour;
     uint8_t active;
   };
 
-  // One droplet per column.
+  // One independent droplet per column.
   const size_t data_size = cols * sizeof(IcicleDroplet);
-
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
-  IcicleDroplet* droplets =
-    reinterpret_cast<IcicleDroplet*>(SEGENV.data);
-
+  IcicleDroplet* droplets = reinterpret_cast<IcicleDroplet*>(SEGENV.data);
   if (SEGENV.call == 0) {
     memset(droplets, 0, data_size);
     SEGMENT.fill(BLACK);
@@ -27448,29 +27403,26 @@ void mAnimatorLight::EffectAnim__2D__IcicleDroplets()
 
   const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
   const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t max_length =
-    1 + ((uint16_t)SEGMENT.custom1 * 4U / 255U);
+  const uint8_t max_length = 1 + ((uint16_t)SEGMENT.custom1 * 4U / 255U);
   const uint8_t smoothing = SEGMENT.custom2;
   const uint8_t variation = SEGMENT.custom3 * 8U;
   const bool use_palette2_head = SEGMENT.check2;
 
-  // Ensure Palette2 is loaded before rendering any droplet heads.
-  // Also handles changes to Palette2 while the effect is active.
-  // If loading fails, the leading pixel falls back to Palette1.
-  const bool palette2_ready = use_palette2_head &&
-    SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  // Load the selected secondary palette once, or whenever its ID changes.
+  // Fall back to Palette1 if Palette2 cannot be loaded.
+  const bool palette2_ready = use_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
 
-  // Reconstruct every complete droplet each frame.
+  // Droplets are reconstructed each frame without accumulated trails.
   SEGMENT.fill(BLACK);
 
   for (uint16_t x = 0; x < cols; x++)
   {
     IcicleDroplet& droplet = droplets[x];
 
+    // Generate a new droplet when the column is available.
     if (!droplet.active)
     {
       if (hw_random8() >= spawn_chance) continue;
-
       droplet.active = 1;
       droplet.position = -16 * (1 + hw_random8(2));
       droplet.velocity = hw_random8();
@@ -27479,95 +27431,48 @@ void mAnimatorLight::EffectAnim__2D__IcicleDroplets()
       continue;
     }
 
-    // Speed variation is selected independently for each droplet.
-    const uint16_t velocity_scale =
-      256U - (variation / 2U) +
-      ((uint16_t)droplet.velocity * variation / 255U);
-
-    const uint16_t movement =
-      max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
-
+    // Apply individual velocity variation while retaining downward movement.
+    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)droplet.velocity * variation / 255U);
+    const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
     droplet.position += movement;
 
-    // Remove the droplet once its complete body passes the bottom.
-    if (droplet.position >=
-        (int16_t)((rows + droplet.length) * 16U))
-    {
+    // Remove the droplet after its entire body passes the bottom.
+    if (droplet.position >= (int16_t)((rows + droplet.length) * 16U)) {
       droplet.active = 0;
       continue;
     }
 
-    // Palette1 supplies the complete droplet body.
-    const uint32_t body_colour = SEGMENT.GetPaletteColour(
-      droplet.colour,
-      PALETTE_INDEX__IS_255_RANGE,
-      PALETTE_MODE__DEFAULT,
-      PALETTE_WRAP_HARDEDGE
-    );
+    // Resolve body colour from Palette1.
+    const uint32_t body_colour = SEGMENT.GetPaletteColour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
 
-    // Check2 optionally switches only the leading pixel to Palette2.
-    // Fall back to Palette1 if Palette2 could not be loaded.
+    // Check2 optionally selects Palette2 for the leading pixel only.
     const uint32_t head_colour = palette2_ready
-      ? SEGMENT.GetPalette2Colour(
-          droplet.colour,
-          PALETTE_INDEX__IS_255_RANGE,
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE
-        )
+      ? SEGMENT.GetPalette2Colour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
       : body_colour;
 
     const int16_t head_y = droplet.position >> 4;
     const uint8_t fraction = droplet.position & 0x0F;
+    const uint8_t fractional_blend = ((uint16_t)fraction * smoothing) / 255U;
 
-    // Custom2 controls how much fractional movement is distributed
-    // into the next vertical pixel.
-    const uint8_t fractional_blend =
-      ((uint16_t)fraction * smoothing) / 255U;
-
+    // Draw the head and the fading body behind it.
     for (uint8_t t = 0; t < droplet.length; t++)
     {
       const int16_t y = head_y - t;
+      const uint8_t brightness = ((uint16_t)(droplet.length - t) * 255U) / droplet.length;
+      const uint32_t colour = (t == 0) ? head_colour : body_colour;
 
-      // The leading pixel is brightest. The rest of the body
-      // progressively decreases in brightness.
-      const uint8_t brightness =
-        ((uint16_t)(droplet.length - t) * 255U) /
-        droplet.length;
+      // Split brightness between adjacent pixels for smooth movement.
+      const uint8_t upper_brightness = ((uint16_t)brightness * (16U - fractional_blend)) >> 4;
+      const uint8_t lower_brightness = ((uint16_t)brightness * fractional_blend) >> 4;
 
-      // Palette2 is used exclusively for the leading pixel.
-      const uint32_t colour = (t == 0)
-        ? head_colour
-        : body_colour;
-
-      const uint8_t upper_brightness =
-        ((uint16_t)brightness * (16U - fractional_blend)) >> 4;
-
-      const uint8_t lower_brightness =
-        ((uint16_t)brightness * fractional_blend) >> 4;
-
-      if (y >= 0 && y < rows)
-      {
-        SEGMENT.addPixelColorXY(
-          x,
-          y,
-          color_blend(BLACK, colour, upper_brightness)
-        );
-      }
-
-      if (lower_brightness && y + 1 >= 0 && y + 1 < rows)
-      {
-        SEGMENT.addPixelColorXY(
-          x,
-          y + 1,
-          color_blend(BLACK, colour, lower_brightness)
-        );
-      }
+      if (y >= 0 && y < rows) SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, upper_brightness));
+      if (lower_brightness && y + 1 >= 0 && y + 1 < rows) SEGMENT.addPixelColorXY(x, y + 1, color_blend(BLACK, colour, lower_brightness));
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_DROPLETS[] PROGMEM =
-"Icicle Droplets@"
+static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
+"Icicle Melting Droplets@"
 "Speed,Density,Length,Smoothing,Variation,,Pal2 Head,,,!"
 ";"
 ""
@@ -27579,10 +27484,10 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_DROPLETS[] PROGMEM =
 "sx=127,ix=100,c1=160,c2=200,c3=16,o2=0,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_DROPLETS[] PROGMEM =
-"Independently falling multi-pixel droplets on vertical icicles.\n\r"
-"Each column contains at most one active droplet.\n\r"
-"The body fades in brightness behind a bright leading head.\n\r"
+static const char PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
+"Independent multi-pixel droplets falling vertically down icicles.\n\r"
+"Each column supports one droplet with a bright leading head and fading body.\n\r"
+"Individual droplets vary in speed, length and palette colour.\n\r"
 "SX: Falling velocity\n\r"
 "IX: Droplet generation density\n\r"
 "C1: Maximum droplet length (1-5 pixels)\n\r"
@@ -27595,245 +27500,20 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_DROPLETS[] PROGMEM =
 
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleWaveDrips
- * @description : A horizontal wave triggers falling droplets progressively
- *                across the icicle columns.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleWaveDrips()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_WAVE_DRIPS[] PROGMEM =
-"Icicle Wave Drips@"
-"Speed,Density,Length,Spacing,Wave mode,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_WAVE_DRIPS[] PROGMEM =
-"Horizontal waves progressively trigger vertical droplets.\n\r"
-"SX: Wave propagation speed\n\r"
-"IX: Number of active waves\n\r"
-"C1: Droplet length\n\r"
-"C2: Wave spacing\n\r"
-"C3: Wave direction or pattern";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleMeteorRain
- * @description : Bright falling meteor heads with longer fading tails
- *                and independently varying motion.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleMeteorRain()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_METEOR_RAIN[] PROGMEM =
-"Icicle Meteor Rain@"
-"Speed,Density,Tail,Fade,Variation,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_METEOR_RAIN[] PROGMEM =
-"Bright falling meteors with long fading trails.\n\r"
-"SX: Meteor velocity\n\r"
-"IX: Meteor density\n\r"
-"C1: Tail length\n\r"
-"C2: Fade strength\n\r"
-"C3: Velocity variation";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleFrozenSparkle
- * @description : Static icy background with independently animated
- *                sparkle points and localized brightness changes.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleFrozenSparkle()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_FROZEN_SPARKLE[] PROGMEM =
-"Icicle Frozen Sparkle@"
-"Speed,Density,Background,Glow,Variation,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_FROZEN_SPARKLE[] PROGMEM =
-"Icy background with randomly twinkling highlights.\n\r"
-"SX: Sparkle animation speed\n\r"
-"IX: Sparkle density\n\r"
-"C1: Background level\n\r"
-"C2: Sparkle glow duration\n\r"
-"C3: Brightness variation";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleCascade
- * @description : Consecutive icicles illuminate horizontally, with each
- *                column filling or fading vertically.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleCascade()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_CASCADE[] PROGMEM =
-"Icicle Cascade@"
-"Speed,Width,Fill,Fade,Direction,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_CASCADE[] PROGMEM =
-"Sequentially illuminated icicles with vertical filling.\n\r"
-"SX: Cascade speed\n\r"
-"IX: Number of simultaneously active icicles\n\r"
-"C1: Vertical fill behaviour\n\r"
-"C2: Fade strength\n\r"
-"C3: Cascade direction";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleRipple
- * @description : Circular or elliptical ripples expand across the
- *                2D installation from one or more origins.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleRipple()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_RIPPLE[] PROGMEM =
-"Icicle Ripple@"
-"Speed,Density,Width,Fade,Shape,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_RIPPLE[] PROGMEM =
-"Expanding circular and elliptical ripples across the icicle matrix.\n\r"
-"SX: Ripple propagation speed\n\r"
-"IX: Number of active ripples\n\r"
-"C1: Ripple thickness\n\r"
-"C2: Fade strength\n\r"
-"C3: Ripple shape";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAurora
- * @description : Smooth colour fields and vertical gradients moving
- *                continuously across the icicle curtain.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAurora()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_AURORA[] PROGMEM =
-"Icicle Aurora@"
-"Speed,Variation,Scale,Blend,Vertical,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_AURORA[] PROGMEM =
-"Slowly moving colour curtains with smooth vertical gradients.\n\r"
-"SX: Movement speed\n\r"
-"IX: Colour variation\n\r"
-"C1: Pattern scale\n\r"
-"C2: Colour blending\n\r"
-"C3: Vertical variation";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleFallingComets
- * @description : Diagonal comets move between adjacent icicles while
- *                descending, leaving fading multi-pixel trails.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleFallingComets()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_FALLING_COMETS[] PROGMEM =
-"Icicle Falling Comets@"
-"Speed,Density,Tail,Angle,Fade,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_FALLING_COMETS[] PROGMEM =
-"Diagonal comets travelling across adjacent icicles.\n\r"
-"SX: Comet velocity\n\r"
-"IX: Number of active comets\n\r"
-"C1: Tail length\n\r"
-"C2: Movement angle\n\r"
-"C3: Trail fading";
-#endif
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleLightning
- * @description : Irregular lightning flashes and branching streaks
- *                across groups of icicles.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleLightning()
-{
-  EffectAnim__Static_Palette();
-}
-static const char PM_EFFECT_CONFIG__2D__ICICLE_LIGHTNING[] PROGMEM =
-"Icicle Lightning@"
-"Speed,Frequency,Branching,Glow,Coverage,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_LIGHTNING[] PROGMEM =
-"Random lightning flashes across groups of icicles.\n\r"
-"SX: Flash animation speed\n\r"
-"IX: Flash frequency\n\r"
-"C1: Branching amount\n\r"
-"C2: Afterglow duration\n\r"
-"C3: Horizontal coverage";
-#endif
+
+
+
+
+
+
+
 
 #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
 
