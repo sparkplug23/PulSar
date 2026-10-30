@@ -1688,8 +1688,8 @@ static const uint8_t kPresetMetaParserVersion = 2;
     #endif
     
     #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
-    void EffectAnim__2D__IcicleSnowfall();
-    void EffectAnim__2D__IcicleRandomDrips();
+    void EffectAnim__2D__IcicleDrips();
+    void EffectAnim__2D__IcicleDroplets();
     void EffectAnim__2D__IcicleWaveDrips();
     void EffectAnim__2D__IcicleMeteorRain();
     void EffectAnim__2D__IcicleFrozenSparkle();
@@ -2272,19 +2272,38 @@ static const uint8_t kPresetMetaParserVersion = 2;
       #endif
 
       
-      #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
-      EFFECTS_FUNCTION__2D__ICICLE_SNOWFALL,
-      EFFECTS_FUNCTION__2D__ICICLE_RANDOM_DRIPS,
-      EFFECTS_FUNCTION__2D__ICICLE_WAVE_DRIPS,
-      EFFECTS_FUNCTION__2D__ICICLE_METEOR_RAIN,
-      EFFECTS_FUNCTION__2D__ICICLE_FROZEN_SPARKLE,
-      EFFECTS_FUNCTION__2D__ICICLE_CASCADE,
-      EFFECTS_FUNCTION__2D__ICICLE_RIPPLE,
-      EFFECTS_FUNCTION__2D__ICICLE_AURORA,
-      EFFECTS_FUNCTION__2D__ICICLE_FALLING_COMETS,
-      EFFECTS_FUNCTION__2D__ICICLE_LIGHTNING,
-      #endif
-      
+      #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
+
+        // Icicle Melting - Independent vertical movement within each column
+        EFFECTS_FUNCTION__2D__ICICLE_MELTING_DRIPS,
+        EFFECTS_FUNCTION__2D__ICICLE_MELTING_DROPLETS,
+
+        // Icicle Sequenced - Coordinated activation across neighbouring columns
+        EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
+        EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_CASCADE,
+
+        // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_AURORA,
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
+        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
+
+        // Icicle Spatial - Waves propagating through the 2D layout
+        EFFECTS_FUNCTION__2D__ICICLE_SPATIAL_RIPPLE,
+
+        // Snow - Falling snowflakes with optional wind and varying flake shapes
+        EFFECTS_FUNCTION__2D__SNOW_FALL,
+
+        // Snow - Moving snowflakes with bouncing, collisions and interactions
+        EFFECTS_FUNCTION__2D__SNOW_FLAKES,
+
+        // Snow - Stationary glowing flakes with optional Palette2 twinkles
+        EFFECTS_FUNCTION__2D__SNOW_GLOW,
+
+      #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+            
 
       /**
        * Audio Reactive 1D

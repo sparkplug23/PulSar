@@ -27226,33 +27226,25 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
 
 
+
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleSnowfall
- * @description : Independent falling snowflakes across a 2D icicle matrix.
+ * @function    : EffectAnim__2D__IcicleDrips
+ * @description : Fine independent drips moving down individual icicles.
  *
- * Each snowflake has:
- *   - An independently selected column.
- *   - A fractional vertical position (1/16 pixel).
- *   - A randomized falling velocity.
- *   - A palette colour.
- *
- * The effect uses PulSar's existing animation frame scheduler.
- * No additional timers or ParticleSystem2D dependencies are required.
+ * Each column may contain multiple falling points. The illuminated
+ * trail is optional and always follows the leading pixel.
  *
  * Controls:
  *   Speed     : Falling velocity
- *   Intensity : Snowflake generation density
- *   Custom1   : Tail length
- *   Custom2   : Velocity variation
- *   Custom3   : Background/trail fade rate
+ *   Intensity : Drip generation density
+ *   Custom1   : Tail length (0-4 pixels)
+ *   Custom2   : Tail mode (None / Solid / Fading)
+ *   Custom3   : Velocity variation (0-31)
  *
- * Notes:
- *   - Coordinates are relative to the current 2D segment.
- *   - Subpixel brightness interpolation smooths vertical movement.
- *   - Each effect invocation advances the animation by one frame.
- *   - State is allocated using SEGENV.allocateData().
+ * Every object remains on its original column.
+ * Uses the normal PulSar effect frame scheduler.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleSnowfall()
+void mAnimatorLight::EffectAnim__2D__IcicleDrips()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -27261,148 +27253,119 @@ void mAnimatorLight::EffectAnim__2D__IcicleSnowfall()
 
   const uint16_t cols = SEG_W;
   const uint16_t rows = SEG_H;
-
   if (!cols || !rows) return;
 
-  struct Snowflake {
-    int16_t y;          // Vertical position, 1/16 pixel precision
-    uint8_t x;          // Column
-    uint8_t velocity;   // Velocity multiplier
-    uint8_t palette;    // Palette index
-    uint8_t active;     // 0 = inactive, 1 = active
+  struct IcicleDrip {
+    int16_t position;    // Vertical position, 1/16 pixel
+    uint8_t velocity;    // Individual velocity variation
+    uint8_t colour;      // Palette1 index
+    uint8_t active;
   };
 
-  // Allow up to two overlapping snowflakes per column.
-  const uint16_t max_flakes = cols * 2;
-  const size_t data_size = max_flakes * sizeof(Snowflake);
+  // Two independently falling points per column.
+  const uint16_t max_drips = cols * 2U;
+  const size_t data_size = max_drips * sizeof(IcicleDrip);
 
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
-  Snowflake* flakes = reinterpret_cast<Snowflake*>(SEGENV.data);
+  IcicleDrip* drips = reinterpret_cast<IcicleDrip*>(SEGENV.data);
 
-  // Initialize effect-owned state when a new effect starts.
   if (SEGENV.call == 0) {
-    memset(flakes, 0, data_size);
+    memset(drips, 0, data_size);
     SEGMENT.fill(BLACK);
   }
 
-  // Speed controls motion per animation frame.
-  // The existing effect scheduler determines the frame interval.
   const uint8_t base_speed = 1 + (SEGMENT.speed >> 5);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
+  const uint8_t tail_length = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
+  const uint8_t tail_mode = (SEGMENT.custom2 <= 85) ? 0 :
+                            (SEGMENT.custom2 <= 170) ? 1 : 2;
+  const uint8_t variation = SEGMENT.custom3 * 8U;
 
-  // Intensity controls the probability that each inactive slot spawns.
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 5);
+  // Reconstruct only the current drops and their selected tails.
+  SEGMENT.fill(BLACK);
 
-  // Custom1 sets the maximum number of trailing pixels.
-  const uint8_t trail_length = (SEGMENT.custom1 * 4U) >> 8;
-
-  // Custom2 adds variation to individual snowflake velocities.
-  const uint8_t variation = SEGMENT.custom2;
-
-  // Custom3 is stored as a 5-bit value in the segment.
-  // Higher values remove old illumination more rapidly.
-  const uint8_t fade_amount = 35 + (SEGMENT.custom3 * 220U / 31U);
-
-  // Fade the existing segment image, retaining a short afterglow.
-  SEGMENT.fadeToBlackBy(fade_amount);
-
-  for (uint16_t i = 0; i < max_flakes; i++)
+  for (uint16_t i = 0; i < max_drips; i++)
   {
-    Snowflake& flake = flakes[i];
+    IcicleDrip& drip = drips[i];
+    const uint16_t x = i % cols;
 
-    if (!flake.active)
+    if (!drip.active)
     {
       if (hw_random8() >= spawn_chance) continue;
 
-      flake.active = 1;
-      flake.x = hw_random16(cols);
-      flake.y = -16 * (1 + hw_random8(3));
-      flake.velocity = hw_random8();
-      flake.palette = hw_random8();
-
+      drip.active = 1;
+      drip.position = -16 * (1 + hw_random8(3));
+      drip.velocity = hw_random8();
+      drip.colour = hw_random8();
       continue;
     }
 
-    // Randomized velocity, scaled using the existing Speed control.
-    const uint8_t velocity_variation =
-      ((uint16_t)flake.velocity * variation) >> 8;
+    // Apply independent velocity variation.
+    const uint16_t velocity_scale =
+      256U - (variation / 2U) +
+      ((uint16_t)drip.velocity * variation / 255U);
 
-    const uint8_t step =
-      base_speed + ((uint16_t)base_speed * velocity_variation >> 8);
+    const uint16_t movement =
+      max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
 
-    flake.y += step;
+    drip.position += movement;
 
-    // Remove flakes after they have completely passed the last row.
-    if (flake.y >= (int16_t)(rows * 16 + trail_length * 16))
+    // The complete point and tail have passed the bottom.
+    if (drip.position >= (int16_t)((rows + tail_length) * 16U))
     {
-      flake.active = 0;
+      drip.active = 0;
       continue;
     }
 
-    // Convert subpixel position to pixel position and fractional part.
-    const int16_t y = flake.y >> 4;
-    const uint8_t fraction = flake.y & 0x0F;
-
-    // Resolve colour from the current segment palette.
-    // Scaling to SEGLEN gives the full 0..255 palette distribution.
-    const uint16_t palette_position =
-      ((uint32_t)flake.palette * (SEGLEN - 1)) / 255U;
+    const int16_t y = drip.position >> 4;
 
     const uint32_t colour = SEGMENT.GetPaletteColour(
-      palette_position,
-      PALETTE_INDEX__IS_SEGLEN_RANGE,
+      drip.colour,
+      PALETTE_INDEX__IS_255_RANGE,
       PALETTE_MODE__DEFAULT,
       PALETTE_WRAP_HARDEDGE
     );
 
-    // Interpolate head brightness between adjacent vertical pixels.
-    // This makes falling motion smoother on short 10-pixel icicles.
-    const uint8_t head_brightness = 255 - fraction * 16;
-    const uint8_t next_brightness = fraction * 16;
-
+    // Single bright moving head.
     if (y >= 0 && y < rows)
     {
-      SEGMENT.addPixelColorXY(
-        flake.x,
-        y,
-        color_blend(BLACK, colour, head_brightness)
-      );
+      SEGMENT.addPixelColorXY(x, y, colour);
     }
 
-    if (y + 1 >= 0 && y + 1 < rows)
-    {
-      SEGMENT.addPixelColorXY(
-        flake.x,
-        y + 1,
-        color_blend(BLACK, colour, next_brightness)
-      );
-    }
+    // Optional tail behind the head.
+    if (tail_mode == 0) continue;
 
-    // Render a short fading tail above the falling snowflake.
-    for (uint8_t t = 1; t <= trail_length; t++)
+    for (uint8_t t = 1; t <= tail_length; t++)
     {
       const int16_t tail_y = y - t;
-
       if (tail_y < 0 || tail_y >= rows) continue;
 
-      const uint8_t tail_brightness =
-        180U / (t + 1U);
+      uint8_t brightness = 255;
+
+      if (tail_mode == 2)
+      {
+        // Progressively dimmer towards the trailing end.
+        brightness =
+          ((uint16_t)(tail_length - t + 1U) * 220U) /
+          (tail_length + 1U);
+      }
 
       SEGMENT.addPixelColorXY(
-        flake.x,
+        x,
         tail_y,
-        color_blend(BLACK, colour, tail_brightness)
+        color_blend(BLACK, colour, brightness)
       );
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL[] PROGMEM =
-"Icicle Snowfall@"
-"Speed,Density,Trail,Variation,Fade,,,,!,!"
+static const char PM_EFFECT_CONFIG__2D__ICICLE_DRIPS[] PROGMEM =
+"Icicle Drips@"
+"Speed,Density,Tail,Tail Mode,Variation,,,,,!"
 ";"
 ""
 ";"
@@ -27410,36 +27373,202 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=127,c1=127,c2=127,c3=16,ep=20";
+"sx=127,ix=100,c1=127,c2=0,c3=16,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL[] PROGMEM =
-"Independent falling snowflakes across the icicle matrix.\n\r"
-"Each snowflake has its own position, speed and palette colour.\n\r"
-"Subpixel interpolation provides smooth vertical movement.\n\r"
-"SX: Falling speed\n\r"
-"IX: Snowflake generation density\n\r"
-"C1: Trail length (0-3 pixels)\n\r"
-"C2: Falling speed variation\n\r"
-"C3: Background and trail fade rate";
+static const char PM_EFFECT_DESCRI__2D__ICICLE_DRIPS[] PROGMEM =
+"Fine independently falling points on vertical icicles.\n\r"
+"Multiple drips may move along the same column.\n\r"
+"All movement is strictly vertical.\n\r"
+"SX: Falling velocity\n\r"
+"IX: Drip generation density\n\r"
+"C1: Tail length (0-4 pixels)\n\r"
+"C2: Tail mode (0-85=None, 86-170=Solid, 171-255=Fading)\n\r"
+"C3: Velocity variation";
 #endif
 
 
 
-#endif
 
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleRandomDrips
- * @description : Each icicle generates independent falling droplets with
- *                randomized intervals, lengths and fading tails.
+ * @function    : EffectAnim__2D__IcicleDroplets
+ * @description : Distinct falling droplets on individual icicles.
+ *
+ * Each column has one independently triggered droplet with:
+ *   - A bright leading pixel
+ *   - A continuous illuminated body
+ *   - Variable body length and falling velocity
+ *   - Optional subpixel smoothing
+ *
+ * Controls:
+ *   Speed     : Falling velocity
+ *   Intensity : Droplet generation density
+ *   Custom1   : Maximum droplet length (1-5 pixels)
+ *   Custom2   : Subpixel smoothing
+ *   Custom3   : Velocity variation (0-31)
+ *   Check2    : Use Palette2 for the leading pixel
+ *
+ * The droplet body always uses Palette1.
+ * All movement is restricted to one column.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleRandomDrips()
+void mAnimatorLight::EffectAnim__2D__IcicleDroplets()
 {
-  EffectAnim__Static_Palette();
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct IcicleDroplet {
+    int16_t position;    // Leading edge, 1/16 pixel
+    uint8_t velocity;    // Individual velocity
+    uint8_t length;      // Body length in pixels
+    uint8_t colour;      // Shared palette index
+    uint8_t active;
+  };
+
+  // One droplet per column.
+  const size_t data_size = cols * sizeof(IcicleDroplet);
+
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  IcicleDroplet* droplets =
+    reinterpret_cast<IcicleDroplet*>(SEGENV.data);
+
+  if (SEGENV.call == 0) {
+    memset(droplets, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
+  const uint8_t max_length =
+    1 + ((uint16_t)SEGMENT.custom1 * 4U / 255U);
+  const uint8_t smoothing = SEGMENT.custom2;
+  const uint8_t variation = SEGMENT.custom3 * 8U;
+  const bool use_palette2_head = SEGMENT.check2;
+
+  // Ensure Palette2 is loaded before rendering any droplet heads.
+  // Also handles changes to Palette2 while the effect is active.
+  // If loading fails, the leading pixel falls back to Palette1.
+  const bool palette2_ready = use_palette2_head &&
+    SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  // Reconstruct every complete droplet each frame.
+  SEGMENT.fill(BLACK);
+
+  for (uint16_t x = 0; x < cols; x++)
+  {
+    IcicleDroplet& droplet = droplets[x];
+
+    if (!droplet.active)
+    {
+      if (hw_random8() >= spawn_chance) continue;
+
+      droplet.active = 1;
+      droplet.position = -16 * (1 + hw_random8(2));
+      droplet.velocity = hw_random8();
+      droplet.length = 1 + hw_random8(max_length);
+      droplet.colour = hw_random8();
+      continue;
+    }
+
+    // Speed variation is selected independently for each droplet.
+    const uint16_t velocity_scale =
+      256U - (variation / 2U) +
+      ((uint16_t)droplet.velocity * variation / 255U);
+
+    const uint16_t movement =
+      max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
+
+    droplet.position += movement;
+
+    // Remove the droplet once its complete body passes the bottom.
+    if (droplet.position >=
+        (int16_t)((rows + droplet.length) * 16U))
+    {
+      droplet.active = 0;
+      continue;
+    }
+
+    // Palette1 supplies the complete droplet body.
+    const uint32_t body_colour = SEGMENT.GetPaletteColour(
+      droplet.colour,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE
+    );
+
+    // Check2 optionally switches only the leading pixel to Palette2.
+    // Fall back to Palette1 if Palette2 could not be loaded.
+    const uint32_t head_colour = palette2_ready
+      ? SEGMENT.GetPalette2Colour(
+          droplet.colour,
+          PALETTE_INDEX__IS_255_RANGE,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE
+        )
+      : body_colour;
+
+    const int16_t head_y = droplet.position >> 4;
+    const uint8_t fraction = droplet.position & 0x0F;
+
+    // Custom2 controls how much fractional movement is distributed
+    // into the next vertical pixel.
+    const uint8_t fractional_blend =
+      ((uint16_t)fraction * smoothing) / 255U;
+
+    for (uint8_t t = 0; t < droplet.length; t++)
+    {
+      const int16_t y = head_y - t;
+
+      // The leading pixel is brightest. The rest of the body
+      // progressively decreases in brightness.
+      const uint8_t brightness =
+        ((uint16_t)(droplet.length - t) * 255U) /
+        droplet.length;
+
+      // Palette2 is used exclusively for the leading pixel.
+      const uint32_t colour = (t == 0)
+        ? head_colour
+        : body_colour;
+
+      const uint8_t upper_brightness =
+        ((uint16_t)brightness * (16U - fractional_blend)) >> 4;
+
+      const uint8_t lower_brightness =
+        ((uint16_t)brightness * fractional_blend) >> 4;
+
+      if (y >= 0 && y < rows)
+      {
+        SEGMENT.addPixelColorXY(
+          x,
+          y,
+          color_blend(BLACK, colour, upper_brightness)
+        );
+      }
+
+      if (lower_brightness && y + 1 >= 0 && y + 1 < rows)
+      {
+        SEGMENT.addPixelColorXY(
+          x,
+          y + 1,
+          color_blend(BLACK, colour, lower_brightness)
+        );
+      }
+    }
+  }
 }
-static const char PM_EFFECT_CONFIG__2D__ICICLE_RANDOM_DRIPS[] PROGMEM =
-"Icicle Random Drips@"
-"Speed,Density,Length,Smoothing,Variation,,,,!,!"
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_DROPLETS[] PROGMEM =
+"Icicle Droplets@"
+"Speed,Density,Length,Smoothing,Variation,,Pal2 Head,,,!"
 ";"
 ""
 ";"
@@ -27447,16 +27576,24 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_RANDOM_DRIPS[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+"sx=127,ix=100,c1=160,c2=200,c3=16,o2=0,ep=20";
+
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_RANDOM_DRIPS[] PROGMEM =
-"Independent randomly triggered droplets falling down each icicle.\n\r"
-"SX: Falling speed\n\r"
-"IX: Droplet generation frequency\n\r"
-"C1: Droplet length\n\r"
-"C2: Tail smoothing\n\r"
-"C3: Speed and timing variation";
+static const char PM_EFFECT_DESCRI__2D__ICICLE_DROPLETS[] PROGMEM =
+"Independently falling multi-pixel droplets on vertical icicles.\n\r"
+"Each column contains at most one active droplet.\n\r"
+"The body fades in brightness behind a bright leading head.\n\r"
+"SX: Falling velocity\n\r"
+"IX: Droplet generation density\n\r"
+"C1: Maximum droplet length (1-5 pixels)\n\r"
+"C2: Subpixel smoothing (0=sharp, 255=smooth)\n\r"
+"C3: Velocity variation\n\r"
+"O2: Use Palette2 for the leading pixel\n\r"
+"Palette1: Droplet body\n\r"
+"Palette2: Leading pixel when O2 is enabled";
 #endif
+
+
 
 /*******************************************************************************************************************************************************************************************************************
  * @function    : EffectAnim__2D__IcicleWaveDrips
@@ -38142,21 +38279,23 @@ void mAnimatorLight::LoadEffects()
    *******************************************************************************************************************************************************************************************************************/
   #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SNOWFALL,
-            &mAnimatorLight::EffectAnim__2D__IcicleSnowfall,
-            PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL,
+  
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_DRIPS,
+            &mAnimatorLight::EffectAnim__2D__IcicleDrips,
+            PM_EFFECT_CONFIG__2D__ICICLE_DRIPS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL,
+            PM_EFFECT_DESCRI__2D__ICICLE_DRIPS,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_RANDOM_DRIPS,
-            &mAnimatorLight::EffectAnim__2D__IcicleRandomDrips,
-            PM_EFFECT_CONFIG__2D__ICICLE_RANDOM_DRIPS,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_DROPLETS,
+            &mAnimatorLight::EffectAnim__2D__IcicleDroplets,
+            PM_EFFECT_CONFIG__2D__ICICLE_DROPLETS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_RANDOM_DRIPS,
+            PM_EFFECT_DESCRI__2D__ICICLE_DROPLETS,
             #endif
             Effect_DevStage::Dev);
+
 
   addEffect(EFFECTS_FUNCTION__2D__ICICLE_WAVE_DRIPS,
             &mAnimatorLight::EffectAnim__2D__IcicleWaveDrips,
