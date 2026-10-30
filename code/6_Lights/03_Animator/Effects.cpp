@@ -27400,6 +27400,31 @@ void mAnimatorLight::EffectAnim__2D__IcicleSnowfall()
   }
 }
 
+static const char PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL[] PROGMEM =
+"Icicle Snowfall@"
+"Speed,Density,Trail,Variation,Fade,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=16,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL[] PROGMEM =
+"Independent falling snowflakes across the icicle matrix.\n\r"
+"Each snowflake has its own position, speed and palette colour.\n\r"
+"Subpixel interpolation provides smooth vertical movement.\n\r"
+"SX: Falling speed\n\r"
+"IX: Snowflake generation density\n\r"
+"C1: Trail length (0-3 pixels)\n\r"
+"C2: Falling speed variation\n\r"
+"C3: Background and trail fade rate";
+#endif
+
+
 
 #endif
 
