@@ -28931,8 +28931,554 @@ static const char PM_EFFECT_DESCRI__2D__SNOW_FALL[] PROGMEM =
 
 
 
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__SnowFlakes
+ * @description : Snowflake ballpit with gravity, bouncing and collisions.
+ *
+ * Snowflakes enter from above and interact with the matrix boundaries.
+ * Optional flake-to-flake collisions allow snowflakes to push one another.
+ * Each flake has its own shape, colour, velocity and lifetime.
+ *
+ * The existing PM_SNOW_PATTERN_MASKS table supplies the five shapes.
+ * Collision boundaries approximate each pattern using a circular radius.
+ *
+ * Speed     : Simulation speed and gravity
+ * Intensity : Maximum active snowflakes
+ * Custom1   : Maximum snowflake size (1x1 to 9x9)
+ * Custom2   : Bounce strength
+ * Custom3   : Horizontal movement and turbulence (0-31)
+ * Check1    : Enable snowflake collisions
+ * Check2    : Randomize snowflake shapes
+ *
+ * Palette1 supplies snowflake colours.
+ * Uses the existing PulSar effect frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__SnowFlakes()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct Snowflake {
+    int32_t x;
+    int32_t y;
+    int16_t vx;
+    int16_t vy;
+    uint16_t age;
+    uint16_t lifetime;
+    uint8_t pattern;
+    uint8_t colour;
+    uint8_t active;
+  };
+
+  const uint16_t max_flakes = 40;
+  const size_t data_size = max_flakes * sizeof(Snowflake);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  Snowflake* flakes = reinterpret_cast<Snowflake*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(flakes, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t gravity = 1 + (SEGMENT.speed >> 6);
+  const uint16_t active_limit = 1 + ((uint32_t)(max_flakes - 1U) * SEGMENT.intensity / 255U);
+  const uint8_t max_pattern = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
+  const uint8_t bounce = SEGMENT.custom2;
+  const uint8_t turbulence = SEGMENT.custom3;
+  const bool enable_collisions = SEGMENT.check1;
+  const bool random_patterns = SEGMENT.check2;
+
+  // Collision radii in 1/16 pixel units.
+  // The larger patterns need more room when settling together.
+  static const uint8_t pattern_radius[5] = {8, 18, 30, 42, 60};
+
+  // Snowflakes are rebuilt from their current positions every frame.
+  SEGMENT.fill(BLACK);
+
+  uint16_t active_count = 0;
+  for (uint16_t i = 0; i < max_flakes; i++) {
+    if (flakes[i].active) active_count++;
+  }
+
+  /************************************************************
+   * Spawn new snowflakes above the matrix.
+   ************************************************************/
+  if (active_count < active_limit && hw_random8() < 48)
+  {
+    for (uint16_t i = 0; i < max_flakes; i++)
+    {
+      Snowflake& flake = flakes[i];
+      if (flake.active) continue;
+
+      flake.pattern = random_patterns ? hw_random8(max_pattern + 1U) : max_pattern;
+      const int32_t radius = pattern_radius[flake.pattern];
+      const int32_t min_x = radius;
+      const int32_t max_x = (int32_t)(cols - 1U) * 16 - radius;
+
+      flake.x = (max_x > min_x) ? min_x + hw_random16((uint16_t)(max_x - min_x + 1)) : (int32_t)(cols - 1U) * 8;
+      flake.y = -radius - 16 - hw_random8(32);
+      flake.vx = (int16_t)hw_random8(9) - 4;
+      flake.vy = 0;
+      flake.age = 0;
+      flake.lifetime = 500 + hw_random16(500);
+      flake.colour = hw_random8();
+      flake.active = 1;
+      break;
+    }
+  }
+
+  /************************************************************
+   * Apply gravity, turbulence and boundary collisions.
+   ************************************************************/
+  for (uint16_t i = 0; i < max_flakes; i++)
+  {
+    Snowflake& flake = flakes[i];
+    if (!flake.active) continue;
+
+    flake.age++;
+    if (flake.age >= flake.lifetime) {
+      flake.active = 0;
+      continue;
+    }
+
+    const int32_t radius = pattern_radius[flake.pattern];
+    const int32_t min_x = radius;
+    const int32_t max_x = (int32_t)(cols - 1U) * 16 - radius;
+    const int32_t floor_y = (int32_t)(rows - 1U) * 16 - radius;
+
+    // Random horizontal impulses simulate small air movements.
+    if (turbulence && hw_random8() < turbulence * 2U) {
+      flake.vx += (int16_t)hw_random8(3) - 1;
+    }
+
+    // Gravity increases vertical velocity until terminal speed.
+    flake.vy += gravity;
+    if (flake.vy > 24) flake.vy = 24;
+
+    // Limit horizontal movement.
+    if (flake.vx > 16) flake.vx = 16;
+    if (flake.vx < -16) flake.vx = -16;
+
+    flake.x += flake.vx;
+    flake.y += flake.vy;
+
+    // Bounce from the left and right boundaries.
+    if (flake.x < min_x) {
+      flake.x = min_x;
+      flake.vx = (int16_t)((int32_t)-flake.vx * bounce / 255);
+    }
+    if (flake.x > max_x) {
+      flake.x = max_x;
+      flake.vx = (int16_t)((int32_t)-flake.vx * bounce / 255);
+    }
+
+    // Bounce or settle on the floor.
+    if (flake.y >= floor_y && flake.vy > 0)
+    {
+      flake.y = floor_y;
+      flake.vy = -(int16_t)((int32_t)flake.vy * bounce / 255);
+
+      // Damp small movements so snowflakes eventually settle.
+      if (flake.vy > -2) flake.vy = 0;
+      flake.vx = (int16_t)((int32_t)flake.vx * 230 / 255);
+    }
+  }
+
+  /************************************************************
+   * Resolve collisions between snowflakes.
+   *
+   * Each shape uses an approximate circular collision boundary.
+   * Colliding snowflakes separate and exchange motion along the
+   * collision normal, with restitution controlled by Custom2.
+   ************************************************************/
+  if (enable_collisions)
+  {
+    for (uint16_t i = 0; i < max_flakes; i++)
+    {
+      Snowflake& a = flakes[i];
+      if (!a.active) continue;
+
+      for (uint16_t j = i + 1; j < max_flakes; j++)
+      {
+        Snowflake& b = flakes[j];
+        if (!b.active) continue;
+
+        const int32_t dx = b.x - a.x;
+        const int32_t dy = b.y - a.y;
+        const int32_t minimum_distance = pattern_radius[a.pattern] + pattern_radius[b.pattern];
+        const int64_t distance_squared = (int64_t)dx * dx + (int64_t)dy * dy;
+
+        if (distance_squared >= (int64_t)minimum_distance * minimum_distance) continue;
+
+        float distance = sqrtf((float)distance_squared);
+        float nx = 0.0f;
+        float ny = 0.0f;
+
+        if (distance > 0.001f) {
+          nx = dx / distance;
+          ny = dy / distance;
+        } else {
+          nx = (i & 1U) ? 1.0f : -1.0f;
+          distance = 0.0f;
+        }
+
+        // Separate intersecting flakes.
+        const float overlap = (minimum_distance - distance) * 0.5f;
+        a.x -= (int32_t)(nx * overlap);
+        a.y -= (int32_t)(ny * overlap);
+        b.x += (int32_t)(nx * overlap);
+        b.y += (int32_t)(ny * overlap);
+
+        // Calculate relative velocity along the collision normal.
+        const float relative_vx = (float)b.vx - a.vx;
+        const float relative_vy = (float)b.vy - a.vy;
+        const float relative_speed = relative_vx * nx + relative_vy * ny;
+
+        // Apply impulse only when the flakes are moving together.
+        if (relative_speed < 0.0f)
+        {
+          const float restitution = (float)bounce / 255.0f;
+          const float impulse = -(1.0f + restitution) * relative_speed * 0.5f;
+
+          a.vx -= (int16_t)(impulse * nx);
+          a.vy -= (int16_t)(impulse * ny);
+          b.vx += (int16_t)(impulse * nx);
+          b.vy += (int16_t)(impulse * ny);
+        }
+      }
+    }
+
+    // Ensure collision resolution has not pushed flakes beyond the walls.
+    for (uint16_t i = 0; i < max_flakes; i++)
+    {
+      Snowflake& flake = flakes[i];
+      if (!flake.active) continue;
+
+      const int32_t radius = pattern_radius[flake.pattern];
+      const int32_t min_x = radius;
+      const int32_t max_x = (int32_t)(cols - 1U) * 16 - radius;
+      const int32_t floor_y = (int32_t)(rows - 1U) * 16 - radius;
+
+      if (max_x >= min_x) {
+        if (flake.x < min_x) flake.x = min_x;
+        if (flake.x > max_x) flake.x = max_x;
+      } else {
+        flake.x = (int32_t)(cols - 1U) * 8;
+      }
+      if (flake.y > floor_y) flake.y = floor_y;
+    }
+  }
+
+  /************************************************************
+   * Render the shared PROGMEM snowflake patterns.
+   ************************************************************/
+  for (uint16_t i = 0; i < max_flakes; i++)
+  {
+    Snowflake& flake = flakes[i];
+    if (!flake.active) continue;
+
+    const int32_t centre_x = flake.x >> 4;
+    const int32_t centre_y = flake.y >> 4;
+    const uint32_t colour = SEGMENT.GetPaletteColour(flake.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+    for (uint8_t py = 0; py < 9; py++)
+    {
+      const int32_t y = centre_y + (int32_t)py - 4;
+      if (y < 0 || y >= rows) continue;
+
+      const uint16_t mask = pgm_read_word(&PM_SNOW_PATTERN_MASKS[flake.pattern][py]);
+      if (!mask) continue;
+
+      for (uint8_t px = 0; px < 9; px++)
+      {
+        if (!(mask & (1U << px))) continue;
+
+        const int32_t x = centre_x + (int32_t)px - 4;
+        if (x < 0 || x >= cols) continue;
+
+        SEGMENT.addPixelColorXY(x, y, colour);
+      }
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__SNOW_FLAKES[] PROGMEM =
+"2D Snow Flakes@"
+"Gravity,Density,Size,Bounce,Turbulence,Collisions,Random Shapes,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=100,ix=150,c1=160,c2=150,c3=10,o1=1,o2=1,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__SNOW_FLAKES[] PROGMEM =
+"Snowflake ballpit with gravity, bouncing and collision physics.\n\r"
+"Flakes of different sizes fall into the scene and interact.\n\r"
+"Colliding flakes push each other and gradually settle near the bottom.\n\r"
+"Flakes eventually expire so the scene continually refreshes.\n\r"
+"SX: Gravity and falling speed\n\r"
+"IX: Maximum number of active flakes\n\r"
+"C1: Maximum flake size (1x1, 3x3, 5x5, 7x7, 9x9)\n\r"
+"C2: Bounce strength (0=no bounce, 255=high bounce)\n\r"
+"C3: Horizontal turbulence (0-31)\n\r"
+"O1: Enable collisions between flakes\n\r"
+"O2: Randomize snowflake shapes\n\r"
+"Palette1: Snowflake colours";
+#endif
 
 
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__SnowGlow
+ * @description : Stationary glowing snowflakes with optional Palette2 twinkles.
+ *
+ * Snowflakes appear at random positions and follow three phases:
+ *   - Fade in from black
+ *   - Hold at full brightness
+ *   - Fade out and disappear
+ *
+ * Multiple snowflakes independently animate using the shared
+ * PM_SNOW_PATTERN_MASKS table.
+ *
+ * Optional Palette2 twinkles are single-pixel highlights that
+ * appear independently anywhere within the matrix.
+ *
+ * Speed     : Snowflake fading speed
+ * Intensity : Maximum visible snowflakes
+ * Custom1   : Maximum snowflake size (1x1 to 9x9)
+ * Custom2   : Stationary hold duration
+ * Custom3   : Palette2 twinkle frequency (0-31)
+ * Check1    : Randomize snowflake shapes
+ * Check2    : Enable Palette2 single-pixel twinkles
+ *
+ * Palette1 supplies the snowflake patterns.
+ * Palette2 supplies optional random twinkles.
+ * Uses the existing PulSar effect frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__SnowGlow()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct SnowGlowFlake {
+    uint16_t x;
+    uint16_t y;
+    uint16_t hold;
+    uint8_t brightness;
+    uint8_t pattern;
+    uint8_t colour;
+    uint8_t state;         // 0=inactive, 1=fade-in, 2=hold, 3=fade-out
+  };
+
+  struct SnowGlowTwinkle {
+    uint16_t x;
+    uint16_t y;
+    uint8_t brightness;
+    uint8_t colour;
+  };
+
+  struct SnowGlowState {
+    SnowGlowFlake flakes[40];
+    SnowGlowTwinkle twinkles[24];
+  };
+
+  if (!SEGENV.allocateData(sizeof(SnowGlowState))) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  SnowGlowState* data = reinterpret_cast<SnowGlowState*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(data, 0, sizeof(SnowGlowState));
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t fade_step = 2 + (SEGMENT.speed >> 4);
+  const uint8_t max_flakes = 40;
+  const uint8_t active_limit = ((uint16_t)max_flakes * SEGMENT.intensity) / 255U;
+  const uint8_t max_pattern = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
+  const uint16_t hold_frames = 5 + ((uint16_t)SEGMENT.custom2 * 195U / 255U);
+  const uint8_t twinkle_frequency = SEGMENT.custom3;
+  const bool random_shapes = SEGMENT.check1;
+  const bool enable_twinkles = SEGMENT.check2;
+  const bool palette2_ready = enable_twinkles && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  SEGMENT.fill(BLACK);
+
+  /************************************************************
+   * Count currently active snowflakes.
+   ************************************************************/
+  uint8_t active_count = 0;
+  for (uint8_t i = 0; i < max_flakes; i++) {
+    if (data->flakes[i].state != 0) active_count++;
+  }
+
+  /************************************************************
+   * Generate new stationary snowflakes.
+   ************************************************************/
+  if (active_count < active_limit && hw_random8() < 32)
+  {
+    for (uint8_t i = 0; i < max_flakes; i++)
+    {
+      SnowGlowFlake& flake = data->flakes[i];
+      if (flake.state != 0) continue;
+
+      flake.x = hw_random16(cols);
+      flake.y = hw_random16(rows);
+      flake.pattern = random_shapes ? hw_random8(max_pattern + 1U) : max_pattern;
+      flake.colour = hw_random8();
+      flake.brightness = 0;
+      flake.hold = hold_frames;
+      flake.state = 1;
+      break;
+    }
+  }
+
+  /************************************************************
+   * Update and render each snowflake.
+   *
+   * State 1: Fade in
+   * State 2: Hold
+   * State 3: Fade out
+   ************************************************************/
+  for (uint8_t i = 0; i < max_flakes; i++)
+  {
+    SnowGlowFlake& flake = data->flakes[i];
+    if (flake.state == 0) continue;
+
+    if (flake.state == 1)
+    {
+      if (flake.brightness >= 255U - fade_step) {
+        flake.brightness = 255;
+        flake.state = 2;
+      } else {
+        flake.brightness += fade_step;
+      }
+    }
+    else if (flake.state == 2)
+    {
+      if (flake.hold > 0) flake.hold--;
+      else flake.state = 3;
+    }
+    else if (flake.state == 3)
+    {
+      if (flake.brightness <= fade_step) {
+        flake.brightness = 0;
+        flake.state = 0;
+        continue;
+      }
+      flake.brightness -= fade_step;
+    }
+
+    const uint32_t colour = SEGMENT.GetPaletteColour(flake.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    const uint32_t output_colour = color_blend(BLACK, colour, flake.brightness);
+
+    // Draw the selected stationary pattern around its centre.
+    for (uint8_t py = 0; py < 9; py++)
+    {
+      const int32_t y = (int32_t)flake.y + py - 4;
+      if (y < 0 || y >= rows) continue;
+
+      const uint16_t mask = pgm_read_word(&PM_SNOW_PATTERN_MASKS[flake.pattern][py]);
+      if (!mask) continue;
+
+      for (uint8_t px = 0; px < 9; px++)
+      {
+        if (!(mask & (1U << px))) continue;
+        const int32_t x = (int32_t)flake.x + px - 4;
+        if (x < 0 || x >= cols) continue;
+
+        SEGMENT.addPixelColorXY(x, y, output_colour);
+      }
+    }
+  }
+
+  /************************************************************
+   * Optional Palette2 twinkles.
+   *
+   * Independent single pixels briefly flash and fade.
+   * They can overlap existing snowflake patterns.
+   ************************************************************/
+  if (!enable_twinkles)
+  {
+    memset(data->twinkles, 0, sizeof(data->twinkles));
+    return;
+  }
+
+  const uint8_t twinkle_spawn_chance = twinkle_frequency * 4U;
+  const uint8_t twinkle_fade = 12 + (SEGMENT.speed >> 4);
+
+  for (uint8_t i = 0; i < 24; i++)
+  {
+    SnowGlowTwinkle& twinkle = data->twinkles[i];
+
+    if (twinkle.brightness == 0)
+    {
+      if (hw_random8() >= twinkle_spawn_chance) continue;
+
+      twinkle.x = hw_random16(cols);
+      twinkle.y = hw_random16(rows);
+      twinkle.colour = hw_random8();
+      twinkle.brightness = 180 + hw_random8(76);
+    }
+
+    const uint32_t colour = palette2_ready
+      ? SEGMENT.GetPalette2Colour(twinkle.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
+      : SEGMENT.GetPaletteColour(twinkle.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+    SEGMENT.addPixelColorXY(twinkle.x, twinkle.y, color_blend(BLACK, colour, twinkle.brightness));
+    twinkle.brightness = (twinkle.brightness > twinkle_fade) ? twinkle.brightness - twinkle_fade : 0;
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__SNOW_GLOW[] PROGMEM =
+"2D Snow Glow@"
+"Fade Speed,Density,Size,Hold,Twinkles,Random Shapes,Pal2 Twinkles,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=100,ix=150,c1=160,c2=120,c3=12,o1=1,o2=1,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__SNOW_GLOW[] PROGMEM =
+"Stationary snowflake patterns appear, glow, hold and fade away.\n\r"
+"Each snowflake independently changes brightness without moving.\n\r"
+"Optional Palette2 single-pixel twinkles overlay the snowflakes.\n\r"
+"Uses the shared snowflake bitmap pattern library.\n\r"
+"SX: Snowflake fade-in and fade-out speed\n\r"
+"IX: Maximum visible snowflake density\n\r"
+"C1: Maximum flake size (1x1, 3x3, 5x5, 7x7, 9x9)\n\r"
+"C2: Hold duration at full brightness\n\r"
+"C3: Palette2 twinkle generation frequency (0-31)\n\r"
+"O1: Randomize snowflake shapes\n\r"
+"O2: Enable Palette2 single-pixel twinkles\n\r"
+"Palette1: Stationary snowflake patterns\n\r"
+"Palette2: Random twinkles when O2 is enabled";
+#endif
 
 
 
