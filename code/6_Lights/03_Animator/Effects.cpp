@@ -9788,7 +9788,7 @@ static const char PM_EFFECT_DESCRI__COLORWAVES[] PROGMEM =
  *
  * Behavior
  *   • A base phase (stp) advances with time; each pixel offsets that phase by its index to form stripes.
- *   • Brightness per pixel = sin8(tempo) with a slight per-pixel offset, producing moving/“breathing” stripes.
+ *   • Brightness per pixel = sin8_t(tempo) with a slight per-pixel offset, producing moving/“breathing” stripes.
  *   • Colors are read from the active palette using (phase + index*2) as the palette index.
  *
  * Implementation
@@ -12693,7 +12693,7 @@ static const char PM_EFFECT_DESCRI__FILLNOISE8[] PROGMEM =
  * @description : 16-bit Perlin noise with moving XY offsets and Z-time evolution; index is sine-warped for smoother palette travel.
  *                Mapping
  *                  • real_x = (i + shift_x)*scale, real_y = (i + shift_y)*scale, real_z = step
- *                  • noise = inoise16(x,y,z) >> 8; index = sin8(noise*3)
+ *                  • noise = inoise16(x,y,z) >> 8; index = sin8_t(noise*3)
  *                Controls
  *                  • SX speeds step (Z) advance; higher SX = faster flow.
  *                Look
@@ -12742,7 +12742,7 @@ static const char PM_EFFECT_DESCRI__NOISE16_1[] PROGMEM =
  * @description : 16-bit Perlin noise scrolling along X only; brightness derives from noise, and the palette index is sine-warped for smooth bands.
  *                Mapping
  *                  • real_x = (i + t)*scale, z fixed, y=0
- *                  • noise = inoise16(x,0,4223)>>8; index = sin8(noise*3); bri = noise
+ *                  • noise = inoise16(x,0,4223)>>8; index = sin8_t(noise*3); bri = noise
  *                Controls
  *                  • SX directly increases t advance (faster scroll at higher SX).
  * @note        : Converted from WLED Effects "mode_noise16_2".
@@ -12785,7 +12785,7 @@ static const char PM_EFFECT_DESCRI__NOISE16_2[] PROGMEM =
  * @description : 16-bit Perlin noise with fixed XY offsets and rapidly advancing Z; yields twitchier, sparkly flow.
  *                Mapping
  *                  • real_x = (i+4223)*scale, real_y = (i+1234)*scale, real_z = step*8
- *                  • noise = inoise16(x,y,z)>>8; index = sin8(noise*3); bri = noise
+ *                  • noise = inoise16(x,y,z)>>8; index = sin8_t(noise*3); bri = noise
  *                Controls
  *                  • SX drives step strongly (higher SX = brisk evolution).
  * @note        : Converted from WLED Effects "mode_noise16_3".
@@ -21850,8 +21850,8 @@ static const char PM_EFFECT_DESCRI__2D__GAME_OF_LIFE[] PROGMEM =
  *                spatial frequencies are driven by X/Y scale controls and whose phase evolves
  *                over time. Each pixel (x,y) is palette-mapped from:
  *
- *                    idx = sin8( cos8( x * SX/16 + t/3 )
- *                               + sin8( y * IX/16 + t/4 )
+ *                    idx = sin8_t( cos8( x * SX/16 + t/3 )
+ *                               + sin8_t( y * IX/16 + t/4 )
  *                               + t )
  *
  *                where t advances with a time divisor from C3. The result is a flowing,
@@ -22100,7 +22100,7 @@ static const char PM_EFFECT_DESCRI__2D__JULIA[] PROGMEM =
  *   • Phase/time: `phase` advances with real time and `C3` (Phase speed) so the curve
  *     rotates/evolves smoothly.
  *   • Points: For i = 0..255, we compute:
- *       x = sin8( phase/2 + (i * SX)/32 )
+ *       x = sin8_t( phase/2 + (i * SX)/32 )
  *       y = cos8( phase/2 + i*2 )
  *     then map them into integer pixel coords [0..cols-1], [0..rows-1] with rounding.
  *     Each point is colored from the active palette using an index that drifts with time.
@@ -22604,7 +22604,7 @@ static const char PM_EFFECT_DESCRI__2D__POLAR_LIGHTS[] PROGMEM =
  *     1) The whole matrix is gently faded toward black (trail persistence).
  *     2) A timebase ‘a’ (scaled by Speed) generates:
  *          x = (a / 14) % cols                // slow, stepwise horizontal motion
- *          y = f(a) = sin8(a*5)+sin8(a*4)+sin8(a*2)  // combined vertical wave
+ *          y = f(a) = sin8_t(a*5)+sin8_t(a*4)+sin8_t(a*2)  // combined vertical wave
  *          y is then mapped into 0..rows-1.
  *     3) The dot is colored from the active palette by its vertical position (y),
  *        producing a color banding from top to bottom.
@@ -22672,12 +22672,12 @@ static const char PM_EFFECT_DESCRI__2D__PULSER[] PROGMEM =
  * @how-it-works :
  *   - Timebase:
  *       t1 = effect_start_time / (257 - SX)
- *       t2 = sin8(t1) / 2        (slower, phase-coupled)
+ *       t2 = sin8_t(t1) / 2        (slower, phase-coupled)
  *   - Per-dot offsets:
  *       For i in [0..12]:
  *         phase = i * (IX / 8)
- *         x = map( sin8(t1 + phase), 0..255 -> 0..(cols-1) )
- *         y = map( sin8(t2 + phase), 0..255 -> 0..(rows-1) )
+ *         x = map( sin8_t(t1 + phase), 0..255 -> 0..(cols-1) )
+ *         y = map( sin8_t(t2 + phase), 0..255 -> 0..(rows-1) )
  *         color = palette index evenly across 0..255
  *   - Trails:
  *       fadeToBlackBy( (C1 >> 3) + (CB1 ? 24 : 0) )
@@ -22896,7 +22896,7 @@ static const char PM_EFFECT_DESCRI__2D__SUN_RADIATION[] PROGMEM =
  * @description : Weaves two moving sine “cloths” (one by X, one by Y) and adds them additively to form a tartan/plaid pattern.
  *
  *   How it works
- *   • Horizontal banding: hue = x * slow_osc + offsetY; brightness comes from sin8(x * SX + offsetX), then optionally “sharpened”
+ *   • Horizontal banding: hue = x * slow_osc + offsetY; brightness comes from sin8_t(x * SX + offsetX), then optionally “sharpened”
  *     by multiplying brightness against itself ‘Sharpness’ times to narrow the lines.
  *   • Vertical banding: same idea, but using y with IX as the scaler and offsetX for phase.
  *   • The two passes are added to the pixel (first set, then add), so crossings appear brighter and richer.
@@ -28090,21 +28090,21 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericAurora()
   {
     const uint8_t x_phase = ((uint32_t)x * band_count * 256U / cols);
     const uint8_t flow_phase = reverse ? (uint8_t)(x_phase + phase) : (uint8_t)(x_phase - phase);
-    const uint8_t primary_wave = sin8(flow_phase);
-    const uint8_t secondary_wave = sin8((uint8_t)(flow_phase * 2U + phase2));
+    const uint8_t primary_wave = sin8_t(flow_phase);
+    const uint8_t secondary_wave = sin8_t((uint8_t)(flow_phase * 2U + phase2));
     const uint8_t wave_height = (primary_wave >> 3) + (secondary_wave >> 4);
 
     for (uint16_t y = 0; y < rows; y++)
     {
       const uint8_t y_phase = ((uint32_t)y * 256U / rows);
-      const uint8_t vertical_wave = sin8((uint8_t)(y_phase + phase2 + x_phase));
+      const uint8_t vertical_wave = sin8_t((uint8_t)(y_phase + phase2 + x_phase));
       const uint8_t bend = ((int16_t)vertical_wave - 128) * distortion / 255;
       const uint8_t curtain_phase = (uint8_t)(flow_phase + y_phase / width_scale + bend + wave_height);
 
       // Build several overlapping soft curtains.
-      const uint8_t curtain1 = sin8(curtain_phase);
-      const uint8_t curtain2 = sin8((uint8_t)(curtain_phase + 85U + phase2));
-      const uint8_t curtain3 = sin8((uint8_t)(curtain_phase + 170U - phase2));
+      const uint8_t curtain1 = sin8_t(curtain_phase);
+      const uint8_t curtain2 = sin8_t((uint8_t)(curtain_phase + 85U + phase2));
+      const uint8_t curtain3 = sin8_t((uint8_t)(curtain_phase + 170U - phase2));
 
       // Broad, overlapping brightness variation.
       const uint8_t envelope = ((uint16_t)curtain1 * 3U + curtain2 + curtain3) / 5U;
@@ -28451,98 +28451,96 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
 #endif
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericWaterfall
- * @description : Continuous flowing streams with turbulence and bottom foam.
- *
- * Vertical streams remain illuminated while travelling highlights
- * create the impression of continuously flowing water.
- * Columns vary in brightness and flow phase.
- * Optional foam appears near the bottom of the matrix.
- *
- * Speed     : Downward flow velocity
- * Intensity : Density of active streams
- * Custom1   : Stream width
- * Custom2   : Flow turbulence
- * Custom3   : Foam strength (0-31)
- * Check2    : Use Palette2 for bottom foam
- *
- * Palette1 supplies the flowing stream colours.
- * Palette2 optionally supplies the foam colours.
- *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
 {
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
+  const uint16_t cols = SEGMENT.virtualWidth();
+  const uint16_t rows = SEGMENT.virtualHeight();
   if (!cols || !rows) return;
 
-  if (SEGENV.call == 0) SEGENV.step = 0;
+  const uint32_t now = millis();
+  const uint8_t speed = SEGMENT.speed;
+  const uint8_t intensity = SEGMENT.intensity;
+  const bool use_palette = SEGMENT.palette_id != 0;
 
-  const uint8_t flow_speed = 1 + (SEGMENT.speed >> 4);
-  const uint8_t density = SEGMENT.intensity;
-  const uint8_t stream_width = SEGMENT.custom1;
-  const uint8_t turbulence = SEGMENT.custom2;
-  const uint8_t foam_strength = SEGMENT.custom3;
-  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  const uint32_t travel_ms = 4200UL - (uint32_t)speed * 12UL;
+  const uint32_t rest_ms = 2800UL - (uint32_t)intensity * 8UL;
+  const uint32_t cycle_ms = travel_ms + rest_ms;
+  const uint8_t background_bri = 8;
+  const uint8_t trail_length = 4;
 
-  // Animation phase advances through the normal effect frame scheduler.
-  SEGENV.step += flow_speed;
-  const uint32_t phase = SEGENV.step;
+  auto scale_colour = [](uint32_t c, uint8_t bri) -> uint32_t {
+    return RGBW32((uint16_t)R(c) * bri / 255, (uint16_t)G(c) * bri / 255, (uint16_t)B(c) * bri / 255, (uint16_t)W(c) * bri / 255);
+  };
 
-  // Higher width values produce broader groups of flowing columns.
-  const uint8_t horizontal_frequency = 4 + ((255U - stream_width) / 12U);
+  auto ice_colour = [&](uint8_t index, uint8_t bri) -> uint32_t {
+    uint32_t c;
+    if (use_palette) {
+      c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
+    } else {
+      if (index < 64) c = RGBW32(35, 85, 165, 0);
+      else if (index < 128) c = RGBW32(95, 175, 255, 0);
+      else if (index < 192) c = RGBW32(175, 225, 255, 0);
+      else c = RGBW32(235, 250, 255, 0);
+    }
+    return scale_colour(c, bri);
+  };
 
-  // Foam occupies the lower 1-4 rows, depending on intensity.
-  const uint8_t foam_rows = foam_strength ? 1 + ((uint16_t)foam_strength * 3U / 31U) : 0;
-  const uint16_t foam_start = (foam_rows >= rows) ? 0 : rows - foam_rows;
+  SEGMENT.fill(0);
 
-  SEGMENT.fill(BLACK);
+  for (uint16_t x = 0; x < cols; x++) {
+    uint32_t seed = (uint32_t)x * 2654435761UL + 0x9E3779B9UL;
+    seed ^= seed >> 16;
+    seed *= 2246822519UL;
+    seed ^= seed >> 13;
 
-  for (uint16_t x = 0; x < cols; x++)
-  {
-    // Smooth horizontal grouping determines which columns carry water.
-    const uint8_t column_wave = sin8((uint8_t)(x * horizontal_frequency + (phase >> 4)));
-    const uint8_t density_threshold = 255U - density;
-    if (column_wave < density_threshold) continue;
+    const uint8_t palette_index = (uint8_t)(seed >> 8);
+    const uint32_t offset = seed % cycle_ms;
+    const uint32_t local_time = now + offset;
+    const uint32_t cycle_number = local_time / cycle_ms;
+    const uint32_t cycle_position = local_time % cycle_ms;
 
-    // Turbulence changes the phase of the falling highlights independently.
-    const uint8_t column_offset = sin8((uint8_t)(x * 7U + (phase >> 2)));
-    const uint8_t turbulent_offset = ((uint16_t)column_offset * turbulence) / 255U;
+    uint32_t event_seed = seed ^ (cycle_number * 747796405UL);
+    event_seed ^= event_seed >> 16;
+    event_seed *= 2246822519UL;
+    event_seed ^= event_seed >> 13;
 
-    for (uint16_t y = 0; y < rows; y++)
-    {
-      // The negative phase produces downward movement as time advances.
-      const uint8_t primary_wave = sin8((uint8_t)(y * 35U - phase + turbulent_offset));
-      const uint8_t secondary_wave = sin8((uint8_t)(y * 77U - phase * 2U + x * 11U));
+    const bool active = (event_seed & 255U) < (uint16_t)(24U + (uint16_t)intensity * 200U / 255U);
 
-      // Continuous illumination with moving bright and dark regions.
-      const uint8_t flow_brightness = 35 + ((uint16_t)primary_wave * 170U + (uint16_t)secondary_wave * 50U) / 255U;
+    for (uint16_t y = 0; y < rows; y++) {
+      const uint8_t depth = rows > 1 ? (uint32_t)y * 255U / (rows - 1U) : 255;
+      const uint8_t shimmer = (uint8_t)((now / 80UL + x * 19UL + y * 7UL) & 31U);
+      const uint8_t bri = background_bri + depth / 24U + shimmer / 12U;
+      SEGMENT.setPixelColorXY(x, y, ice_colour(palette_index, bri));
+    }
 
-      const uint8_t palette_index = (uint8_t)(((uint32_t)x * 255U / max<uint16_t>(1, cols - 1U)) + (phase >> 4) + (primary_wave >> 3));
-      const uint32_t stream_colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-      uint32_t output_colour = color_blend(BLACK, stream_colour, flow_brightness);
+    if (!active) continue;
 
-      // Optional moving foam appears near the bottom of the waterfall.
-      if (foam_rows && y >= foam_start)
-      {
-        const uint8_t foam_wave = sin8((uint8_t)(x * 29U + y * 47U - phase * 3U));
-        const uint8_t foam_brightness = ((uint16_t)foam_wave * foam_strength * 255U) / (31U * 255U);
-        const uint32_t foam_colour = palette2_ready
-          ? SEGMENT.GetPalette2Colour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
-          : WHITE;
+    if (cycle_position < travel_ms) {
+      const uint32_t progress = cycle_position * 65535UL / travel_ms;
+      const uint32_t accelerated = (progress * progress) / 65535UL;
+      const int32_t head_y = (int32_t)((accelerated * (uint32_t)(rows + trail_length) / 65535UL)) - trail_length;
 
-        output_colour = color_blend(output_colour, foam_colour, foam_brightness);
+      for (uint8_t t = 0; t <= trail_length; t++) {
+        const int32_t y = head_y - t;
+        if (y < 0 || y >= rows) continue;
+
+        const uint8_t bri = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
+        const uint8_t colour_index = t == 0 ? 240 : (uint8_t)(palette_index + t * 13U);
+        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, bri));
       }
+    } else {
+      const uint32_t after_travel = cycle_position - travel_ms;
+      if (after_travel >= 360UL) continue;
 
-      SEGMENT.setPixelColorXY(x, y, output_colour);
+      const uint8_t fade = (uint32_t)(360UL - after_travel) * 255UL / 360UL;
+      const uint8_t sparkle = (uint32_t)fade * fade / 255UL;
+      SEGMENT.setPixelColorXY(x, rows - 1, ice_colour(240, sparkle));
+
+      if (rows > 1) SEGMENT.setPixelColorXY(x, rows - 2, ice_colour(190, sparkle / 4));
     }
   }
 }
+
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
 "Icicle Atmospheric Waterfall@"
