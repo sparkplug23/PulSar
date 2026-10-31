@@ -28734,6 +28734,200 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_SPATIAL_RIPPLE[] PROGMEM =
 #endif
 
 
+/*******************************************************************************************************************************************************************************************************************
+ * Snowflake patterns shared by 2D Snow effects.
+ *
+ * Each pattern is stored as a 9x9 bitmap with its centre at (4,4).
+ * Smaller patterns occupy only the central region.
+ *
+ * Pattern 0: Single pixel
+ * Pattern 1: 3x3 cross
+ * Pattern 2: 5x5 crystal
+ * Pattern 3: 7x7 branched snowflake
+ * Pattern 4: 9x9 detailed snowflake
+ *
+ * Each row uses bits 0-8 as horizontal pixel positions.
+ *******************************************************************************************************************************************************************************************************************/
+static const uint16_t PM_SNOW_PATTERN_MASKS[5][9] PROGMEM = {
+  {0x000,0x000,0x000,0x000,0x010,0x000,0x000,0x000,0x000},
+  {0x000,0x000,0x000,0x010,0x038,0x010,0x000,0x000,0x000},
+  {0x000,0x000,0x054,0x038,0x07C,0x038,0x054,0x000,0x000},
+  {0x000,0x010,0x0AA,0x038,0x0FE,0x038,0x0AA,0x010,0x000},
+  {0x010,0x111,0x0AA,0x038,0x1FF,0x038,0x0AA,0x111,0x010}
+};
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__SnowFall
+ * @description : Falling snowflakes with variable shapes and optional wind.
+ *
+ * Snowflakes spawn above the matrix and move continuously downward.
+ * Each snowflake has an independent position, falling speed,
+ * palette colour, pattern and wind direction.
+ *
+ * Wind allows diagonal movement at 45 degrees.
+ * Individual snowflakes may change direction while falling.
+ *
+ * Speed     : Downward falling velocity
+ * Intensity : Maximum active snowflake density
+ * Custom1   : Maximum snowflake pattern size (1x1 to 9x9)
+ * Custom2   : Wind strength / diagonal movement probability
+ * Custom3   : Falling velocity variation (0-31)
+ * Check1    : Enable wind
+ * Check2    : Randomize pattern selection
+ *
+ * Palette1 supplies snowflake colours.
+ * Uses the existing PulSar effect frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__SnowFall()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct Snowflake {
+    int32_t x;
+    int32_t y;
+    uint8_t velocity;
+    uint8_t colour;
+    uint8_t pattern;
+    int8_t wind_direction;
+    uint8_t active;
+  };
+
+  // Scale particle capacity with matrix area, with a maximum of 80 flakes.
+  uint32_t capacity = (uint32_t)cols * rows / 50U;
+  if (capacity < 8U) capacity = 8U;
+  if (capacity > 80U) capacity = 80U;
+  const uint16_t max_flakes = (uint16_t)capacity;
+  const size_t data_size = max_flakes * sizeof(Snowflake);
+
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  Snowflake* flakes = reinterpret_cast<Snowflake*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(flakes, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 5);
+  const uint16_t active_limit = 1 + ((uint32_t)(max_flakes - 1U) * SEGMENT.intensity / 255U);
+  const uint8_t max_pattern = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
+  const uint8_t wind_strength = SEGMENT.custom2;
+  const uint8_t variation = SEGMENT.custom3 * 8U;
+  const bool enable_wind = SEGMENT.check1;
+  const bool random_patterns = SEGMENT.check2;
+
+  SEGMENT.fill(BLACK);
+
+  uint16_t active_count = 0;
+  for (uint16_t i = 0; i < max_flakes; i++) {
+    if (flakes[i].active) active_count++;
+  }
+
+  for (uint16_t i = 0; i < max_flakes; i++)
+  {
+    Snowflake& flake = flakes[i];
+
+    // Generate new snowflakes above the visible matrix.
+    if (!flake.active)
+    {
+      if (active_count >= active_limit || hw_random8() >= 16) continue;
+
+      flake.active = 1;
+      flake.x = (int32_t)hw_random16(cols) * 16;
+      flake.y = -16 * (5 + hw_random8(6));
+      flake.velocity = hw_random8();
+      flake.colour = hw_random8();
+      flake.pattern = random_patterns ? hw_random8(max_pattern + 1U) : max_pattern;
+      flake.wind_direction = hw_random8(2) ? 1 : -1;
+      active_count++;
+      continue;
+    }
+
+    // Advance vertically with an individual falling velocity.
+    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)flake.velocity * variation / 255U);
+    const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
+    flake.y += movement;
+
+    // Wind moves horizontally by the same amount as vertical movement.
+    // This produces a 45-degree diagonal whenever wind is active.
+    if (enable_wind && wind_strength)
+    {
+      if (hw_random8() < wind_strength) flake.x += (int32_t)flake.wind_direction * movement;
+
+      // Occasionally reverse wind direction for individual snowflakes.
+      if (hw_random8() < 1 + (wind_strength >> 5)) flake.wind_direction = -flake.wind_direction;
+    }
+
+    // Remove snowflakes after they have completely left the matrix.
+    if (flake.y > ((int32_t)rows + 5) * 16 || flake.x < -5 * 16 || flake.x >= ((int32_t)cols + 5) * 16) {
+      flake.active = 0;
+      active_count--;
+      continue;
+    }
+
+    const int32_t centre_x = flake.x >> 4;
+    const int32_t centre_y = flake.y >> 4;
+    const uint32_t colour = SEGMENT.GetPaletteColour(flake.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+    // Render the selected snowflake bitmap around its centre.
+    for (uint8_t py = 0; py < 9; py++)
+    {
+      const int32_t y = centre_y + (int32_t)py - 4;
+      if (y < 0 || y >= rows) continue;
+
+      const uint16_t mask = pgm_read_word(&PM_SNOW_PATTERN_MASKS[flake.pattern][py]);
+      if (!mask) continue;
+
+      for (uint8_t px = 0; px < 9; px++)
+      {
+        if (!(mask & (1U << px))) continue;
+
+        const int32_t x = centre_x + (int32_t)px - 4;
+        if (x < 0 || x >= cols) continue;
+
+        SEGMENT.addPixelColorXY(x, y, colour);
+      }
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__SNOW_FALL[] PROGMEM =
+"2D Snow Fall@"
+"Speed,Density,Size,Wind,Variation,Enable Wind,Random Shapes,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=120,c1=120,c2=100,c3=16,o1=1,o2=1,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__SNOW_FALL[] PROGMEM =
+"Falling snowflakes with individual movement and predefined shapes.\n\r"
+"Snowflakes may be single pixels or larger symmetric crystals.\n\r"
+"Optional wind moves snowflakes diagonally at 45 degrees.\n\r"
+"Each snowflake can independently reverse its horizontal direction.\n\r"
+"SX: Falling velocity\n\r"
+"IX: Maximum active snowflake density\n\r"
+"C1: Maximum pattern size (1x1, 3x3, 5x5, 7x7, 9x9)\n\r"
+"C2: Wind strength and probability of diagonal movement\n\r"
+"C3: Individual falling velocity variation\n\r"
+"O1: Enable wind-driven horizontal movement\n\r"
+"O2: Randomize snowflake patterns up to the selected size\n\r"
+"Palette1: Snowflake colours";
+#endif
+
 
 
 
