@@ -28451,10 +28451,37 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
 #endif
 
 
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericWaterfall
+ * @description : Frozen icicles slowly melting into independent falling droplets.
+ *
+ * A dim icy-blue background illuminates the icicles while individual
+ * droplets form near the top and descend towards the tips.
+ * Droplets accelerate as they fall, leaving short fading trails.
+ * At the bottom, each droplet briefly glistens before disappearing.
+ *
+ * Each column uses a deterministic independent animation phase,
+ * preventing the synchronized appearance of a conventional waterfall.
+ * Droplet activation varies between cycles to create a natural thaw.
+ *
+ * Speed     : Droplet falling speed
+ * Intensity : Probability of active droplets per column
+ *
+ * Palette 0 : Built-in ice colours (deep blue, cyan, pale blue, white)
+ * Palette 1+: Colours obtained through SEGMENT.GetPaletteColour()
+ *
+ * Uses millis() for time-based animation independent of frame rate.
+ * No dynamic allocations or persistent particle buffers required.
+ *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
 {
-  const uint16_t cols = SEGMENT.virtualWidth();
-  const uint16_t rows = SEGMENT.virtualHeight();
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
   if (!cols || !rows) return;
 
   const uint32_t now = millis();
@@ -28469,7 +28496,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
   const uint8_t trail_length = 4;
 
   auto scale_colour = [](uint32_t c, uint8_t bri) -> uint32_t {
-    return RGBW32((uint16_t)R(c) * bri / 255, (uint16_t)G(c) * bri / 255, (uint16_t)B(c) * bri / 255, (uint16_t)W(c) * bri / 255);
+    return RGBW32((uint16_t)R(c) * bri / 255U, (uint16_t)G(c) * bri / 255U, (uint16_t)B(c) * bri / 255U, (uint16_t)W(c) * bri / 255U);
   };
 
   auto ice_colour = [&](uint8_t index, uint8_t bri) -> uint32_t {
@@ -28485,9 +28512,10 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
     return scale_colour(c, bri);
   };
 
-  SEGMENT.fill(0);
+  SEGMENT.fill(BLACK);
 
-  for (uint16_t x = 0; x < cols; x++) {
+  for (uint16_t x = 0; x < cols; x++)
+  {
     uint32_t seed = (uint32_t)x * 2654435761UL + 0x9E3779B9UL;
     seed ^= seed >> 16;
     seed *= 2246822519UL;
@@ -28506,7 +28534,9 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
 
     const bool active = (event_seed & 255U) < (uint16_t)(24U + (uint16_t)intensity * 200U / 255U);
 
-    for (uint16_t y = 0; y < rows; y++) {
+    // Dim frozen illumination remains visible between droplets.
+    for (uint16_t y = 0; y < rows; y++)
+    {
       const uint8_t depth = rows > 1 ? (uint32_t)y * 255U / (rows - 1U) : 255;
       const uint8_t shimmer = (uint8_t)((now / 80UL + x * 19UL + y * 7UL) & 31U);
       const uint8_t bri = background_bri + depth / 24U + shimmer / 12U;
@@ -28515,12 +28545,15 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
 
     if (!active) continue;
 
-    if (cycle_position < travel_ms) {
+    // Droplet descends with increasing velocity and a fading tail.
+    if (cycle_position < travel_ms)
+    {
       const uint32_t progress = cycle_position * 65535UL / travel_ms;
       const uint32_t accelerated = (progress * progress) / 65535UL;
       const int32_t head_y = (int32_t)((accelerated * (uint32_t)(rows + trail_length) / 65535UL)) - trail_length;
 
-      for (uint8_t t = 0; t <= trail_length; t++) {
+      for (uint8_t t = 0; t <= trail_length; t++)
+      {
         const int32_t y = head_y - t;
         if (y < 0 || y >= rows) continue;
 
@@ -28528,7 +28561,10 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
         const uint8_t colour_index = t == 0 ? 240 : (uint8_t)(palette_index + t * 13U);
         SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, bri));
       }
-    } else {
+    }
+    else
+    {
+      // Brief glisten at the icicle tip before the droplet fades.
       const uint32_t after_travel = cycle_position - travel_ms;
       if (after_travel >= 360UL) continue;
 
@@ -28541,10 +28577,9 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
   }
 }
 
-
 static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
-"Icicle Atmospheric Waterfall@"
-"Flow Speed,Density,Stream Width,Turbulence,Foam,,Pal2 Foam,,,!"
+"Icicle - Frozen Melt GOOD@"
+"Fall Speed,Drip Density,,,,,,,,!"
 ";"
 ""
 ";"
@@ -28552,184 +28587,22 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=220,c1=180,c2=100,c3=16,o2=0,ep=20";
+"sx=100,ix=100,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
 static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
-"Continuous vertical waterfall streams with moving highlights.\n\r"
-"Independent phase variation creates flowing water and turbulence.\n\r"
-"Optional animated foam brightens the lower rows.\n\r"
-"SX: Downward flow velocity\n\r"
-"IX: Density of active streams\n\r"
-"C1: Stream width\n\r"
-"C2: Flow turbulence\n\r"
-"C3: Bottom foam strength (0-31)\n\r"
-"O2: Use Palette2 for foam\n\r"
-"Palette1: Flowing water colours\n\r"
-"Palette2: Bottom foam when O2 is enabled";
+"Frozen Christmas icicles with occasional melting droplets.\n\r"
+"Each icicle remains softly illuminated in icy colours.\n\r"
+"Individual droplets form near the top, accelerate downwards and leave a short fading trail.\n\r"
+"Droplets briefly glisten at the tips before disappearing.\n\r"
+"Columns operate independently with randomized activation cycles.\n\r"
+"SX: Droplet falling speed\n\r"
+"IX: Density and frequency of active droplets\n\r"
+"Palette 0: Built-in deep blue, cyan, pale blue and ice white\n\r"
+"Palette 1+: Use the selected palette for all illumination and droplets";
 #endif
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleSpatialRipple
- * @description : Expanding circular or elliptical waves across a 2D matrix.
- *
- * Independent ripples originate at random matrix positions.
- * Each ripple expands outward, illuminating pixels near its perimeter.
- * Multiple ripples can overlap and combine their illumination.
- *
- * Speed     : Ripple expansion velocity
- * Intensity : Ripple generation frequency
- * Custom1   : Ring thickness (1-8 pixels)
- * Custom2   : Ring edge softness
- * Custom3   : Elliptical distortion (0-31)
- * Check2    : Use Palette2 for ripple centres
- *
- * Palette1 supplies the expanding ring colours.
- * Palette2 optionally supplies a short flash at each ripple origin.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleSpatialRipple()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  struct IcicleRipple {
-    uint16_t x;
-    uint16_t y;
-    uint16_t radius;
-    uint8_t colour;
-    uint8_t active;
-  };
-
-  const uint8_t max_ripples = 4;
-  const size_t data_size = max_ripples * sizeof(IcicleRipple);
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  IcicleRipple* ripples = reinterpret_cast<IcicleRipple*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(ripples, 0, data_size);
-    SEGMENT.fill(BLACK);
-  }
-
-  const uint8_t expansion_speed = 1 + (SEGMENT.speed >> 5);
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t ring_width = 1 + ((uint16_t)SEGMENT.custom1 * 7U / 255U);
-  const uint8_t softness = SEGMENT.custom2;
-  const uint8_t distortion = SEGMENT.custom3;
-  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
-
-  // Higher distortion makes the rings wider horizontally relative to height.
-  const float vertical_scale = 1.0f + ((float)distortion * 7.0f / 31.0f);
-  const float max_radius = sqrtf((float)cols * cols + (float)rows * rows * vertical_scale * vertical_scale) + ring_width;
-  const uint16_t max_radius_fixed = (uint16_t)(max_radius * 16.0f);
-
-  // Ripples are reconstructed each frame, without residual afterglow.
-  SEGMENT.fill(BLACK);
-
-  // Randomly start a ripple when an animation slot is available.
-  if (hw_random8() < spawn_chance)
-  {
-    for (uint8_t i = 0; i < max_ripples; i++)
-    {
-      IcicleRipple& ripple = ripples[i];
-      if (ripple.active) continue;
-
-      ripple.x = hw_random16(cols);
-      ripple.y = hw_random16(rows);
-      ripple.radius = 0;
-      ripple.colour = hw_random8();
-      ripple.active = 1;
-      break;
-    }
-  }
-
-  for (uint8_t i = 0; i < max_ripples; i++)
-  {
-    IcicleRipple& ripple = ripples[i];
-    if (!ripple.active) continue;
-
-    // Expand by a fractional number of pixels per frame.
-    ripple.radius += expansion_speed;
-
-    if (ripple.radius >= max_radius_fixed) {
-      ripple.active = 0;
-      continue;
-    }
-
-    const float radius = (float)ripple.radius / 16.0f;
-    const uint32_t ring_colour = SEGMENT.GetPaletteColour(ripple.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t centre_colour = palette2_ready ? SEGMENT.GetPalette2Colour(ripple.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : ring_colour;
-
-    // A newly formed ripple briefly illuminates its origin.
-    if (radius < 2.0f)
-    {
-      const uint8_t centre_brightness = (uint8_t)(255.0f * (2.0f - radius) / 2.0f);
-      SEGMENT.addPixelColorXY(ripple.x, ripple.y, color_blend(BLACK, centre_colour, centre_brightness));
-    }
-
-    // Calculate the expanding ring using the distance from its origin.
-    for (uint16_t y = 0; y < rows; y++)
-    {
-      const float dy = ((int32_t)y - ripple.y) * vertical_scale;
-      const float dy2 = dy * dy;
-
-      for (uint16_t x = 0; x < cols; x++)
-      {
-        const float dx = (int32_t)x - ripple.x;
-        const float distance = sqrtf(dx * dx + dy2);
-        const float difference = fabsf(distance - radius);
-        if (difference >= ring_width) continue;
-
-        // Softness controls the contrast between the ring core and edges.
-        const float normalized = difference / ring_width;
-        const float sharp_brightness = (normalized < 0.5f) ? 1.0f : 0.0f;
-        const float smooth_brightness = 1.0f - normalized;
-        const float blend = (float)softness / 255.0f;
-        const float brightness_float = sharp_brightness * (1.0f - blend) + smooth_brightness * blend;
-        const uint8_t brightness = (uint8_t)(255.0f * brightness_float);
-        if (!brightness) continue;
-
-        SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, ring_colour, brightness));
-      }
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_SPATIAL_RIPPLE[] PROGMEM =
-"Icicle Spatial Ripple@"
-"Speed,Frequency,Thickness,Softness,Ellipse,,Pal2 Centre,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=100,c1=100,c2=180,c3=16,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_SPATIAL_RIPPLE[] PROGMEM =
-"Expanding circular or elliptical light waves across the matrix.\n\r"
-"Each ripple originates at a random position and expands outward.\n\r"
-"Up to four ripples may overlap, combining their illumination.\n\r"
-"SX: Ripple expansion velocity\n\r"
-"IX: Ripple generation frequency\n\r"
-"C1: Ring thickness (1-8 pixels)\n\r"
-"C2: Ring edge softness\n\r"
-"C3: Elliptical distortion (0=circular, 31=maximum horizontal elongation)\n\r"
-"O2: Use Palette2 for ripple centre flashes\n\r"
-"Palette1: Expanding ring colours\n\r"
-"Palette2: Ripple centre when O2 is enabled";
-#endif
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -40002,15 +39875,6 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-            #endif
-            Effect_DevStage::Dev);
-
-  // Icicle Spatial - Waves propagating through the 2D layout
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SPATIAL_RIPPLE,
-            &mAnimatorLight::EffectAnim__2D__IcicleSpatialRipple,
-            PM_EFFECT_CONFIG__2D__ICICLE_SPATIAL_RIPPLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_SPATIAL_RIPPLE,
             #endif
             Effect_DevStage::Dev);
 

@@ -1706,9 +1706,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
       void EffectAnim__2D__IcicleAtmosphericLightning();
       void EffectAnim__2D__IcicleAtmosphericWaterfall();
 
-      // Icicle Spatial - Waves propagating through the 2D layout
-      void EffectAnim__2D__IcicleSpatialRipple();
-
       // Snow - Falling snowflakes with optional wind and varying flake shapes
       void EffectAnim__2D__SnowFall();
 
@@ -2310,9 +2307,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
         EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
         EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
         EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-
-        // Icicle Spatial - Waves propagating through the 2D layout
-        EFFECTS_FUNCTION__2D__ICICLE_SPATIAL_RIPPLE,
 
         // Snow - Falling snowflakes with optional wind and varying flake shapes
         EFFECTS_FUNCTION__2D__SNOW_FALL,
