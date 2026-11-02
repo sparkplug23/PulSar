@@ -24706,6 +24706,382 @@ static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM =
 "SX: speed  |  IX: blur  |  C1: X amp  |  C2: Y amp  |  C3: Y cos amp  |  CB2: flow toggle";
 #endif
 
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__HaloSparkle
+ * @description : Independent sparkling pixels with optional two-dimensional spatial halos over a configurable palette background.
+ *
+ * Each pixel can independently generate a sparkle that appears at full
+ * colour brightness and gradually fades to the background.
+ * Sparkles remain stationary throughout their lifetime.
+ *
+ * An optional 2D halo illuminates the four directly neighbouring pixels.
+ * Halo brightness follows the sparkle's decay and is independently adjustable.
+ *
+ * The background is generated from Palette1 along either the horizontal
+ * or vertical matrix axis. A configurable number of palette repetitions
+ * can be displayed across that axis.
+ *
+ * Discrete palettes may optionally be forced into gradient interpolation.
+ * This applies consistently to the background, sparkle and halo colours.
+ *
+ * Speed     : Sparkle fading speed
+ * Intensity : Sparkle generation density
+ * Custom1   : Background brightness (0-255)
+ * Custom2   : Surrounding halo strength (0-255)
+ * Custom3   : Palette repetitions (0-31, where 0 and 1 mean one repeat)
+ * Check1    : Enable spatial halo around each sparkle
+ * Check2    : Force gradient interpolation for discrete palettes
+ * Check3    : Use vertical instead of horizontal palette mapping
+ *
+ * Palette 0 : Built-in neutral blue-white gradient with white sparkles
+ * Palette 1+: All colours obtained from SEGMENT.GetPaletteColour()
+ *
+ * Sparkle peak brightness is always 255 and is not limited by Custom1.
+ * Each sparkle maintains its own fading state in a per-pixel buffer.
+ * The effect uses the normal PulSar frame scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__HaloSparkle()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  const size_t data_size = (size_t)cols * rows;
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  uint8_t* sparkles = reinterpret_cast<uint8_t*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(sparkles, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t fade_step = 2 + (SEGMENT.speed >> 3);
+  const uint8_t spawn_chance = SEGMENT.intensity >> 3;
+  const uint8_t background_brightness = SEGMENT.custom1;
+  const uint8_t halo_strength = SEGMENT.custom2;
+  const uint8_t repetitions = max<uint8_t>(1, min<uint8_t>(31, SEGMENT.custom3));
+  const bool enable_halo = SEGMENT.check1;
+  const bool force_gradient = SEGMENT.check2;
+  const bool vertical_gradient = SEGMENT.check3;
+  const bool use_palette = SEGMENT.palette_id != 0;
+  const uint8_t palette_mode = force_gradient ? PALETTE_MODE__FORCE_GRADIENT : PALETTE_MODE__DEFAULT;
+  const uint16_t axis_length = vertical_gradient ? rows : cols;
+
+  // Map each position onto one of the repeated 0-255 palette cycles.
+  auto palette_index_at = [&](uint16_t x, uint16_t y) -> uint8_t {
+    const uint16_t position = vertical_gradient ? y : x;
+    return (uint8_t)(((uint32_t)position * repetitions * 256UL / axis_length) & 0xFFU);
+  };
+
+  // Palette 0 provides a neutral built-in gradient.
+  // All other palettes use the existing palette system.
+  auto palette_colour = [&](uint8_t index) -> uint32_t {
+    if (use_palette) return SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, palette_mode, PALETTE_WRAP_HARDEDGE);
+
+    const uint8_t section = index >> 6;
+    const uint8_t blend = (index & 63U) * 4U;
+
+    uint32_t a;
+    uint32_t b;
+
+    if (section == 0) {
+      a = RGBW32(25, 45, 95, 0);
+      b = RGBW32(45, 115, 190, 0);
+    } else if (section == 1) {
+      a = RGBW32(45, 115, 190, 0);
+      b = RGBW32(100, 175, 235, 0);
+    } else if (section == 2) {
+      a = RGBW32(100, 175, 235, 0);
+      b = RGBW32(165, 205, 245, 0);
+    } else {
+      a = RGBW32(165, 205, 245, 0);
+      b = RGBW32(25, 45, 95, 0);
+    }
+
+    return force_gradient ? color_blend(a, b, blend) : a;
+  };
+
+  // Rebuild the background with independently selectable orientation,
+  // number of repetitions and gradient blending mode.
+  for (uint16_t y = 0; y < rows; y++)
+  {
+    for (uint16_t x = 0; x < cols; x++)
+    {
+      const uint8_t index = palette_index_at(x, y);
+      const uint32_t colour = palette_colour(index);
+      SEGMENT.setPixelColorXY(x, y, color_blend(BLACK, colour, background_brightness));
+    }
+  }
+
+  // Update the independently fading sparkle brightness values.
+  // Newly spawned sparkles always begin at maximum brightness.
+  for (uint16_t y = 0; y < rows; y++)
+  {
+    for (uint16_t x = 0; x < cols; x++)
+    {
+      const size_t index = (size_t)y * cols + x;
+
+      if (sparkles[index] > fade_step) sparkles[index] -= fade_step;
+      else sparkles[index] = 0;
+
+      if (sparkles[index] == 0 && hw_random16(4096) < spawn_chance) {
+        sparkles[index] = 255;
+      }
+    }
+  }
+
+  // Render optional 2D halos before the bright sparkle centres.
+  // Each halo inherits the originating sparkle's palette colour.
+  if (enable_halo && halo_strength)
+  {
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      for (uint16_t x = 0; x < cols; x++)
+      {
+        const uint8_t brightness = sparkles[(size_t)y * cols + x];
+        if (!brightness) continue;
+
+        const uint8_t halo_brightness = ((uint32_t)brightness * halo_strength / 255U) / 4U;
+        if (!halo_brightness) continue;
+
+        const uint8_t index = palette_index_at(x, y);
+        const uint32_t colour = use_palette ? palette_colour(index) : RGBW32(235, 245, 255, 0);
+        const uint32_t halo_colour = color_blend(BLACK, colour, halo_brightness);
+
+        if (x > 0) SEGMENT.addPixelColorXY(x - 1, y, halo_colour);
+        if (x + 1 < cols) SEGMENT.addPixelColorXY(x + 1, y, halo_colour);
+        if (y > 0) SEGMENT.addPixelColorXY(x, y - 1, halo_colour);
+        if (y + 1 < rows) SEGMENT.addPixelColorXY(x, y + 1, halo_colour);
+      }
+    }
+  }
+
+  // Render sparkle centres last, keeping them brighter than their halos.
+  // Custom1 affects only the background, never the sparkle peak colour.
+  for (uint16_t y = 0; y < rows; y++)
+  {
+    for (uint16_t x = 0; x < cols; x++)
+    {
+      const uint8_t brightness = sparkles[(size_t)y * cols + x];
+      if (!brightness) continue;
+
+      const uint8_t index = palette_index_at(x, y);
+      const uint32_t colour = palette_colour(index);
+      const uint32_t sparkle_colour = use_palette ? colour : RGBW32(255, 255, 255, 0);
+      const uint32_t background_colour = color_blend(BLACK, colour, background_brightness);
+
+      SEGMENT.setPixelColorXY(x, y, color_blend(background_colour, sparkle_colour, brightness));
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__HALO_SPARKLE[] PROGMEM =
+"Halo Sparkle@"
+"Fade Speed,Density,Background,Halo Strength,Repeats,Halo,Force Gradient,Vertical,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=100,c1=40,c2=100,c3=3,o1=1,o2=1,o3=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__HALO_SPARKLE[] PROGMEM =
+"Independent sparkling pixels with optional 2D surrounding glow.\n\r"
+"Sparkles appear at full colour brightness and gradually fade.\n\r"
+"Optional halos illuminate the four directly neighbouring pixels.\n\r"
+"The background supports repeated horizontal or vertical palette gradients.\n\r"
+"SX: Sparkle fading speed\n\r"
+"IX: Sparkle generation density\n\r"
+"C1: Background brightness only (0-255)\n\r"
+"C2: Surrounding halo strength (0-255)\n\r"
+"C3: Number of palette repetitions (0-31, 0 and 1 = one repeat)\n\r"
+"O1: Enable surrounding 2D halo\n\r"
+"O2: Force gradient interpolation for discrete palettes\n\r"
+"O3: Vertical gradient instead of horizontal\n\r"
+"Palette 0: Built-in neutral blue-white gradient with white sparkles\n\r"
+"Palette 1+: Selected palette controls background, sparkle and halo colours\n\r"
+"Sparkle peak brightness is independent of background brightness";
+#endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAtmosphericLightning
+ * @description : Random lightning strikes with branching and fading afterglow.
+ *
+ * Lightning originates at the top of the matrix and travels downward.
+ * Individual strikes have irregular paths, optional horizontal branches,
+ * independently selected colours and short flickering lifetimes.
+ *
+ * Speed     : Flash duration (higher = faster)
+ * Intensity : Lightning generation frequency
+ * Custom1   : Branching frequency
+ * Custom2   : Afterglow persistence
+ * Custom3   : Horizontal spread (0-31)
+ * Check2    : Use Palette2 for the lightning core
+ *
+ * Palette1 supplies branching and afterglow colours.
+ * Palette2 optionally supplies the brighter lightning core.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct LightningStrike {
+    uint16_t x;
+    uint8_t seed;
+    uint8_t colour;
+    uint8_t age;
+    uint8_t duration;
+    uint8_t active;
+  };
+
+  const uint8_t max_strikes = 4;
+  const size_t data_size = max_strikes * sizeof(LightningStrike);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  LightningStrike* strikes = reinterpret_cast<LightningStrike*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(strikes, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t flash_duration = 2 + ((255U - SEGMENT.speed) / 22U);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 3);
+  const uint8_t branching = SEGMENT.custom1;
+  const uint8_t afterglow_fade = 220 - ((uint16_t)SEGMENT.custom2 * 200U / 255U);
+  const uint8_t horizontal_spread = ((uint16_t)SEGMENT.custom3 * 8U) / 31U;
+  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+
+  // Preserve previous lightning illumination as a fading afterglow.
+  SEGMENT.fadeToBlackBy(afterglow_fade);
+
+  // Randomly generate a strike in an available slot.
+  if (hw_random8() < spawn_chance)
+  {
+    for (uint8_t i = 0; i < max_strikes; i++)
+    {
+      LightningStrike& strike = strikes[i];
+      if (strike.active) continue;
+
+      strike.x = hw_random16(cols);
+      strike.seed = hw_random8();
+      strike.colour = hw_random8();
+      strike.age = 0;
+      strike.duration = flash_duration + hw_random8(3);
+      strike.active = 1;
+      break;
+    }
+  }
+
+  for (uint8_t i = 0; i < max_strikes; i++)
+  {
+    LightningStrike& strike = strikes[i];
+    if (!strike.active) continue;
+
+    if (strike.age >= strike.duration) {
+      strike.active = 0;
+      continue;
+    }
+
+    const uint8_t remaining = strike.duration - strike.age;
+    const uint8_t lifetime_brightness = ((uint16_t)remaining * 255U) / strike.duration;
+    const uint8_t flicker = hw_random8(2) ? 255 : 170;
+    const uint8_t brightness = ((uint16_t)lifetime_brightness * flicker) / 255U;
+
+    const uint32_t branch_colour = SEGMENT.GetPaletteColour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : branch_colour;
+
+    // Reconstruct a repeatable jagged path from the strike seed.
+    uint32_t random_state = (uint32_t)strike.seed + 1U;
+    int32_t x = strike.x;
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      random_state = random_state * 1664525UL + 1013904223UL;
+      const uint8_t direction = (random_state >> 24) % 3U;
+      const int16_t shift = (direction == 0) ? -1 : (direction == 2) ? 1 : 0;
+
+      // Spread determines whether each row can change columns.
+      if (((random_state >> 16) & 0xFF) < (uint16_t)horizontal_spread * 28U) x += shift;
+      if (x < 0) x = 0;
+      if (x >= cols) x = cols - 1;
+
+      // The lightning core is brighter than its surrounding branches.
+      const uint32_t core = color_blend(BLACK, core_colour, brightness);
+      SEGMENT.addPixelColorXY(x, y, core);
+
+      // Draw occasional side branches from the main strike.
+      random_state = random_state * 1664525UL + 1013904223UL;
+      if (((random_state >> 24) & 0xFF) < branching)
+      {
+        const int16_t branch_direction = (random_state & 1U) ? 1 : -1;
+        const uint8_t branch_length = 1 + ((random_state >> 8) % 4U);
+
+        for (uint8_t b = 1; b <= branch_length; b++)
+        {
+          const int32_t branch_x = x + branch_direction * b;
+          const int32_t branch_y = y + (b >> 1);
+          if (branch_x < 0 || branch_x >= cols || branch_y >= rows) break;
+
+          const uint8_t branch_brightness = ((uint16_t)brightness * (branch_length - b + 1U)) / (branch_length + 1U);
+          SEGMENT.addPixelColorXY(branch_x, branch_y, color_blend(BLACK, branch_colour, branch_brightness));
+        }
+      }
+    }
+
+    strike.age++;
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
+"Fork Lightning@"
+"Flash Speed,Frequency,Branching,Afterglow,Spread,,Pal2 Core,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=180,ix=60,c1=90,c2=110,c3=16,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
+"Random lightning strikes with irregular paths and horizontal branches.\n\r"
+"Individual strikes flicker and leave a fading afterglow.\n\r"
+"Multiple strikes can overlap across the matrix.\n\r"
+"SX: Flash speed (higher = shorter strikes)\n\r"
+"IX: Lightning generation frequency\n\r"
+"C1: Horizontal branching frequency\n\r"
+"C2: Afterglow persistence\n\r"
+"C3: Horizontal spread (0-31)\n\r"
+"O2: Use Palette2 for lightning cores\n\r"
+"Palette1: Branches and afterglow\n\r"
+"Palette2: Lightning core when O2 is enabled";
+#endif
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /********************     audio enhanced routines     ************************/
@@ -27228,18 +27604,38 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 
 /*******************************************************************************************************************************************************************************************************************
  * @function    : EffectAnim__2D__IcicleMeltingDrips
- * @description : Independent vertical drips with configurable tails.
+ * @description : Independent falling ice droplets with optional moving trails and persistent afterglow.
  *
- * Each column supports up to two independently falling points.
- * Drips remain restricted to their originating column.
+ * Small droplets form above individual icicles and move vertically downwards.
+ * Each column supports up to two independently moving droplets.
+ * Falling velocity, spawn probability and individual speed variation are configurable.
+ *
+ * Three independent options determine the appearance:
+ *   - Moving trail: A fading tail follows the current droplet position.
+ *   - Afterglow: Previous droplet positions remain illuminated and gradually fade.
+ *   - Palette2 head: The leading pixel uses Palette2 while the trail uses Palette1.
+ *
+ * With both trail and afterglow disabled, droplets appear as individual moving points.
+ * Enabling only the trail produces short moving streaks without retained illumination.
+ * Enabling only afterglow creates fading tracks behind single moving points.
+ * Enabling both produces longer luminous streaks with persistent illumination.
  *
  * Speed     : Falling velocity
- * Intensity : Drip generation density
- * Custom1   : Tail length (0-4 pixels)
- * Custom2   : Tail mode (None / Solid / Fading)
- * Custom3   : Velocity variation (0-31)
+ * Intensity : Droplet generation density
+ * Custom1   : Moving trail length (0-12 pixels)
+ * Custom2   : Afterglow fade rate (0=slow, 255=fast)
+ * Custom3   : Individual velocity variation (0-31)
+ * Check1    : Enable moving trail
+ * Check2    : Enable persistent afterglow
+ * Check3    : Enable Palette2 for the leading pixel
  *
- * Uses the existing PulSar effect frame scheduler.
+ * Palette 0 : Built-in winter colours (ice blue, cyan, pale blue and ice white)
+ * Palette 1+: Palette1 supplies the droplets and moving trails.
+ * Palette2  : Optional leading pixel colour when Check3 is enabled.
+ *
+ * The afterglow decay uses elapsed milliseconds rather than frame count.
+ * Particle positions and spawning retain the normal effect frame scheduler.
+ * All particles remain within their originating matrix column.
  *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
 {
@@ -27267,24 +27663,61 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
   }
 
   IcicleDrip* drips = reinterpret_cast<IcicleDrip*>(SEGENV.data);
+  const uint32_t now = millis();
+
   if (SEGENV.call == 0) {
     memset(drips, 0, data_size);
     SEGMENT.fill(BLACK);
+    SEGENV.step = now;
   }
 
   const uint8_t base_speed = 1 + (SEGMENT.speed >> 5);
   const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t tail_length = ((uint16_t)SEGMENT.custom1 * 4U) / 255U;
-  const uint8_t tail_mode = (SEGMENT.custom2 <= 85) ? 0 : (SEGMENT.custom2 <= 170) ? 1 : 2;
+  const uint8_t trail_length = ((uint16_t)SEGMENT.custom1 * 12U) / 255U;
+  const uint8_t fade_rate = 2 + ((uint16_t)SEGMENT.custom2 * 78U) / 255U;
   const uint8_t variation = SEGMENT.custom3 * 8U;
+  const bool enable_trail = SEGMENT.check1;
+  const bool enable_afterglow = SEGMENT.check2;
+  const bool enable_palette2_head = SEGMENT.check3;
+  const bool use_palette = SEGMENT.palette_id != 0;
+  const bool palette2_ready = use_palette && enable_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
 
-  SEGMENT.fill(BLACK);
+  // Retain the previous image only when afterglow is enabled.
+  // Fade is normalized to a 20 ms reference interval.
+  if (enable_afterglow)
+  {
+    const uint32_t elapsed = now - SEGENV.step;
+    const uint32_t bounded_elapsed = min<uint32_t>(elapsed, 2000UL);
+    const uint32_t full_intervals = bounded_elapsed / 20UL;
+    const uint8_t partial_interval = bounded_elapsed % 20UL;
+
+    uint16_t retained = 255U;
+    const uint16_t retention_per_interval = 255U - fade_rate;
+
+    for (uint32_t i = 0; i < full_intervals && retained; i++) {
+      retained = ((uint32_t)retained * retention_per_interval) / 255U;
+    }
+
+    if (partial_interval && retained) {
+      const uint8_t partial_fade = ((uint16_t)fade_rate * partial_interval) / 20U;
+      retained = ((uint32_t)retained * (255U - partial_fade)) / 255U;
+    }
+
+    SEGMENT.fadeToBlackBy(255U - retained);
+  }
+  else
+  {
+    SEGMENT.fill(BLACK);
+  }
+
+  SEGENV.step = now;
 
   for (uint16_t i = 0; i < max_drips; i++)
   {
     IcicleDrip& drip = drips[i];
     const uint16_t x = i % cols;
 
+    // Independently spawn new droplets above each icicle.
     if (!drip.active)
     {
       if (hw_random8() >= spawn_chance) continue;
@@ -27295,36 +27728,62 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
       continue;
     }
 
+    // Apply individual velocity variation.
     const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)drip.velocity * variation / 255U);
     const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
     drip.position += movement;
 
-    if (drip.position >= (int16_t)((rows + tail_length) * 16U)) {
+    // Remove droplets once their head and any moving trail leave the matrix.
+    const uint8_t effective_trail_length = enable_trail ? trail_length : 0;
+    if (drip.position >= (int16_t)((rows + effective_trail_length) * 16U)) {
       drip.active = 0;
       continue;
     }
 
-    const int16_t y = drip.position >> 4;
-    const uint32_t colour = SEGMENT.GetPaletteColour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    // Palette 0 supplies built-in icy winter colours.
+    // Every other palette ID uses the normal segment palette lookup.
+    uint32_t body_colour;
+    uint32_t head_colour;
 
-    if (y >= 0 && y < rows) SEGMENT.addPixelColorXY(x, y, colour);
-    if (tail_mode == 0 || tail_length == 0) continue;
-
-    for (uint8_t t = 1; t <= tail_length; t++)
+    if (use_palette)
     {
-      const int16_t tail_y = y - t;
+      body_colour = SEGMENT.GetPaletteColour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+      head_colour = palette2_ready ? SEGMENT.GetPalette2Colour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : body_colour;
+    }
+    else
+    {
+      if (drip.colour < 64) body_colour = RGBW32(35, 85, 165, 0);
+      else if (drip.colour < 128) body_colour = RGBW32(70, 170, 245, 0);
+      else if (drip.colour < 192) body_colour = RGBW32(150, 215, 255, 0);
+      else body_colour = RGBW32(200, 235, 255, 0);
+      head_colour = enable_palette2_head ? RGBW32(235, 250, 255, 0) : body_colour;
+    }
+
+    const int16_t head_y = drip.position >> 4;
+
+    // Render the leading droplet pixel.
+    if (head_y >= 0 && head_y < rows) {
+      SEGMENT.addPixelColorXY(x, head_y, head_colour);
+    }
+
+    // Optional moving tail with decreasing brightness.
+    // This is independent of the persistent framebuffer afterglow.
+    if (!enable_trail || trail_length == 0) continue;
+
+    for (uint8_t t = 1; t <= trail_length; t++)
+    {
+      const int16_t tail_y = head_y - t;
       if (tail_y < 0 || tail_y >= rows) continue;
 
-      uint8_t brightness = 255;
-      if (tail_mode == 2) brightness = ((uint16_t)(tail_length - t + 1U) * 220U) / (tail_length + 1U);
-      SEGMENT.addPixelColorXY(x, tail_y, color_blend(BLACK, colour, brightness));
+      const uint8_t brightness = ((uint16_t)(trail_length - t + 1U) * 220U) / (trail_length + 1U);
+      SEGMENT.addPixelColorXY(x, tail_y, color_blend(BLACK, body_colour, brightness));
     }
   }
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
 "GOOD Icicle Melting Drips@"
-"Speed,Density,Tail,Tail Mode,Variation,,,,!,!"
+"Fall Speed,Density,Trail Length,Afterglow Decay,Variation,Trail,Afterglow,Pal2 Head,,!"
 ";"
 ""
 ";"
@@ -27332,19 +27791,26 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=100,c1=127,c2=0,c3=16,ep=20";
+"sx=127,ix=100,c1=85,c2=120,c3=16,o1=1,o2=0,o3=0,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
 static const char PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
-"Independent vertical drips with selectable tail rendering.\n\r"
-"Each icicle supports up to two independently moving drips.\n\r"
-"All movement remains within the originating column.\n\r"
+"Independent falling ice droplets with configurable trails and afterglow.\n\r"
+"Each icicle supports up to two independently moving droplets.\n\r"
+"Moving trails and persistent afterglow can be enabled separately.\n\r"
 "SX: Falling velocity\n\r"
 "IX: Drip generation density\n\r"
-"C1: Tail length (0-4 pixels)\n\r"
-"C2: Tail mode (0-85=None, 86-170=Solid, 171-255=Fading)\n\r"
-"C3: Velocity variation";
+"C1: Moving trail length (0-12 pixels)\n\r"
+"C2: Afterglow decay (0=slow fading, 255=fast fading)\n\r"
+"C3: Individual velocity variation (0-31)\n\r"
+"O1: Enable moving fading trails\n\r"
+"O2: Enable persistent afterglow from previous frames\n\r"
+"O3: Use Palette2 for the leading droplet pixel\n\r"
+"Palette 0: Built-in ice blue, cyan, pale blue and ice white\n\r"
+"Palette 1+: Selected Palette1 colours for droplet bodies and trails\n\r"
+"Palette2: Optional leading pixel colours when O3 is enabled";
 #endif
+
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -27748,7 +28214,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleSequencedCascade()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_CASCADE[] PROGMEM =
-"Icicle Sequenced Cascade@"
+"DELETE Icicle Sequenced Cascade@"
 "Wave Speed,Fill Speed,Hold,Fade,Waves,,Reverse,,,!"
 ";"
 ""
@@ -27877,7 +28343,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericMeteorRain()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN[] PROGMEM =
-"Icicle Atmospheric Meteor Rain@"
+"DELETE Icicle Atmospheric Meteor Rain@"
 "Speed,Density,Tail,Fade,Variation,,Pal2 Head,,,!"
 ";"
 ""
@@ -27904,144 +28370,6 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN[] PROGMEM
 #endif
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericFrozenSparkle
- * @description : Static icy background with independent sparkling highlights.
- *
- * Each pixel may independently produce a sparkle.
- * Sparkles brighten immediately and fade over subsequent frames.
- * Optional glow illuminates the four neighbouring pixels.
- *
- * Speed     : Sparkle fading speed
- * Intensity : Sparkle generation density
- * Custom1   : Background brightness
- * Custom2   : Surrounding glow strength
- * Custom3   : Random sparkle brightness variation (0-31)
- *
- * Palette1 supplies the background colours.
- * Sparkles use icy white highlights.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFrozenSparkle()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  // One brightness value per pixel, retained between frames.
-  const size_t data_size = (size_t)cols * rows;
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  uint8_t* sparkles = reinterpret_cast<uint8_t*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(sparkles, 0, data_size);
-    SEGMENT.fill(BLACK);
-  }
-
-  const uint8_t fade_step = 2 + (SEGMENT.speed >> 3);
-  const uint8_t spawn_chance = SEGMENT.intensity >> 3;
-  const uint8_t background_brightness = SEGMENT.custom1;
-  const uint8_t glow_strength = SEGMENT.custom2;
-  const uint8_t variation = SEGMENT.custom3 * 7U;
-
-  // Rebuild the static background from Palette1 each frame.
-  // Palette colours follow the horizontal position.
-  for (uint16_t x = 0; x < cols; x++)
-  {
-    const uint8_t palette_index = ((uint32_t)x * 255U) / max<uint16_t>(1, cols - 1U);
-    const uint32_t colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t background_colour = color_blend(BLACK, colour, background_brightness);
-
-    for (uint16_t y = 0; y < rows; y++) SEGMENT.setPixelColorXY(x, y, background_colour);
-  }
-
-  // Update sparkle intensities independently.
-  for (uint16_t y = 0; y < rows; y++)
-  {
-    for (uint16_t x = 0; x < cols; x++)
-    {
-      const size_t index = (size_t)y * cols + x;
-
-      if (sparkles[index] > fade_step) sparkles[index] -= fade_step;
-      else sparkles[index] = 0;
-
-      // Only generate a new sparkle on an inactive pixel.
-      if (sparkles[index] == 0 && hw_random16(4096) < spawn_chance) {
-        sparkles[index] = 255 - hw_random8(1 + variation);
-      }
-    }
-  }
-
-  // Render optional halos first, allowing sparkle heads to remain bright.
-  if (glow_strength > 0)
-  {
-    for (uint16_t y = 0; y < rows; y++)
-    {
-      for (uint16_t x = 0; x < cols; x++)
-      {
-        const uint8_t brightness = sparkles[(size_t)y * cols + x];
-        if (!brightness) continue;
-
-        const uint8_t halo_brightness = ((uint16_t)brightness * glow_strength / 255U) / 4U;
-        if (!halo_brightness) continue;
-
-        const uint32_t halo_colour = color_blend(BLACK, WHITE, halo_brightness);
-        if (x > 0) SEGMENT.addPixelColorXY(x - 1, y, halo_colour);
-        if (x + 1 < cols) SEGMENT.addPixelColorXY(x + 1, y, halo_colour);
-        if (y > 0) SEGMENT.addPixelColorXY(x, y - 1, halo_colour);
-        if (y + 1 < rows) SEGMENT.addPixelColorXY(x, y + 1, halo_colour);
-      }
-    }
-  }
-
-  // Overlay the brighter sparkle centres.
-  for (uint16_t y = 0; y < rows; y++)
-  {
-    for (uint16_t x = 0; x < cols; x++)
-    {
-      const uint8_t brightness = sparkles[(size_t)y * cols + x];
-      if (!brightness) continue;
-
-      const uint8_t palette_index = ((uint32_t)x * 255U) / max<uint16_t>(1, cols - 1U);
-      const uint32_t base_colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-      const uint32_t background_colour = color_blend(BLACK, base_colour, background_brightness);
-      SEGMENT.setPixelColorXY(x, y, color_blend(background_colour, WHITE, brightness));
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE[] PROGMEM =
-"Icicle Atmospheric Frozen Sparkle@"
-"Fade Speed,Density,Background,Glow,Variation,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=100,c1=40,c2=100,c3=12,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE[] PROGMEM =
-"Static icy palette background with independently animated sparkles.\n\r"
-"Each sparkle brightens and gradually fades without changing position.\n\r"
-"Optional surrounding glow illuminates adjacent pixels.\n\r"
-"SX: Sparkle fading speed\n\r"
-"IX: Sparkle generation density\n\r"
-"C1: Background brightness\n\r"
-"C2: Surrounding glow strength\n\r"
-"C3: Random sparkle brightness variation\n\r"
-"Palette1: Static icy background\n\r"
-"Sparkles: White highlights";
-#endif
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -28283,172 +28611,6 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS[] PROG
 "Palette1: Comet colours";
 #endif
 
-
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericLightning
- * @description : Random lightning strikes with branching and fading afterglow.
- *
- * Lightning originates at the top of the matrix and travels downward.
- * Individual strikes have irregular paths, optional horizontal branches,
- * independently selected colours and short flickering lifetimes.
- *
- * Speed     : Flash duration (higher = faster)
- * Intensity : Lightning generation frequency
- * Custom1   : Branching frequency
- * Custom2   : Afterglow persistence
- * Custom3   : Horizontal spread (0-31)
- * Check2    : Use Palette2 for the lightning core
- *
- * Palette1 supplies branching and afterglow colours.
- * Palette2 optionally supplies the brighter lightning core.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  struct LightningStrike {
-    uint16_t x;
-    uint8_t seed;
-    uint8_t colour;
-    uint8_t age;
-    uint8_t duration;
-    uint8_t active;
-  };
-
-  const uint8_t max_strikes = 4;
-  const size_t data_size = max_strikes * sizeof(LightningStrike);
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  LightningStrike* strikes = reinterpret_cast<LightningStrike*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(strikes, 0, data_size);
-    SEGMENT.fill(BLACK);
-  }
-
-  const uint8_t flash_duration = 2 + ((255U - SEGMENT.speed) / 22U);
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 3);
-  const uint8_t branching = SEGMENT.custom1;
-  const uint8_t afterglow_fade = 220 - ((uint16_t)SEGMENT.custom2 * 200U / 255U);
-  const uint8_t horizontal_spread = ((uint16_t)SEGMENT.custom3 * 8U) / 31U;
-  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
-
-  // Preserve previous lightning illumination as a fading afterglow.
-  SEGMENT.fadeToBlackBy(afterglow_fade);
-
-  // Randomly generate a strike in an available slot.
-  if (hw_random8() < spawn_chance)
-  {
-    for (uint8_t i = 0; i < max_strikes; i++)
-    {
-      LightningStrike& strike = strikes[i];
-      if (strike.active) continue;
-
-      strike.x = hw_random16(cols);
-      strike.seed = hw_random8();
-      strike.colour = hw_random8();
-      strike.age = 0;
-      strike.duration = flash_duration + hw_random8(3);
-      strike.active = 1;
-      break;
-    }
-  }
-
-  for (uint8_t i = 0; i < max_strikes; i++)
-  {
-    LightningStrike& strike = strikes[i];
-    if (!strike.active) continue;
-
-    if (strike.age >= strike.duration) {
-      strike.active = 0;
-      continue;
-    }
-
-    const uint8_t remaining = strike.duration - strike.age;
-    const uint8_t lifetime_brightness = ((uint16_t)remaining * 255U) / strike.duration;
-    const uint8_t flicker = hw_random8(2) ? 255 : 170;
-    const uint8_t brightness = ((uint16_t)lifetime_brightness * flicker) / 255U;
-
-    const uint32_t branch_colour = SEGMENT.GetPaletteColour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : branch_colour;
-
-    // Reconstruct a repeatable jagged path from the strike seed.
-    uint32_t random_state = (uint32_t)strike.seed + 1U;
-    int32_t x = strike.x;
-
-    for (uint16_t y = 0; y < rows; y++)
-    {
-      random_state = random_state * 1664525UL + 1013904223UL;
-      const uint8_t direction = (random_state >> 24) % 3U;
-      const int16_t shift = (direction == 0) ? -1 : (direction == 2) ? 1 : 0;
-
-      // Spread determines whether each row can change columns.
-      if (((random_state >> 16) & 0xFF) < (uint16_t)horizontal_spread * 28U) x += shift;
-      if (x < 0) x = 0;
-      if (x >= cols) x = cols - 1;
-
-      // The lightning core is brighter than its surrounding branches.
-      const uint32_t core = color_blend(BLACK, core_colour, brightness);
-      SEGMENT.addPixelColorXY(x, y, core);
-
-      // Draw occasional side branches from the main strike.
-      random_state = random_state * 1664525UL + 1013904223UL;
-      if (((random_state >> 24) & 0xFF) < branching)
-      {
-        const int16_t branch_direction = (random_state & 1U) ? 1 : -1;
-        const uint8_t branch_length = 1 + ((random_state >> 8) % 4U);
-
-        for (uint8_t b = 1; b <= branch_length; b++)
-        {
-          const int32_t branch_x = x + branch_direction * b;
-          const int32_t branch_y = y + (b >> 1);
-          if (branch_x < 0 || branch_x >= cols || branch_y >= rows) break;
-
-          const uint8_t branch_brightness = ((uint16_t)brightness * (branch_length - b + 1U)) / (branch_length + 1U);
-          SEGMENT.addPixelColorXY(branch_x, branch_y, color_blend(BLACK, branch_colour, branch_brightness));
-        }
-      }
-    }
-
-    strike.age++;
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
-"Icicle Atmospheric Lightning@"
-"Flash Speed,Frequency,Branching,Afterglow,Spread,,Pal2 Core,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=180,ix=60,c1=90,c2=110,c3=16,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
-"Random lightning strikes with irregular paths and horizontal branches.\n\r"
-"Individual strikes flicker and leave a fading afterglow.\n\r"
-"Multiple strikes can overlap across the matrix.\n\r"
-"SX: Flash speed (higher = shorter strikes)\n\r"
-"IX: Lightning generation frequency\n\r"
-"C1: Horizontal branching frequency\n\r"
-"C2: Afterglow persistence\n\r"
-"C3: Horizontal spread (0-31)\n\r"
-"O2: Use Palette2 for lightning cores\n\r"
-"Palette1: Branches and afterglow\n\r"
-"Palette2: Lightning core when O2 is enabled";
-#endif
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -39514,6 +39676,14 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__2D__WAVING_CELL,
             #endif
             Effect_DevStage::Release);    
+
+  addEffect(EFFECTS_FUNCTION__2D__HALO_SPARKLE,
+          &mAnimatorLight::EffectAnim__2D__HaloSparkle,
+          PM_EFFECT_CONFIG__2D__HALO_SPARKLE,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__HALO_SPARKLE,
+          #endif
+          Effect_DevStage::Dev);
     
   #endif
 
@@ -39835,14 +40005,6 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFrozenSparkle,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
             #endif
             Effect_DevStage::Dev);
 

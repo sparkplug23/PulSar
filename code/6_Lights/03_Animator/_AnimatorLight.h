@@ -1681,6 +1681,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void     EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels);
     void EffectAnim__2D__Octopus();
     void EffectAnim__2D__WavingCell();
+    void EffectAnim__2D__HaloSparkle();
     void EffectAnim__2D__ScrollingText();
     void EffectAnim__2D__ScrollingText_With_Baseline();
     void EffectAnim__2D__DigitalClock();
@@ -1700,7 +1701,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
 
       // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
       void EffectAnim__2D__IcicleAtmosphericMeteorRain();
-      void EffectAnim__2D__IcicleAtmosphericFrozenSparkle();
       void EffectAnim__2D__IcicleAtmosphericAurora();
       void EffectAnim__2D__IcicleAtmosphericFallingComets();
       void EffectAnim__2D__IcicleAtmosphericLightning();
@@ -2280,6 +2280,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__SOAP__ID,   
       EFFECTS_FUNCTION__2D__OCTOPUS__ID,    
       EFFECTS_FUNCTION__2D__WAVING_CELL__ID,  
+      EFFECTS_FUNCTION__2D__HALO_SPARKLE,
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,         
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT_WITH_BASELINE__ID,
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
