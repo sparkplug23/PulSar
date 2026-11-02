@@ -1680,12 +1680,16 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__Soap();
     void     EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels);
     void EffectAnim__2D__Octopus();
-    void EffectAnim__2D__WavingCell();
-    void EffectAnim__2D__HaloSparkle();
+    void EffectAnim__2D__ForkLightning();
     void EffectAnim__2D__ScrollingText();
     void EffectAnim__2D__ScrollingText_With_Baseline();
     void EffectAnim__2D__DigitalClock();
     void EffectAnim__2D__PlasmaRotoZoom();
+
+    void EffectAnim__2D__WavingCell();
+    void EffectAnim__2D__HaloSparkle();
+    void EffectAnim__2D__AuroraCurtains();
+    void EffectAnim__2D__FallingComets();
     #endif
     
     
@@ -1697,13 +1701,8 @@ static const uint8_t kPresetMetaParserVersion = 2;
 
       // Icicle Sequenced - Coordinated activation across neighbouring columns
       void EffectAnim__2D__IcicleSequencedWaveDrips();
-      void EffectAnim__2D__IcicleSequencedCascade();
 
       // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
-      void EffectAnim__2D__IcicleAtmosphericMeteorRain();
-      void EffectAnim__2D__IcicleAtmosphericAurora();
-      void EffectAnim__2D__IcicleAtmosphericFallingComets();
-      void EffectAnim__2D__IcicleAtmosphericLightning();
       void EffectAnim__2D__IcicleAtmosphericWaterfall();
 
       // Snow - Falling snowflakes with optional wind and varying flake shapes
@@ -2279,14 +2278,19 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__DISTORTION_WAVES__ID,       
       EFFECTS_FUNCTION__2D__SOAP__ID,   
       EFFECTS_FUNCTION__2D__OCTOPUS__ID,    
-      EFFECTS_FUNCTION__2D__WAVING_CELL__ID,  
-      EFFECTS_FUNCTION__2D__HALO_SPARKLE,
-      EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,         
+      EFFECTS_FUNCTION__2D__WAVING_CELL__ID, 
+
+
+      EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,     
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT_WITH_BASELINE__ID,
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
       // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
       
+      EFFECTS_FUNCTION__2D__HALO_SPARKLE,
+      EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
+      EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
+      EFFECTS_FUNCTION__2D__FALLING_COMETS,
 
       #endif
 
@@ -2299,14 +2303,9 @@ static const uint8_t kPresetMetaParserVersion = 2;
 
         // Icicle Sequenced - Coordinated activation across neighbouring columns
         EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
-        EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_CASCADE,
 
         // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
         EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_AURORA,
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
         EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
 
         // Snow - Falling snowflakes with optional wind and varying flake shapes

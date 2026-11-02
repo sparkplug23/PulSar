@@ -24916,24 +24916,33 @@ static const char PM_EFFECT_DESCRI__2D__HALO_SPARKLE[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericLightning
- * @description : Random lightning strikes with branching and fading afterglow.
+ * @function    : EffectAnim__2D__ForkLightning
+ * @description : Two-dimensional branching lightning strikes with irregular paths, flickering cores and fading afterglow.
  *
- * Lightning originates at the top of the matrix and travels downward.
- * Individual strikes have irregular paths, optional horizontal branches,
- * independently selected colours and short flickering lifetimes.
+ * Lightning originates at the upper edge of the matrix and propagates downwards.
+ * Each strike follows a deterministic jagged path reconstructed from its seed.
+ * Random horizontal branches extend from the main lightning channel.
  *
- * Speed     : Flash duration (higher = faster)
+ * Multiple independent strikes may coexist across the matrix.
+ * Lightning cores remain brighter than their surrounding branches.
+ * Each strike flickers during its lifetime and fades progressively.
+ * Previous illumination is retained as a fading afterglow.
+ *
+ * Speed     : Flash duration (higher = shorter strikes)
  * Intensity : Lightning generation frequency
- * Custom1   : Branching frequency
+ * Custom1   : Horizontal branching frequency
  * Custom2   : Afterglow persistence
- * Custom3   : Horizontal spread (0-31)
- * Check2    : Use Palette2 for the lightning core
+ * Custom3   : Horizontal displacement strength (0-31)
+ * Check2    : Enable Palette2 for the lightning core
  *
- * Palette1 supplies branching and afterglow colours.
- * Palette2 optionally supplies the brighter lightning core.
+ * Palette 0 : Built-in electric-blue branches with a bright white core
+ * Palette 1+: Palette1 supplies lightning core and branch colours
+ * Palette2  : Optionally overrides the lightning core when Check2 is enabled
+ *
+ * Lightning geometry is independent of the selected palette.
+ * No dependencies on the specialised Ice and Snow effects.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
+void mAnimatorLight::EffectAnim__2D__ForkLightning()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -24971,12 +24980,13 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
   const uint8_t branching = SEGMENT.custom1;
   const uint8_t afterglow_fade = 220 - ((uint16_t)SEGMENT.custom2 * 200U / 255U);
   const uint8_t horizontal_spread = ((uint16_t)SEGMENT.custom3 * 8U) / 31U;
+  const bool use_palette = SEGMENT.palette_id != 0;
   const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
 
   // Preserve previous lightning illumination as a fading afterglow.
   SEGMENT.fadeToBlackBy(afterglow_fade);
 
-  // Randomly generate a strike in an available slot.
+  // Generate a new strike in the first available slot.
   if (hw_random8() < spawn_chance)
   {
     for (uint8_t i = 0; i < max_strikes; i++)
@@ -24994,6 +25004,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
     }
   }
 
+  // Render each active lightning strike.
   for (uint8_t i = 0; i < max_strikes; i++)
   {
     LightningStrike& strike = strikes[i];
@@ -25009,8 +25020,27 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
     const uint8_t flicker = hw_random8(2) ? 255 : 170;
     const uint8_t brightness = ((uint16_t)lifetime_brightness * flicker) / 255U;
 
-    const uint32_t branch_colour = SEGMENT.GetPaletteColour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : branch_colour;
+    // Palette 0 uses dedicated lightning colours.
+    // Other palettes use the normal PulSar palette lookup.
+    uint32_t branch_colour;
+    uint32_t core_colour;
+
+    if (use_palette)
+    {
+      branch_colour = SEGMENT.GetPaletteColour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+      core_colour = branch_colour;
+    }
+    else
+    {
+      if (strike.colour < 85) branch_colour = RGBW32(35, 90, 255, 0);
+      else if (strike.colour < 170) branch_colour = RGBW32(90, 155, 255, 0);
+      else branch_colour = RGBW32(165, 205, 255, 0);
+      core_colour = RGBW32(235, 245, 255, 0);
+    }
+
+    if (palette2_ready) {
+      core_colour = SEGMENT.GetPalette2Colour(strike.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    }
 
     // Reconstruct a repeatable jagged path from the strike seed.
     uint32_t random_state = (uint32_t)strike.seed + 1U;
@@ -25022,18 +25052,18 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
       const uint8_t direction = (random_state >> 24) % 3U;
       const int16_t shift = (direction == 0) ? -1 : (direction == 2) ? 1 : 0;
 
-      // Spread determines whether each row can change columns.
-      if (((random_state >> 16) & 0xFF) < (uint16_t)horizontal_spread * 28U) x += shift;
+      // Horizontal spread controls how frequently the main path changes columns.
+      if (((random_state >> 16) & 0xFFU) < (uint16_t)horizontal_spread * 28U) x += shift;
       if (x < 0) x = 0;
       if (x >= cols) x = cols - 1;
 
-      // The lightning core is brighter than its surrounding branches.
+      // Draw the lightning core at the current row.
       const uint32_t core = color_blend(BLACK, core_colour, brightness);
       SEGMENT.addPixelColorXY(x, y, core);
 
-      // Draw occasional side branches from the main strike.
+      // Occasionally create short diagonal branches from the main path.
       random_state = random_state * 1664525UL + 1013904223UL;
-      if (((random_state >> 24) & 0xFF) < branching)
+      if (((random_state >> 24) & 0xFFU) < branching)
       {
         const int16_t branch_direction = (random_state & 1U) ? 1 : -1;
         const uint8_t branch_length = 1 + ((random_state >> 8) % 4U);
@@ -25054,7 +25084,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning()
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
+static const char PM_EFFECT_CONFIG__2D__FORK_LIGHTNING[] PROGMEM =
 "Fork Lightning@"
 "Flash Speed,Frequency,Branching,Afterglow,Spread,,Pal2 Core,,,!"
 ";"
@@ -25067,19 +25097,291 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
 "sx=180,ix=60,c1=90,c2=110,c3=16,o2=0,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING[] PROGMEM =
-"Random lightning strikes with irregular paths and horizontal branches.\n\r"
+static const char PM_EFFECT_DESCRI__2D__FORK_LIGHTNING[] PROGMEM =
+"Random two-dimensional lightning strikes with irregular paths and branching.\n\r"
+"Lightning originates at the upper edge and propagates downwards.\n\r"
 "Individual strikes flicker and leave a fading afterglow.\n\r"
+"Short diagonal branches form along the main lightning channel.\n\r"
 "Multiple strikes can overlap across the matrix.\n\r"
-"SX: Flash speed (higher = shorter strikes)\n\r"
+"SX: Flash speed (higher = shorter strike lifetime)\n\r"
 "IX: Lightning generation frequency\n\r"
 "C1: Horizontal branching frequency\n\r"
 "C2: Afterglow persistence\n\r"
-"C3: Horizontal spread (0-31)\n\r"
-"O2: Use Palette2 for lightning cores\n\r"
-"Palette1: Branches and afterglow\n\r"
-"Palette2: Lightning core when O2 is enabled";
+"C3: Horizontal displacement strength (0-31)\n\r"
+"O2: Use Palette2 for the lightning core\n\r"
+"Palette 0: Built-in blue branches and white lightning core\n\r"
+"Palette 1+: Selected Palette1 colours for branches and core\n\r"
+"Palette2: Optional lightning core colour when O2 is enabled";
 #endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__AuroraCurtains
+ * @description : Flowing aurora curtains formed from overlapping colour waves and smoothly varying brightness.
+ *
+ * Multiple sine-wave fields create broad, layered curtains across the matrix.
+ * Horizontal propagation combines with vertical wave distortion to produce
+ * gently bending curtains rather than a uniform scrolling gradient.
+ *
+ * Three overlapping waves contribute to each pixel's brightness.
+ * Their relative phases vary over time, creating moving regions of
+ * illumination that resemble aurora curtains.
+ *
+ * Palette colours also vary spatially and temporally, allowing different
+ * colour bands to move through the illuminated regions.
+ *
+ * Speed     : Horizontal curtain flow speed
+ * Intensity : Overall brightness
+ * Custom1   : Curtain width
+ * Custom2   : Vertical wave distortion
+ * Custom3   : Number of horizontal colour bands (1-6)
+ * Check2    : Reverse horizontal flow direction
+ *
+ * Palette1 supplies all curtain colours.
+ * Requires a 2D matrix but does not depend on the Ice and Snow effects.
+ * Uses the normal PulSar effect scheduler.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__AuroraCurtains()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  if (SEGENV.call == 0) SEGENV.step = 0;
+
+  const uint8_t flow_speed = 1 + (SEGMENT.speed >> 5);
+  const uint8_t brightness = SEGMENT.intensity;
+  const uint8_t curtain_width = SEGMENT.custom1;
+  const uint8_t distortion = SEGMENT.custom2;
+  const uint8_t band_count = 1 + ((uint16_t)SEGMENT.custom3 * 5U / 31U);
+  const bool reverse = SEGMENT.check2;
+
+  SEGENV.step += flow_speed;
+  const uint8_t phase = (uint8_t)SEGENV.step;
+  const uint8_t phase2 = (uint8_t)(SEGENV.step >> 1);
+  const uint8_t width_scale = 2 + ((uint16_t)curtain_width * 14U / 255U);
+
+  for (uint16_t x = 0; x < cols; x++)
+  {
+    const uint8_t x_phase = ((uint32_t)x * band_count * 256U / cols);
+    const uint8_t flow_phase = reverse ? (uint8_t)(x_phase + phase) : (uint8_t)(x_phase - phase);
+    const uint8_t primary_wave = sin8_t(flow_phase);
+    const uint8_t secondary_wave = sin8_t((uint8_t)(flow_phase * 2U + phase2));
+    const uint8_t wave_height = (primary_wave >> 3) + (secondary_wave >> 4);
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      const uint8_t y_phase = ((uint32_t)y * 256U / rows);
+      const uint8_t vertical_wave = sin8_t((uint8_t)(y_phase + phase2 + x_phase));
+      const uint8_t bend = ((int16_t)vertical_wave - 128) * distortion / 255;
+      const uint8_t curtain_phase = (uint8_t)(flow_phase + y_phase / width_scale + bend + wave_height);
+
+      // Combine three differently phased curtains into a smooth envelope.
+      const uint8_t curtain1 = sin8_t(curtain_phase);
+      const uint8_t curtain2 = sin8_t((uint8_t)(curtain_phase + 85U + phase2));
+      const uint8_t curtain3 = sin8_t((uint8_t)(curtain_phase + 170U - phase2));
+
+      // Curtain brightness decreases gradually towards the lower edge.
+      const uint8_t envelope = ((uint16_t)curtain1 * 3U + curtain2 + curtain3) / 5U;
+      const uint8_t vertical_brightness = 255U - ((uint32_t)y * 100U / rows);
+      const uint8_t pixel_brightness = ((uint32_t)envelope * vertical_brightness * brightness) / 65025U;
+
+      // Palette colours move independently of the brightness envelope.
+      const uint8_t palette_index = (uint8_t)(x_phase + y_phase / 3U + phase2 + secondary_wave / 4U);
+      const uint32_t colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+      SEGMENT.setPixelColorXY(x, y, color_blend(BLACK, colour, pixel_brightness));
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__AURORA_CURTAINS[] PROGMEM =
+"Aurora Curtains@"
+"Flow Speed,Brightness,Width,Distortion,Bands,,Reverse,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=100,ix=180,c1=160,c2=100,c3=12,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__AURORA_CURTAINS[] PROGMEM =
+"Flowing aurora curtains formed from overlapping colour waves.\n\r"
+"Three layered waves create broad areas of smoothly varying brightness.\n\r"
+"Horizontal movement combines with vertical distortion to bend the curtains.\n\r"
+"Palette colours shift independently of the brightness waves.\n\r"
+"No falling particles or independent column activation.\n\r"
+"SX: Horizontal curtain flow speed\n\r"
+"IX: Overall curtain brightness\n\r"
+"C1: Curtain width\n\r"
+"C2: Vertical wave distortion\n\r"
+"C3: Number of horizontal colour bands (1-6)\n\r"
+"O2: Reverse horizontal flow direction\n\r"
+"Palette1: Aurora curtain colours";
+#endif
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__FallingComets
+ * @description : Independently falling comets with configurable diagonal movement, fading tails and persistent afterglow.
+ *
+ * Multiple comets originate above the upper edge of the matrix and travel
+ * downwards with individually selected positions, velocities and colours.
+ *
+ * Each comet has a bright leading pixel followed by a progressively fading
+ * tail. Horizontal velocity may be enabled to produce diagonal trajectories.
+ * The tail follows the comet's direction of travel rather than remaining
+ * restricted to a single matrix column.
+ *
+ * Previously illuminated pixels gradually fade, producing an additional
+ * persistent afterglow behind each comet's moving tail.
+ *
+ * Comets are generated independently and removed after leaving the matrix.
+ * The maximum number of simultaneous comets scales with matrix width,
+ * with an upper limit of 32 active particles.
+ *
+ * Speed     : Comet falling velocity
+ * Intensity : Comet generation density
+ * Custom1   : Maximum moving tail length (2-12 pixels)
+ * Custom2   : Afterglow fade rate
+ * Custom3   : Horizontal movement strength (0-31)
+ * Check2    : Reverse horizontal movement direction
+ *
+ * Palette1 supplies all comet colours.
+ * All colours are obtained through SEGMENT.GetPaletteColour().
+ *
+ * Requires a 2D matrix.
+ * Uses the normal PulSar effect scheduler.
+ * No dependencies on the specialised Ice and Snow effects.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__FallingComets()
+{
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (!cols || !rows) return;
+
+  struct Comet {
+    int32_t x;
+    int32_t y;
+    uint8_t vx;
+    uint8_t vy;
+    uint8_t length;
+    uint8_t colour;
+    uint8_t active;
+  };
+
+  const uint16_t max_comets = min<uint16_t>(32, max<uint16_t>(4, cols / 8U));
+  const size_t data_size = max_comets * sizeof(Comet);
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  Comet* comets = reinterpret_cast<Comet*>(SEGENV.data);
+  if (SEGENV.call == 0) {
+    memset(comets, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
+  const uint8_t max_length = 2 + ((uint16_t)SEGMENT.custom1 * 10U / 255U);
+  const uint8_t fade_amount = 10 + ((uint16_t)SEGMENT.custom2 * 210U / 255U);
+  const uint8_t horizontal_strength = SEGMENT.custom3;
+  const bool reverse = SEGMENT.check2;
+
+  // Preserve previous illumination as a fading afterglow.
+  SEGMENT.fadeToBlackBy(fade_amount);
+
+  for (uint16_t i = 0; i < max_comets; i++)
+  {
+    Comet& comet = comets[i];
+
+    // Generate new comets independently above the matrix.
+    if (!comet.active)
+    {
+      if (hw_random8() >= spawn_chance) continue;
+
+      comet.active = 1;
+      comet.x = (int32_t)hw_random16(cols) * 16;
+      comet.y = -16 * (1 + hw_random8(3));
+      comet.vy = base_speed + hw_random8(max<uint8_t>(1, base_speed / 2U));
+      comet.vx = (horizontal_strength == 0) ? 0 : 1 + ((uint16_t)horizontal_strength * hw_random8(16)) / 31U;
+      comet.length = 2 + hw_random8(max_length - 1U);
+      comet.colour = hw_random8();
+      continue;
+    }
+
+    // Update independent X/Y positions in 1/16-pixel units.
+    const int16_t horizontal_step = reverse ? -(int16_t)comet.vx : (int16_t)comet.vx;
+    comet.x += horizontal_step;
+    comet.y += comet.vy;
+
+    // Remove the comet once its complete tail leaves the matrix.
+    if (comet.y >= (int32_t)(rows + comet.length) * 16 || comet.x < -(int32_t)comet.length * 16 || comet.x >= (int32_t)(cols + comet.length) * 16) {
+      comet.active = 0;
+      continue;
+    }
+
+    const uint32_t colour = SEGMENT.GetPaletteColour(comet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+
+    // Draw the bright comet head and its progressively fading diagonal tail.
+    for (uint8_t t = 0; t <= comet.length; t++)
+    {
+      const int32_t tail_x = comet.x - ((int32_t)horizontal_step * t * 16 / max<uint8_t>(1, comet.vy));
+      const int32_t tail_y = comet.y - (int32_t)t * 16;
+      const int32_t x = tail_x >> 4;
+      const int32_t y = tail_y >> 4;
+
+      if (x < 0 || x >= cols || y < 0 || y >= rows) continue;
+
+      const uint8_t brightness = (t == 0) ? 255 : ((uint16_t)(comet.length - t + 1U) * 220U) / (comet.length + 1U);
+      SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, brightness));
+    }
+  }
+}
+
+static const char PM_EFFECT_CONFIG__2D__FALLING_COMETS[] PROGMEM =
+"Falling Comets@"
+"Speed,Density,Tail,Fade,Angle,,Reverse,,,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=150,c1=160,c2=120,c3=20,o2=0,ep=20";
+
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__FALLING_COMETS[] PROGMEM =
+"Independent falling comets with configurable diagonal movement.\n\r"
+"Comets originate above the matrix and travel downwards.\n\r"
+"Each comet has a bright head, fading tail and independently selected velocity.\n\r"
+"Horizontal movement creates diagonal trajectories across the matrix.\n\r"
+"Previously illuminated pixels retain a gradually fading afterglow.\n\r"
+"SX: Falling velocity\n\r"
+"IX: Comet generation density\n\r"
+"C1: Maximum moving tail length (2-12 pixels)\n\r"
+"C2: Afterglow fade rate (higher = faster fading)\n\r"
+"C3: Horizontal movement strength (0 = vertical)\n\r"
+"O2: Reverse horizontal movement direction\n\r"
+"Palette1: All comet colours";
+#endif
+
 
 
 
@@ -28100,275 +28402,6 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
 
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleSequencedCascade
- * @description : Sequential top-to-bottom illumination of entire icicles.
- *
- * Horizontal waves activate neighbouring columns progressively.
- * Each activated column fills vertically, holds, then fades.
- *
- * Speed     : Horizontal wave propagation speed
- * Intensity : Vertical column filling speed
- * Custom1   : Hold duration (0-100 frames)
- * Custom2   : Column fading speed
- * Custom3   : Number of simultaneous waves (1-4)
- * Check2    : Reverse horizontal wave direction
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleSequencedCascade()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  struct CascadeColumn {
-    int16_t progress;
-    uint16_t hold;
-    uint8_t brightness;
-    uint8_t state;
-  };
-
-  const size_t data_size = cols * sizeof(CascadeColumn);
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  CascadeColumn* columns = reinterpret_cast<CascadeColumn*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(columns, 0, data_size);
-    SEGENV.step = 0;
-  }
-
-  const uint8_t wave_speed = 1 + (SEGMENT.speed >> 4);
-  const uint8_t fill_speed = 1 + (SEGMENT.intensity >> 3);
-  const uint16_t hold_frames = ((uint16_t)SEGMENT.custom1 * 100U) / 255U;
-  const uint8_t fade_amount = 1 + (SEGMENT.custom2 >> 3);
-  const uint8_t wave_count = 1 + (SEGMENT.custom3 * 3U / 31U);
-  const bool reverse = SEGMENT.check2;
-
-  const uint32_t previous_wave = SEGENV.step >> 4;
-  SEGENV.step += wave_speed;
-  const uint32_t current_wave = SEGENV.step >> 4;
-
-  // Begin filling a column whenever a travelling wave reaches it.
-  if (SEGENV.call == 0 || current_wave != previous_wave)
-  {
-    for (uint8_t w = 0; w < wave_count; w++)
-    {
-      const uint16_t offset = ((uint32_t)w * cols) / wave_count;
-      const uint16_t wave_x = (current_wave + offset) % cols;
-      const uint16_t x = reverse ? (cols - 1U - wave_x) : wave_x;
-
-      CascadeColumn& column = columns[x];
-      column.progress = 0;
-      column.hold = hold_frames;
-      column.brightness = 255;
-      column.state = 1;
-    }
-  }
-
-  SEGMENT.fill(BLACK);
-
-  for (uint16_t x = 0; x < cols; x++)
-  {
-    CascadeColumn& column = columns[x];
-    if (column.state == 0) continue;
-
-    if (column.state == 1)
-    {
-      // Progressively fill the entire column from top to bottom.
-      column.progress += fill_speed;
-      if (column.progress >= (int16_t)(rows * 16U)) {
-        column.progress = rows * 16U;
-        column.state = 2;
-      }
-    }
-    else if (column.state == 2)
-    {
-      // Hold the fully illuminated column.
-      if (column.hold > 0) column.hold--;
-      else column.state = 3;
-    }
-    else if (column.state == 3)
-    {
-      // Fade the illuminated column uniformly.
-      column.brightness = (column.brightness > fade_amount) ? column.brightness - fade_amount : 0;
-      if (column.brightness == 0) {
-        column.state = 0;
-        continue;
-      }
-    }
-
-    const uint16_t illuminated_rows = (column.state == 1) ? min<uint16_t>(rows, (column.progress + 15) / 16) : rows;
-    const uint16_t palette_position = ((uint32_t)x * 255U) / max<uint16_t>(1, cols - 1);
-    const uint32_t colour = SEGMENT.GetPaletteColour(palette_position, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t output_colour = color_blend(BLACK, colour, column.brightness);
-
-    for (uint16_t y = 0; y < illuminated_rows; y++) SEGMENT.setPixelColorXY(x, y, output_colour);
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_CASCADE[] PROGMEM =
-"DELETE Icicle Sequenced Cascade@"
-"Wave Speed,Fill Speed,Hold,Fade,Waves,,Reverse,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=100,c2=120,c3=0,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_CASCADE[] PROGMEM =
-"Sequentially illuminates entire icicles from top to bottom.\n\r"
-"Horizontal waves progressively activate neighbouring columns.\n\r"
-"Each column fills, holds at full brightness, then fades away.\n\r"
-"SX: Horizontal wave propagation speed\n\r"
-"IX: Vertical filling speed\n\r"
-"C1: Hold duration after filling (0-100 frames)\n\r"
-"C2: Column fade rate\n\r"
-"C3: Number of simultaneous waves (1-4)\n\r"
-"O2: Reverse horizontal wave direction";
-#endif
-
-
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericMeteorRain
- * @description : Bright falling meteors with moving tails and fading afterglow.
- *
- * Meteors move vertically within individual columns.
- * Multiple meteors can occupy the same column independently.
- * The moving tail is rendered behind each meteor head.
- * Previous illumination gradually fades, producing persistent trails.
- *
- * Speed     : Falling velocity
- * Intensity : Meteor generation density
- * Custom1   : Moving tail length (1-12 pixels)
- * Custom2   : Afterglow fade rate
- * Custom3   : Velocity variation (0-31)
- * Check2    : Use Palette2 for meteor heads
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericMeteorRain()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  struct IcicleMeteor {
-    int16_t position;
-    uint8_t velocity;
-    uint8_t colour;
-    uint8_t length;
-    uint8_t active;
-  };
-
-  const uint16_t max_meteors = cols * 2U;
-  const size_t data_size = max_meteors * sizeof(IcicleMeteor);
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  IcicleMeteor* meteors = reinterpret_cast<IcicleMeteor*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(meteors, 0, data_size);
-    SEGMENT.fill(BLACK);
-  }
-
-  const uint8_t base_speed = 2 + (SEGMENT.speed >> 4);
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 5);
-  const uint8_t max_length = 1 + ((uint16_t)SEGMENT.custom1 * 11U / 255U);
-  const uint8_t fade_amount = 8 + ((uint16_t)SEGMENT.custom2 * 215U / 255U);
-  const uint8_t variation = SEGMENT.custom3 * 8U;
-  const bool palette2_ready = SEGMENT.check2 && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
-
-  // Fade the previous image instead of clearing it.
-  // This produces afterglow trails independently of each meteor's moving tail.
-  SEGMENT.fadeToBlackBy(fade_amount);
-
-  for (uint16_t i = 0; i < max_meteors; i++)
-  {
-    IcicleMeteor& meteor = meteors[i];
-    const uint16_t x = i % cols;
-
-    if (!meteor.active)
-    {
-      if (hw_random8() >= spawn_chance) continue;
-      meteor.active = 1;
-      meteor.position = -16 * (1 + hw_random8(3));
-      meteor.velocity = hw_random8();
-      meteor.colour = hw_random8();
-      meteor.length = 1 + hw_random8(max_length);
-      continue;
-    }
-
-    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)meteor.velocity * variation / 255U);
-    const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
-    meteor.position += movement;
-
-    if (meteor.position >= (int16_t)((rows + meteor.length) * 16U)) {
-      meteor.active = 0;
-      continue;
-    }
-
-    const int16_t head_y = meteor.position >> 4;
-    const uint32_t body_colour = SEGMENT.GetPaletteColour(meteor.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    const uint32_t head_colour = palette2_ready ? SEGMENT.GetPalette2Colour(meteor.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : body_colour;
-
-    // Draw the bright meteor head.
-    if (head_y >= 0 && head_y < rows) SEGMENT.addPixelColorXY(x, head_y, head_colour);
-
-    // Draw the moving tail with progressively reducing brightness.
-    for (uint8_t t = 1; t <= meteor.length; t++)
-    {
-      const int16_t y = head_y - t;
-      if (y < 0 || y >= rows) continue;
-
-      const uint8_t brightness = ((uint16_t)(meteor.length - t + 1U) * 220U) / (meteor.length + 1U);
-      SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, body_colour, brightness));
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN[] PROGMEM =
-"DELETE Icicle Atmospheric Meteor Rain@"
-"Speed,Density,Tail,Fade,Variation,,Pal2 Head,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=100,c1=160,c2=150,c3=16,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN[] PROGMEM =
-"Bright meteors falling down individual icicle columns.\n\r"
-"Each meteor carries an illuminated tail and leaves a fading afterglow.\n\r"
-"Multiple meteors can occupy the same column.\n\r"
-"SX: Meteor falling velocity\n\r"
-"IX: Meteor generation density\n\r"
-"C1: Moving tail length (1-12 pixels)\n\r"
-"C2: Afterglow fade rate\n\r"
-"C3: Individual velocity variation\n\r"
-"O2: Use Palette2 for meteor heads\n\r"
-"Palette1: Meteor tails\n\r"
-"Palette2: Meteor heads when O2 is enabled";
-#endif
-
 
 
 
@@ -28473,144 +28506,6 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_AURORA[] PROGMEM =
 "O2: Reverse horizontal flow\n\r"
 "Palette1: Aurora curtain colours";
 #endif
-
-
-
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericFallingComets
- * @description : Independently moving diagonal comets with fading tails.
- *
- * Comets travel downward and sideways across the 2D matrix.
- * Each comet has an independently selected position, velocity,
- * colour and tail length.
- *
- * Speed     : Comet falling velocity
- * Intensity : Active comet density
- * Custom1   : Maximum tail length (2-12 pixels)
- * Custom2   : Background afterglow fade rate
- * Custom3   : Horizontal movement strength (0-31)
- * Check2    : Reverse horizontal movement
- *
- * Palette1 supplies the comet colours.
- * Uses the existing PulSar effect frame scheduler.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFallingComets()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  struct IcicleComet {
-    int32_t x;
-    int32_t y;
-    uint8_t vx;
-    uint8_t vy;
-    uint8_t length;
-    uint8_t colour;
-    uint8_t active;
-  };
-
-  const uint16_t max_comets = min<uint16_t>(32, max<uint16_t>(4, cols / 8U));
-  const size_t data_size = max_comets * sizeof(IcicleComet);
-  if (!SEGENV.allocateData(data_size)) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  IcicleComet* comets = reinterpret_cast<IcicleComet*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(comets, 0, data_size);
-    SEGMENT.fill(BLACK);
-  }
-
-  const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t max_length = 2 + ((uint16_t)SEGMENT.custom1 * 10U / 255U);
-  const uint8_t fade_amount = 10 + ((uint16_t)SEGMENT.custom2 * 210U / 255U);
-  const uint8_t horizontal_strength = SEGMENT.custom3;
-  const bool reverse = SEGMENT.check2;
-
-  // Retain fading illumination from previous comet positions.
-  SEGMENT.fadeToBlackBy(fade_amount);
-
-  for (uint16_t i = 0; i < max_comets; i++)
-  {
-    IcicleComet& comet = comets[i];
-
-    if (!comet.active)
-    {
-      if (hw_random8() >= spawn_chance) continue;
-
-      comet.active = 1;
-      comet.x = (int32_t)hw_random16(cols) * 16;
-      comet.y = -16 * (1 + hw_random8(3));
-      comet.vy = base_speed + hw_random8(max<uint8_t>(1, base_speed / 2U));
-      comet.vx = (horizontal_strength == 0) ? 0 : 1 + ((uint16_t)horizontal_strength * hw_random8(16)) / 31U;
-      comet.length = 2 + hw_random8(max_length - 1U);
-      comet.colour = hw_random8();
-      continue;
-    }
-
-    // Move the comet along its independently selected diagonal trajectory.
-    const int16_t horizontal_step = reverse ? -(int16_t)comet.vx : (int16_t)comet.vx;
-    comet.x += horizontal_step;
-    comet.y += comet.vy;
-
-    // Remove comets after leaving the matrix.
-    if (comet.y >= (int32_t)(rows + comet.length) * 16 || comet.x < -(int32_t)comet.length * 16 || comet.x >= (int32_t)(cols + comet.length) * 16) {
-      comet.active = 0;
-      continue;
-    }
-
-    const uint32_t colour = SEGMENT.GetPaletteColour(comet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-
-    // Render the comet head followed by its diagonal tail.
-    for (uint8_t t = 0; t <= comet.length; t++)
-    {
-      const int32_t tail_x = comet.x - ((int32_t)horizontal_step * t * 16 / max<uint8_t>(1, comet.vy));
-      const int32_t tail_y = comet.y - (int32_t)t * 16;
-      const int32_t x = tail_x >> 4;
-      const int32_t y = tail_y >> 4;
-
-      if (x < 0 || x >= cols || y < 0 || y >= rows) continue;
-
-      const uint8_t brightness = (t == 0) ? 255 : ((uint16_t)(comet.length - t + 1U) * 220U) / (comet.length + 1U);
-      SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, brightness));
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS[] PROGMEM =
-"Icicle Atmospheric Falling Comets@"
-"Speed,Density,Tail,Fade,Angle,,Reverse,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=150,c1=160,c2=120,c3=20,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS[] PROGMEM =
-"Diagonal comets travel across neighbouring icicles.\n\r"
-"Each comet has a bright head, fading tail and independent velocity.\n\r"
-"Trails persist briefly after the comet moves onward.\n\r"
-"SX: Falling velocity\n\r"
-"IX: Comet generation density\n\r"
-"C1: Maximum comet tail length (2-12 pixels)\n\r"
-"C2: Background afterglow fade rate\n\r"
-"C3: Horizontal movement strength (0=vertical)\n\r"
-"O2: Reverse horizontal movement\n\r"
-"Palette1: Comet colours";
-#endif
-
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -39685,6 +39580,23 @@ void mAnimatorLight::LoadEffects()
           #endif
           Effect_DevStage::Dev);
     
+addEffect(EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
+          &mAnimatorLight::EffectAnim__2D__AuroraCurtains,
+          PM_EFFECT_CONFIG__2D__AURORA_CURTAINS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__AURORA_CURTAINS,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__FALLING_COMETS,
+          &mAnimatorLight::EffectAnim__2D__FallingComets,
+          PM_EFFECT_CONFIG__2D__FALLING_COMETS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__FALLING_COMETS,
+          #endif
+          Effect_DevStage::Dev);
+
+
   #endif
 
 
@@ -39991,40 +39903,6 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_CASCADE,
-            &mAnimatorLight::EffectAnim__2D__IcicleSequencedCascade,
-            PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_CASCADE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_CASCADE,
-            #endif
-            Effect_DevStage::Dev);
-
-  // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericMeteorRain,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_AURORA,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericAurora,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_AURORA,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_AURORA,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFallingComets,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
-            #endif
-            Effect_DevStage::Dev);
-
-
   addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
             &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall,
             PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL,
@@ -40060,17 +39938,6 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-
-// keep but not "icicle"
-
-            
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            #endif
-            Effect_DevStage::Dev);
 
 
  //           make effect like "the core" exploding and rotating
