@@ -43,7 +43,7 @@
 // #define DEVICE_COLORADO26__LIGHT03__HALLOWEEN
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
-#define DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
+// #define DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
 
 /**
  * String of 100 behind TV
@@ -801,6 +801,10 @@
    * SECTION: Lighting Configs
   ************************************/   
 
+
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+
+
 #define RT_COVERAGE_DEBUG
 
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
@@ -1218,7 +1222,8 @@
   /***********************************
   * SECTION: Enable Grouped
   ************************************/
-  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__ICICLE_TYPE
+  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__FULL_PANEL
   // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
 
   /***********************************
@@ -1228,7 +1233,7 @@
   /***********************************
   * SECTION: Lighting Configs
   ************************************/
-  #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__ICICLE_TYPE
 
     #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
     #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
@@ -1311,6 +1316,72 @@
             "RateMs":10000
           },
           "BrightnessRGB":0,
+          "BrightnessCCT":0
+        }
+      ],
+      "BrightnessRGB":30,
+      "BrightnessCCT":0
+    }
+    )=====";
+  #endif // ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  
+  #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__FULL_PANEL
+
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+    #define BOARD_HAS_PSRAM
+
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+
+    #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW_INTERVAL_MS 20
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Name":"HUB75E P2 CHIP",
+          "BusType":"HUB75E",
+          "ColourOrder":"BGR",
+          "Start":0,
+          "Length":8192
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":128,
+          "Height":64,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":0,
+          "Serpentine":0,
+          "xOffset":0,
+          "yOffset":0
+        }
+      ],
+      "Segments":[
+        {
+          "PixelRange":[0,8192],
+          "ColourPalette":"Rainbow",
+          "ColourType":3,
+          "Effects":{
+            "Function":"PS Ballpit",
+            "Speed":100,
+            "Intensity":220,
+            "Custom1":70,
+            "Custom2":180,
+            "Custom3":31,
+            "Check3":1,
+            "Grouping":1,
+            "RateMs":20
+          },
+          "BrightnessRGB":100,
           "BrightnessCCT":0
         }
       ],

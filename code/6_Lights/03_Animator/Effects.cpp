@@ -27323,7 +27323,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
-"Icicle Melting Drips@"
+"GOOD Icicle Melting Drips@"
 "Speed,Density,Tail,Tail Mode,Variation,,,,!,!"
 ";"
 ""
@@ -27472,7 +27472,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
-"Icicle Melting Droplets@"
+"GOOD Icicle Melting Droplets@"
 "Speed,Density,Length,Smoothing,Variation,,Pal2 Head,,,!"
 ";"
 ""
@@ -27608,7 +27608,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
-"Icicle Sequenced Wave Drips@"
+"GOOD Icicle Sequenced Drips@"
 "Wave Speed,Drip Speed,Tail,Waves,Variation,,Reverse,,,!"
 ";"
 ""
@@ -39862,13 +39862,6 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
-            #endif
-            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
             &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall,
@@ -39904,6 +39897,23 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__2D__SNOW_GLOW,
             #endif
             Effect_DevStage::Dev);
+
+
+// keep but not "icicle"
+
+            
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
+            #endif
+            Effect_DevStage::Dev);
+
+
+ //           make effect like "the core" exploding and rotating
+// make effect of solar susten viewed from above, then alterating 3d views. planets and moons on orbits
+
 
   #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
 
