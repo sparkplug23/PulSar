@@ -25383,39 +25383,37 @@ static const char PM_EFFECT_DESCRI__2D__FALLING_COMETS[] PROGMEM =
 #endif
 
 
+
 /*******************************************************************************************************************************************************************************************************************
  * @function    : EffectAnim__2D__FrozenMelt
- * @description : Frozen surfaces slowly melting into independently falling droplets with configurable illumination, trails and glistening tips.
+ * @description : Independently melting frozen surfaces with falling droplets, configurable trails, background illumination and glistening tips.
  *
- * Each matrix column represents a separate vertical frozen surface.
- * Individual droplets periodically form near the top and descend towards
- * the bottom, accelerating as they fall.
+ * Each matrix column acts as an independently melting frozen surface.
+ * Droplets form near the upper edge and accelerate downwards.
+ * Randomized activation cycles prevent synchronized movement between columns.
  *
- * Columns use deterministic independent animation phases to prevent
- * synchronized movement. Each melting cycle independently determines
- * whether a droplet should appear.
+ * The frozen background provides optional softly illuminated ice colours.
+ * Its brightness is independently controlled and does not limit droplet brightness.
  *
- * An optional frozen background provides softly illuminated ice colours
- * with subtle variation along the vertical axis.
+ * Each droplet may have a moving trail with progressively fading brightness.
+ * An optional glistening highlight appears at the lower edge after the
+ * droplet completes its descent.
  *
- * An optional moving trail follows each droplet with decreasing brightness.
- * At the bottom, droplets may briefly produce a glistening highlight before
- * disappearing.
- *
- * Speed     : Droplet falling speed
- * Intensity : Probability of active droplets per column
+ * Speed     : Falling speed
+ * Intensity : Droplet activation probability and cycle frequency
  * Custom1   : Frozen background brightness (0-255)
  * Custom2   : Moving trail length (0-8 pixels)
- * Custom3   : Tip glisten duration (0-31, mapped to 150-1080 ms)
+ * Custom3   : Tip glisten duration (0-31, 0=disabled, 1-31=150-1050 ms)
  * Check1    : Enable frozen background illumination
- * Check2    : Enable moving droplet trails
- * Check3    : Enable glistening at the bottom
+ * Check2    : Enable moving trails
+ * Check3    : Enable tip glistening
  *
- * Palette 0 : Built-in ice colours (deep blue, cyan, pale blue and white)
- * Palette 1+: All colours obtained through SEGMENT.GetPaletteColour()
+ * Palette 0 : Built-in ice blue, cyan, pale blue and white colours
+ * Palette 1+: All colours obtained from SEGMENT.GetPaletteColour()
  *
- * Uses millis() for time-based movement independent of frame rate.
- * No dynamic allocations or persistent particle buffers required.
+ * Movement is derived from millis() and is independent of effect frame rate.
+ * Each column has a deterministic phase and randomized activation per cycle.
+ * No persistent particle buffers or dynamic allocations are required.
  * Requires a 2D matrix.
  *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__FrozenMelt()
@@ -25434,7 +25432,8 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
   const uint8_t intensity = SEGMENT.intensity;
   const uint8_t background_brightness = SEGMENT.custom1;
   const uint8_t trail_length = ((uint16_t)SEGMENT.custom2 * 8U) / 255U;
-  const uint16_t glisten_ms = 150U + (uint16_t)SEGMENT.custom3 * 30U;
+  const uint8_t glisten_setting = min<uint8_t>(31, SEGMENT.custom3);
+  const uint16_t glisten_ms = glisten_setting ? 120U + (uint16_t)glisten_setting * 30U : 0U;
   const bool enable_background = SEGMENT.check1;
   const bool enable_trails = SEGMENT.check2;
   const bool enable_glisten = SEGMENT.check3;
@@ -25445,33 +25444,29 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
   const uint32_t cycle_ms = travel_ms + rest_ms;
   const uint8_t effective_trail = enable_trails ? trail_length : 0;
 
-  auto scale_colour = [](uint32_t c, uint8_t bri) -> uint32_t {
-    return RGBW32((uint16_t)R(c) * bri / 255U, (uint16_t)G(c) * bri / 255U, (uint16_t)B(c) * bri / 255U, (uint16_t)W(c) * bri / 255U);
-  };
-
   auto ice_colour = [&](uint8_t index, uint8_t bri) -> uint32_t {
-    uint32_t c;
+    uint32_t colour;
 
     if (use_palette)
     {
-      c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
+      colour = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
     }
     else
     {
-      if (index < 64) c = RGBW32(35, 85, 165, 0);
-      else if (index < 128) c = RGBW32(95, 175, 255, 0);
-      else if (index < 192) c = RGBW32(175, 225, 255, 0);
-      else c = RGBW32(235, 250, 255, 0);
+      if (index < 64) colour = RGBW32(35, 85, 165, 0);
+      else if (index < 128) colour = RGBW32(95, 175, 255, 0);
+      else if (index < 192) colour = RGBW32(175, 225, 255, 0);
+      else colour = RGBW32(235, 250, 255, 0);
     }
 
-    return scale_colour(c, bri);
+    return color_blend(BLACK, colour, bri);
   };
 
   SEGMENT.fill(BLACK);
 
   for (uint16_t x = 0; x < cols; x++)
   {
-    // Generate a deterministic seed for each column.
+    // Stable independent seed for each matrix column.
     uint32_t seed = (uint32_t)x * 2654435761UL + 0x9E3779B9UL;
     seed ^= seed >> 16;
     seed *= 2246822519UL;
@@ -25483,7 +25478,7 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
     const uint32_t cycle_number = local_time / cycle_ms;
     const uint32_t cycle_position = local_time % cycle_ms;
 
-    // Randomize droplet activation independently for every cycle.
+    // Generate an independent activation decision for each melting cycle.
     uint32_t event_seed = seed ^ (cycle_number * 747796405UL);
     event_seed ^= event_seed >> 16;
     event_seed *= 2246822519UL;
@@ -25491,7 +25486,7 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
 
     const bool active = (event_seed & 255U) < intensity;
 
-    // Optional frozen background with subtle depth and brightness variation.
+    // Optional frozen background, varying gently with depth.
     if (enable_background && background_brightness)
     {
       for (uint16_t y = 0; y < rows; y++)
@@ -25506,7 +25501,7 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
 
     if (!active) continue;
 
-    // Falling phase: accelerating droplet with an optional fading trail.
+    // Falling phase: quadratic acceleration and optional moving trail.
     if (cycle_position < travel_ms)
     {
       const uint32_t progress = (uint64_t)cycle_position * 65535ULL / travel_ms;
@@ -25514,20 +25509,19 @@ void mAnimatorLight::EffectAnim__2D__FrozenMelt()
       const int32_t travel_pixels = (int32_t)rows + effective_trail + 1;
       const int32_t head_y = (int32_t)((uint64_t)accelerated * travel_pixels / 65535ULL) - effective_trail - 1;
 
-      // Draw the droplet head and optional trailing pixels.
       for (uint8_t t = 0; t <= effective_trail; t++)
       {
         const int32_t y = head_y - t;
         if (y < 0 || y >= rows) continue;
 
-        const uint8_t bri = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
+        const uint8_t brightness = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
         const uint8_t colour_index = t == 0 ? 240 : (uint8_t)(palette_index + t * 13U);
-        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, bri));
+        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, brightness));
       }
     }
-    else if (enable_glisten)
+    else if (enable_glisten && glisten_ms)
     {
-      // Briefly illuminate the lower tip after the droplet reaches the bottom.
+      // Tip illumination fades after the droplet finishes its descent.
       const uint32_t after_travel = cycle_position - travel_ms;
       if (after_travel >= glisten_ms) continue;
 
@@ -25550,26 +25544,27 @@ static const char PM_EFFECT_CONFIG__2D__FROZEN_MELT[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=100,ix=100,c1=12,c2=127,c3=7,o1=1,o2=1,o3=1,ep=20";
+"sx=100,ix=100,c1=12,c2=127,c3=8,o1=1,o2=1,o3=1,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
 static const char PM_EFFECT_DESCRI__2D__FROZEN_MELT[] PROGMEM =
-"Slowly melting frozen surfaces with independent falling droplets.\n\r"
-"Each column has its own melting cycle and randomized droplet activation.\n\r"
-"Droplets accelerate while falling and may leave a short moving trail.\n\r"
-"Optional icy background illumination remains visible between droplets.\n\r"
-"Optional glistening highlights briefly illuminate the lower tips.\n\r"
+"Melting frozen surfaces with independent falling droplets and optional glistening tips.\n\r"
+"Each column follows an independently randomized melting cycle.\n\r"
+"Droplets accelerate downwards and can leave a short moving trail.\n\r"
+"Optional frozen background illumination remains visible between droplets.\n\r"
+"Background brightness does not limit droplet brightness.\n\r"
 "SX: Droplet falling speed\n\r"
-"IX: Probability of active droplets (0-255)\n\r"
+"IX: Droplet activation probability and cycle frequency\n\r"
 "C1: Frozen background brightness (0-255)\n\r"
 "C2: Moving trail length (0-8 pixels)\n\r"
-"C3: Tip glisten duration (0-31, approximately 150-1080 ms)\n\r"
+"C3: Tip glisten duration (0=disabled, 1-31=150-1050 ms)\n\r"
 "O1: Enable frozen background illumination\n\r"
 "O2: Enable moving droplet trails\n\r"
 "O3: Enable glistening at the lower tips\n\r"
-"Palette 0: Built-in deep blue, cyan, pale blue and ice white\n\r"
-"Palette 1+: Selected palette provides all illumination and droplet colours";
+"Palette 0: Built-in ice blue, cyan, pale blue and white\n\r"
+"Palette 1+: Selected palette supplies all background and droplet colours";
 #endif
+
 
 
 
@@ -28766,190 +28761,6 @@ static const char PM_EFFECT_DESCRI__2D__SEQUENCED_WAVE_DRIPS[] PROGMEM =
 #endif
 
 
-
-
-
-
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__FrozenMelt
- * @description : Independently melting frozen surfaces with falling droplets, configurable trails, background illumination and glistening tips.
- *
- * Each matrix column acts as an independently melting frozen surface.
- * Droplets form near the upper edge and accelerate downwards.
- * Randomized activation cycles prevent synchronized movement between columns.
- *
- * The frozen background provides optional softly illuminated ice colours.
- * Its brightness is independently controlled and does not limit droplet brightness.
- *
- * Each droplet may have a moving trail with progressively fading brightness.
- * An optional glistening highlight appears at the lower edge after the
- * droplet completes its descent.
- *
- * Speed     : Falling speed
- * Intensity : Droplet activation probability and cycle frequency
- * Custom1   : Frozen background brightness (0-255)
- * Custom2   : Moving trail length (0-8 pixels)
- * Custom3   : Tip glisten duration (0-31, 0=disabled, 1-31=150-1050 ms)
- * Check1    : Enable frozen background illumination
- * Check2    : Enable moving trails
- * Check3    : Enable tip glistening
- *
- * Palette 0 : Built-in ice blue, cyan, pale blue and white colours
- * Palette 1+: All colours obtained from SEGMENT.GetPaletteColour()
- *
- * Movement is derived from millis() and is independent of effect frame rate.
- * Each column has a deterministic phase and randomized activation per cycle.
- * No persistent particle buffers or dynamic allocations are required.
- * Requires a 2D matrix.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__FrozenMelt()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  const uint32_t now = millis();
-  const uint8_t speed = SEGMENT.speed;
-  const uint8_t intensity = SEGMENT.intensity;
-  const uint8_t background_brightness = SEGMENT.custom1;
-  const uint8_t trail_length = ((uint16_t)SEGMENT.custom2 * 8U) / 255U;
-  const uint8_t glisten_setting = min<uint8_t>(31, SEGMENT.custom3);
-  const uint16_t glisten_ms = glisten_setting ? 120U + (uint16_t)glisten_setting * 30U : 0U;
-  const bool enable_background = SEGMENT.check1;
-  const bool enable_trails = SEGMENT.check2;
-  const bool enable_glisten = SEGMENT.check3;
-  const bool use_palette = SEGMENT.palette_id != 0;
-
-  const uint32_t travel_ms = 4200UL - (uint32_t)speed * 12UL;
-  const uint32_t rest_ms = 2800UL - (uint32_t)intensity * 8UL;
-  const uint32_t cycle_ms = travel_ms + rest_ms;
-  const uint8_t effective_trail = enable_trails ? trail_length : 0;
-
-  auto ice_colour = [&](uint8_t index, uint8_t bri) -> uint32_t {
-    uint32_t colour;
-
-    if (use_palette)
-    {
-      colour = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-    }
-    else
-    {
-      if (index < 64) colour = RGBW32(35, 85, 165, 0);
-      else if (index < 128) colour = RGBW32(95, 175, 255, 0);
-      else if (index < 192) colour = RGBW32(175, 225, 255, 0);
-      else colour = RGBW32(235, 250, 255, 0);
-    }
-
-    return color_blend(BLACK, colour, bri);
-  };
-
-  SEGMENT.fill(BLACK);
-
-  for (uint16_t x = 0; x < cols; x++)
-  {
-    // Stable independent seed for each matrix column.
-    uint32_t seed = (uint32_t)x * 2654435761UL + 0x9E3779B9UL;
-    seed ^= seed >> 16;
-    seed *= 2246822519UL;
-    seed ^= seed >> 13;
-
-    const uint8_t palette_index = (uint8_t)(seed >> 8);
-    const uint32_t offset = seed % cycle_ms;
-    const uint32_t local_time = now + offset;
-    const uint32_t cycle_number = local_time / cycle_ms;
-    const uint32_t cycle_position = local_time % cycle_ms;
-
-    // Generate an independent activation decision for each melting cycle.
-    uint32_t event_seed = seed ^ (cycle_number * 747796405UL);
-    event_seed ^= event_seed >> 16;
-    event_seed *= 2246822519UL;
-    event_seed ^= event_seed >> 13;
-
-    const bool active = (event_seed & 255U) < intensity;
-
-    // Optional frozen background, varying gently with depth.
-    if (enable_background && background_brightness)
-    {
-      for (uint16_t y = 0; y < rows; y++)
-      {
-        const uint8_t depth = rows > 1 ? (uint32_t)y * 255U / (rows - 1U) : 255;
-        const uint8_t shimmer = (uint8_t)((now / 80UL + x * 19UL + y * 7UL) & 31U);
-        const uint8_t illumination = 160U + depth / 4U + shimmer;
-        const uint8_t bri = ((uint16_t)background_brightness * illumination) / 255U;
-        SEGMENT.setPixelColorXY(x, y, ice_colour(palette_index, bri));
-      }
-    }
-
-    if (!active) continue;
-
-    // Falling phase: quadratic acceleration and optional moving trail.
-    if (cycle_position < travel_ms)
-    {
-      const uint32_t progress = (uint64_t)cycle_position * 65535ULL / travel_ms;
-      const uint32_t accelerated = (uint64_t)progress * progress / 65535ULL;
-      const int32_t travel_pixels = (int32_t)rows + effective_trail + 1;
-      const int32_t head_y = (int32_t)((uint64_t)accelerated * travel_pixels / 65535ULL) - effective_trail - 1;
-
-      for (uint8_t t = 0; t <= effective_trail; t++)
-      {
-        const int32_t y = head_y - t;
-        if (y < 0 || y >= rows) continue;
-
-        const uint8_t brightness = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
-        const uint8_t colour_index = t == 0 ? 240 : (uint8_t)(palette_index + t * 13U);
-        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, brightness));
-      }
-    }
-    else if (enable_glisten && glisten_ms)
-    {
-      // Tip illumination fades after the droplet finishes its descent.
-      const uint32_t after_travel = cycle_position - travel_ms;
-      if (after_travel >= glisten_ms) continue;
-
-      const uint8_t fade = ((uint32_t)(glisten_ms - after_travel) * 255UL) / glisten_ms;
-      const uint8_t sparkle = ((uint16_t)fade * fade) / 255U;
-
-      SEGMENT.setPixelColorXY(x, rows - 1, ice_colour(240, sparkle));
-      if (rows > 1) SEGMENT.setPixelColorXY(x, rows - 2, ice_colour(190, sparkle / 4U));
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__FROZEN_MELT[] PROGMEM =
-"Frozen Melt@"
-"Fall Speed,Drip Density,Background,Trail Length,Tip Duration,Background,Trails,Tip Glisten,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=100,ix=100,c1=12,c2=127,c3=8,o1=1,o2=1,o3=1,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__FROZEN_MELT[] PROGMEM =
-"Melting frozen surfaces with independent falling droplets and optional glistening tips.\n\r"
-"Each column follows an independently randomized melting cycle.\n\r"
-"Droplets accelerate downwards and can leave a short moving trail.\n\r"
-"Optional frozen background illumination remains visible between droplets.\n\r"
-"Background brightness does not limit droplet brightness.\n\r"
-"SX: Droplet falling speed\n\r"
-"IX: Droplet activation probability and cycle frequency\n\r"
-"C1: Frozen background brightness (0-255)\n\r"
-"C2: Moving trail length (0-8 pixels)\n\r"
-"C3: Tip glisten duration (0=disabled, 1-31=150-1050 ms)\n\r"
-"O1: Enable frozen background illumination\n\r"
-"O2: Enable moving droplet trails\n\r"
-"O3: Enable glistening at the lower tips\n\r"
-"Palette 0: Built-in ice blue, cyan, pale blue and white\n\r"
-"Palette 1+: Selected palette supplies all background and droplet colours";
-#endif
 
 
 
