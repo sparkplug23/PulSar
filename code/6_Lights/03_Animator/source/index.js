@@ -2633,13 +2633,9 @@ if (forceAll)
 }
 
 const modeLabel = gId('modeLabel');
-if (modeLabel)
-{
-  const icon = modeLabel.querySelector('.sel-icon');
-  if (icon) {
-    icon.style.opacity = forceAll ? '1' : '0.55';
-    icon.setAttribute('title', forceAll ? 'Show configured effect controls' : 'Show all effect controls');
-  }
+if (modeLabel) {
+  modeLabel.style.opacity = forceAll ? '1' : '0.7';
+  modeLabel.title = forceAll ? 'Show configured effect controls' : 'Show all effect controls';
 }
 
 

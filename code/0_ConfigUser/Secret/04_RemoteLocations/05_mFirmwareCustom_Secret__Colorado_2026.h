@@ -1222,8 +1222,8 @@
   /***********************************
   * SECTION: Enable Grouped
   ************************************/
-  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__ICICLE_TYPE
-  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__FULL_PANEL
+  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__ICICLE_TYPE
+  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D__FULL_PANEL
   // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
 
   /***********************************
