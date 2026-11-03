@@ -28084,7 +28084,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
-"GOOD Icicle Melting Drips@"
+"Icicle Drips@"
 "Fall Speed,Density,Trail Length,Afterglow Decay,Variation,Trail,Afterglow,Pal2 Head,,!"
 ";"
 ""
@@ -28240,7 +28240,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
-"GOOD Icicle Melting Droplets@"
+"Icicle Droplets@"
 "Speed,Density,Length,Smoothing,Variation,,Pal2 Head,,,!"
 ";"
 ""
@@ -28376,7 +28376,7 @@ void mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips()
 }
 
 static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
-"GOOD Icicle Sequenced Drips@"
+"Icicle Sequenced Drips@"
 "Wave Speed,Drip Speed,Tail,Waves,Variation,,Reverse,,,!"
 ";"
 ""
@@ -28405,107 +28405,6 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
 
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericAurora
- * @description : Flowing aurora curtains with overlapping waves and gradients.
- *
- * Two independently moving wave fields create horizontal colour
- * curtains with vertical undulations and smoothly varying brightness.
- *
- * Speed     : Horizontal flow speed
- * Intensity : Overall brightness
- * Custom1   : Curtain width
- * Custom2   : Vertical wave distortion
- * Custom3   : Number of colour bands (1-6)
- * Check2    : Reverse horizontal flow
- *
- * Palette1 supplies the aurora colours.
- * Uses the existing effect frame scheduler.
- *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericAurora()
-{
-  if (!isMatrix || !SEGMENT.is2D()) {
-    EffectAnim__Static_Palette();
-    return;
-  }
-
-  const uint16_t cols = SEG_W;
-  const uint16_t rows = SEG_H;
-  if (!cols || !rows) return;
-
-  if (SEGENV.call == 0) SEGENV.step = 0;
-
-  const uint8_t flow_speed = 1 + (SEGMENT.speed >> 5);
-  const uint8_t brightness = SEGMENT.intensity;
-  const uint8_t curtain_width = SEGMENT.custom1;
-  const uint8_t distortion = SEGMENT.custom2;
-  const uint8_t band_count = 1 + ((uint16_t)SEGMENT.custom3 * 5U / 31U);
-  const bool reverse = SEGMENT.check2;
-
-  SEGENV.step += flow_speed;
-  const uint8_t phase = (uint8_t)SEGENV.step;
-  const uint8_t phase2 = (uint8_t)(SEGENV.step >> 1);
-  const uint8_t width_scale = 2 + ((uint16_t)curtain_width * 14U / 255U);
-
-  for (uint16_t x = 0; x < cols; x++)
-  {
-    const uint8_t x_phase = ((uint32_t)x * band_count * 256U / cols);
-    const uint8_t flow_phase = reverse ? (uint8_t)(x_phase + phase) : (uint8_t)(x_phase - phase);
-    const uint8_t primary_wave = sin8_t(flow_phase);
-    const uint8_t secondary_wave = sin8_t((uint8_t)(flow_phase * 2U + phase2));
-    const uint8_t wave_height = (primary_wave >> 3) + (secondary_wave >> 4);
-
-    for (uint16_t y = 0; y < rows; y++)
-    {
-      const uint8_t y_phase = ((uint32_t)y * 256U / rows);
-      const uint8_t vertical_wave = sin8_t((uint8_t)(y_phase + phase2 + x_phase));
-      const uint8_t bend = ((int16_t)vertical_wave - 128) * distortion / 255;
-      const uint8_t curtain_phase = (uint8_t)(flow_phase + y_phase / width_scale + bend + wave_height);
-
-      // Build several overlapping soft curtains.
-      const uint8_t curtain1 = sin8_t(curtain_phase);
-      const uint8_t curtain2 = sin8_t((uint8_t)(curtain_phase + 85U + phase2));
-      const uint8_t curtain3 = sin8_t((uint8_t)(curtain_phase + 170U - phase2));
-
-      // Broad, overlapping brightness variation.
-      const uint8_t envelope = ((uint16_t)curtain1 * 3U + curtain2 + curtain3) / 5U;
-      const uint8_t vertical_brightness = 255U - ((uint32_t)y * 100U / rows);
-      const uint8_t pixel_brightness = ((uint32_t)envelope * vertical_brightness * brightness) / 65025U;
-
-      // Moving palette index changes the colour within each curtain.
-      const uint8_t palette_index = (uint8_t)(x_phase + y_phase / 3U + phase2 + secondary_wave / 4U);
-      const uint32_t colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-
-      SEGMENT.setPixelColorXY(x, y, color_blend(BLACK, colour, pixel_brightness));
-    }
-  }
-}
-
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_AURORA[] PROGMEM =
-"Icicle Atmospheric Aurora@"
-"Flow Speed,Brightness,Width,Distortion,Bands,,Reverse,,,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=100,ix=180,c1=160,c2=100,c3=12,o2=0,ep=20";
-
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_AURORA[] PROGMEM =
-"Flowing aurora curtains with overlapping colour waves.\n\r"
-"Horizontal motion combines with vertical distortion and soft gradients.\n\r"
-"No individual particles or independent column triggers.\n\r"
-"SX: Horizontal flow speed\n\r"
-"IX: Overall illumination\n\r"
-"C1: Curtain width\n\r"
-"C2: Vertical wave distortion\n\r"
-"C3: Number of colour bands (1-6)\n\r"
-"O2: Reverse horizontal flow\n\r"
-"Palette1: Aurora curtain colours";
-#endif
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -28829,7 +28728,7 @@ void mAnimatorLight::EffectAnim__2D__SnowFall()
 }
 
 static const char PM_EFFECT_CONFIG__2D__SNOW_FALL[] PROGMEM =
-"2D Snow Fall@"
+"Snow Fall@"
 "Speed,Density,Size,Wind,Variation,Enable Wind,Random Shapes,,,!"
 ";"
 ""
@@ -29140,7 +29039,7 @@ void mAnimatorLight::EffectAnim__2D__SnowFlakes()
 }
 
 static const char PM_EFFECT_CONFIG__2D__SNOW_FLAKES[] PROGMEM =
-"2D Snow Flakes@"
+"Snow Flakes@"
 "Gravity,Density,Size,Bounce,Turbulence,Collisions,Random Shapes,,,!"
 ";"
 ""
@@ -29380,7 +29279,7 @@ void mAnimatorLight::EffectAnim__2D__SnowGlow()
 }
 
 static const char PM_EFFECT_CONFIG__2D__SNOW_GLOW[] PROGMEM =
-"2D Snow Glow@"
+"Snow Glow@"
 "Fade Speed,Density,Size,Hold,Twinkles,Random Shapes,Pal2 Twinkles,,,!"
 ";"
 ""
