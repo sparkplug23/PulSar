@@ -39659,19 +39659,61 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);    
 
-  addEffect(EFFECTS_FUNCTION__2D__HALO_SPARKLE,
+
+            
+addEffect(EFFECTS_FUNCTION__2D__HALO_SPARKLE,
           &mAnimatorLight::EffectAnim__2D__HaloSparkle,
           PM_EFFECT_CONFIG__2D__HALO_SPARKLE,
           #ifdef ENABLE_EFFECT_DESCRIPTIONS
           PM_EFFECT_DESCRI__2D__HALO_SPARKLE,
           #endif
           Effect_DevStage::Dev);
-    
+
 addEffect(EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
           &mAnimatorLight::EffectAnim__2D__AuroraCurtains,
           PM_EFFECT_CONFIG__2D__AURORA_CURTAINS,
           #ifdef ENABLE_EFFECT_DESCRIPTIONS
           PM_EFFECT_DESCRI__2D__AURORA_CURTAINS,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
+          &mAnimatorLight::EffectAnim__2D__ForkLightning,
+          PM_EFFECT_CONFIG__2D__FORK_LIGHTNING,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__FORK_LIGHTNING,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__FALLING_COMETS,
+          &mAnimatorLight::EffectAnim__2D__FallingComets,
+          PM_EFFECT_CONFIG__2D__FALLING_COMETS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__FALLING_COMETS,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__MELTING_DRIPS,
+          &mAnimatorLight::EffectAnim__2D__MeltingDrips,
+          PM_EFFECT_CONFIG__2D__MELTING_DRIPS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__MELTING_DRIPS,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__MELTING_DROPLETS,
+          &mAnimatorLight::EffectAnim__2D__MeltingDroplets,
+          PM_EFFECT_CONFIG__2D__MELTING_DROPLETS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__MELTING_DROPLETS,
+          #endif
+          Effect_DevStage::Dev);
+
+addEffect(EFFECTS_FUNCTION__2D__SEQUENCED_WAVE_DRIPS,
+          &mAnimatorLight::EffectAnim__2D__SequencedWaveDrips,
+          PM_EFFECT_CONFIG__2D__SEQUENCED_WAVE_DRIPS,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__2D__SEQUENCED_WAVE_DRIPS,
           #endif
           Effect_DevStage::Dev);
 
@@ -39682,8 +39724,6 @@ addEffect(EFFECTS_FUNCTION__2D__FROZEN_MELT,
           PM_EFFECT_DESCRI__2D__FROZEN_MELT,
           #endif
           Effect_DevStage::Dev);
-
-
 
   #endif
 
@@ -39964,40 +40004,6 @@ addEffect(EFFECTS_FUNCTION__2D__FROZEN_MELT,
    * Ice and Snow - Specialised 2D Effects
    *******************************************************************************************************************************************************************************************************************/
   #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
-
-  // Icicle Melting - Independent vertical movement within each column
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_MELTING_DRIPS,
-            &mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips,
-            PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DRIPS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_MELTING_DROPLETS,
-            &mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets,
-            PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DROPLETS,
-            #endif
-            Effect_DevStage::Dev);
-
-  // Icicle Sequenced - Coordinated activation across neighbouring columns
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
-            &mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips,
-            PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall,
-            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-            #endif
-            Effect_DevStage::Dev);
 
   // Snow - Falling snowflakes with optional wind and varying flake shapes
   addEffect(EFFECTS_FUNCTION__2D__SNOW_FALL,
