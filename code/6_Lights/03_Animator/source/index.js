@@ -2509,7 +2509,13 @@ function setEffectParameters(idx) {
  * Slider 7: Decimate (Not controlled by effect data, toggled separately)
 	 */
 	if (!(Array.isArray(fxdata) && fxdata.length > idx)) return;
+
+	d.querySelectorAll("#sliders .sliderwrap, #sliders .ochkl").forEach(el => {
+	if (!el.dataset.defaultTitle) el.dataset.defaultTitle = el.title;
+	});
+
 	var controlDefined = fxdata[idx].length;
+
 	var effectPar = fxdata[idx];
 	var effectPars = (effectPar == '') ? [] : effectPar.split(";");
 	var slOnOff = (effectPars.length == 0 || effectPars[0] == '') ? [] : effectPars[0].split(",");
@@ -2520,39 +2526,28 @@ function setEffectParameters(idx) {
   
 	// Set HTML slider items on/off (Sliders 0-4 only)
 	d.querySelectorAll("#sliders .sliderwrap").forEach((slider, i) => {
-	  let text = slider.getAttribute("title");
-  
-	  if (i < 5) {
-		// Handle sliders 0-4
-		if ((!controlDefined && i < ((idx < 128) ? 2 : 5)) || (slOnOff.length > i && slOnOff[i] != "")) {
-		  if (slOnOff.length > i && slOnOff[i] != "!") text = slOnOff[i];
-		  else if (i == 0) text = "Speed";
-		  else if (i == 1) text = "Intensity";
-		  else text = "Custom " + (i - 1);
-		  slider.setAttribute("title", text);
-		  slider.parentElement.classList.remove('hide');
+		if (i >= 5) return;
+
+		const label = slOnOff[i];
+		slider.title = label && label !== "!" ? label : slider.dataset.defaultTitle;
+
+		if ((!controlDefined && i < ((idx < 128) ? 2 : 5)) || (slOnOff.length > i && slOnOff[i] !== "")) {
+		slider.parentElement.classList.remove('hide');
 		} else {
-		  slider.parentElement.classList.add('hide');
+		slider.parentElement.classList.add('hide');
 		}
-	  }
 	});
-  
+	
 	// Handle checkboxes (Checkboxes 0-2)
-	if (slOnOff.length > 5) {
-	  gId('fxopt').classList.remove('fade');
-	  d.querySelectorAll("#sliders .ochkl").forEach((check, i) => {
-		let text = check.getAttribute("title");
-		if (5 + i < slOnOff.length && slOnOff[5 + i] !== '') {
-		  if (slOnOff.length > 5 + i && slOnOff[5 + i] != "!") text = slOnOff[5 + i];
-		  check.setAttribute("title", text);
-		  check.classList.remove('hide');
-		} else {
-		  check.classList.add('hide');
-		}
-	  });
-	} else {
-	  gId('fxopt').classList.add('fade');
-	}
+	const fxopt = gId('fxopt');
+	fxopt.classList.toggle('fade', slOnOff.length <= 5);
+
+	d.querySelectorAll("#sliders .ochkl").forEach((check, i) => {
+		const label = slOnOff[5 + i];
+		check.title = label && label !== "!" ? label : check.dataset.defaultTitle;
+		check.classList.toggle('hide', slOnOff.length <= 5 || label === undefined || label === "");
+	});
+
   
 	// Handle sliders 5 (Effect Time Period) and 6 (Grouping)
 	d.querySelectorAll("#sliders .sliderwrap").forEach((slider, i) => {
