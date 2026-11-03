@@ -1685,38 +1685,23 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__ScrollingText_With_Baseline();
     void EffectAnim__2D__DigitalClock();
     void EffectAnim__2D__PlasmaRotoZoom();
-
     void EffectAnim__2D__WavingCell();
+
     void EffectAnim__2D__HaloSparkle();
     void EffectAnim__2D__AuroraCurtains();
     void EffectAnim__2D__FallingComets();
+    void EffectAnim__2D__MeltingDrips();
+    void EffectAnim__2D__MeltingDroplets();
+    void EffectAnim__2D__SequencedWaveDrips();
+    void EffectAnim__2D__FrozenMelt();
     #endif
     
-    
+
     #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
-
-      // Icicle Melting - Independent vertical movement within each column
-      void EffectAnim__2D__IcicleMeltingDrips();
-      void EffectAnim__2D__IcicleMeltingDroplets();
-
-      // Icicle Sequenced - Coordinated activation across neighbouring columns
-      void EffectAnim__2D__IcicleSequencedWaveDrips();
-
-      // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
-      void EffectAnim__2D__IcicleAtmosphericWaterfall();
-
-      // Snow - Falling snowflakes with optional wind and varying flake shapes
-      void EffectAnim__2D__SnowFall();
-
-      // Snow - Moving snowflakes with bouncing, collisions and interactions
-      void EffectAnim__2D__SnowFlakes();
-
-      // Snow - Stationary glowing flakes with optional Palette2 twinkles
-      void EffectAnim__2D__SnowGlow();
-
+    void EffectAnim__2D__SnowFall();
+    void EffectAnim__2D__SnowFlakes();
+    void EffectAnim__2D__SnowGlow();
     #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
-
-
 
     /****************************************************************************************************************************************************************************
     *** Specialised: 1D (Audio Reactive) ****************************************************************************************************************************************
@@ -2290,7 +2275,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__HALO_SPARKLE,
       EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
       EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
-      EFFECTS_FUNCTION__2D__FALLING_COMETS,
+      EFFECTS_FUNCTION__2D__FROZEN_MELT,
 
       #endif
 
