@@ -28093,41 +28093,46 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleMeltingDrips
- * @description : Independent falling ice droplets with optional moving trails and persistent afterglow.
+ * @function    : EffectAnim__2D__MeltingDrips
+ * @description : Independently falling vertical drips with configurable moving trails, persistent afterglow and palette-derived colours.
  *
- * Small droplets form above individual icicles and move vertically downwards.
- * Each column supports up to two independently moving droplets.
- * Falling velocity, spawn probability and individual speed variation are configurable.
+ * Multiple droplets fall vertically down individual matrix columns.
+ * Each droplet has an independently selected falling velocity and colour.
  *
- * Three independent options determine the appearance:
- *   - Moving trail: A fading tail follows the current droplet position.
- *   - Afterglow: Previous droplet positions remain illuminated and gradually fade.
- *   - Palette2 head: The leading pixel uses Palette2 while the trail uses Palette1.
+ * Each column supports up to two active droplets simultaneously.
+ * Droplets originate above the matrix and disappear after leaving the
+ * bottom edge.
  *
- * With both trail and afterglow disabled, droplets appear as individual moving points.
- * Enabling only the trail produces short moving streaks without retained illumination.
- * Enabling only afterglow creates fading tracks behind single moving points.
- * Enabling both produces longer luminous streaks with persistent illumination.
+ * Optional moving trails extend behind each droplet with progressively
+ * decreasing brightness. These trails move with their corresponding droplets.
  *
- * Speed     : Falling velocity
+ * Optional framebuffer afterglow preserves previously illuminated pixels,
+ * producing a longer fading trail behind moving droplets.
+ * Moving trails and persistent afterglow can be enabled independently.
+ *
+ * The afterglow fading calculation uses elapsed milliseconds to maintain
+ * consistent decay across different effect frame rates.
+ *
+ * Speed     : Droplet falling speed
  * Intensity : Droplet generation density
  * Custom1   : Moving trail length (0-12 pixels)
- * Custom2   : Afterglow fade rate (0=slow, 255=fast)
+ * Custom2   : Persistent afterglow fade rate (0=slow, 255=fast)
  * Custom3   : Individual velocity variation (0-31)
- * Check1    : Enable moving trail
- * Check2    : Enable persistent afterglow
- * Check3    : Enable Palette2 for the leading pixel
+ * Check1    : Enable moving droplet trails
+ * Check2    : Enable persistent framebuffer afterglow
+ * Check3    : Enable Palette2 for the leading droplet pixel
  *
- * Palette 0 : Built-in winter colours (ice blue, cyan, pale blue and ice white)
- * Palette 1+: Palette1 supplies the droplets and moving trails.
- * Palette2  : Optional leading pixel colour when Check3 is enabled.
+ * Palette 0 : Built-in blue, cyan, pale blue and white colours
+ * Palette 1+: Palette1 supplies the droplet bodies and moving trails
+ * Palette2  : Optional leading pixel colour when Check3 is enabled
  *
- * The afterglow decay uses elapsed milliseconds rather than frame count.
- * Particle positions and spawning retain the normal effect frame scheduler.
- * All particles remain within their originating matrix column.
+ * This effect uses independent vertical particle movement rather than
+ * horizontal sequencing or coordinated column activation.
+ *
+ * Requires a 2D matrix.
+ * No dependency on the specialised Ice and Snow effects.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
+void mAnimatorLight::EffectAnim__2D__MeltingDrips()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -28138,21 +28143,21 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
   const uint16_t rows = SEG_H;
   if (!cols || !rows) return;
 
-  struct IcicleDrip {
-    int16_t position;
+  struct Drip {
+    int32_t position;
     uint8_t velocity;
     uint8_t colour;
     uint8_t active;
   };
 
-  const uint16_t max_drips = cols * 2U;
-  const size_t data_size = max_drips * sizeof(IcicleDrip);
+  const size_t max_drips = (size_t)cols * 2U;
+  const size_t data_size = max_drips * sizeof(Drip);
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
-  IcicleDrip* drips = reinterpret_cast<IcicleDrip*>(SEGENV.data);
+  Drip* drips = reinterpret_cast<Drip*>(SEGENV.data);
   const uint32_t now = millis();
 
   if (SEGENV.call == 0) {
@@ -28165,14 +28170,15 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
   const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
   const uint8_t trail_length = ((uint16_t)SEGMENT.custom1 * 12U) / 255U;
   const uint8_t fade_rate = 2 + ((uint16_t)SEGMENT.custom2 * 78U) / 255U;
-  const uint8_t variation = SEGMENT.custom3 * 8U;
-  const bool enable_trail = SEGMENT.check1;
+  const uint8_t variation = min<uint8_t>(31, SEGMENT.custom3) * 8U;
+  const bool enable_trails = SEGMENT.check1;
   const bool enable_afterglow = SEGMENT.check2;
   const bool enable_palette2_head = SEGMENT.check3;
   const bool use_palette = SEGMENT.palette_id != 0;
-  const bool palette2_ready = use_palette && enable_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  const bool palette2_ready = enable_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  const uint8_t effective_trail = enable_trails ? trail_length : 0;
 
-  // Retain the previous image only when afterglow is enabled.
+  // Retain previously illuminated pixels only when afterglow is enabled.
   // Fade is normalized to a 20 ms reference interval.
   if (enable_afterglow)
   {
@@ -28202,15 +28208,17 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
 
   SEGENV.step = now;
 
-  for (uint16_t i = 0; i < max_drips; i++)
+  // Update every independent droplet.
+  for (size_t i = 0; i < max_drips; i++)
   {
-    IcicleDrip& drip = drips[i];
+    Drip& drip = drips[i];
     const uint16_t x = i % cols;
 
-    // Independently spawn new droplets above each icicle.
+    // Generate new droplets above each available column.
     if (!drip.active)
     {
       if (hw_random8() >= spawn_chance) continue;
+
       drip.active = 1;
       drip.position = -16 * (1 + hw_random8(3));
       drip.velocity = hw_random8();
@@ -28218,20 +28226,18 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
       continue;
     }
 
-    // Apply individual velocity variation.
+    // Apply individual velocity variation while preserving downward movement.
     const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)drip.velocity * variation / 255U);
     const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
     drip.position += movement;
 
-    // Remove droplets once their head and any moving trail leave the matrix.
-    const uint8_t effective_trail_length = enable_trail ? trail_length : 0;
-    if (drip.position >= (int16_t)((rows + effective_trail_length) * 16U)) {
+    // Remove droplets when the head and moving trail leave the matrix.
+    if (drip.position >= ((int32_t)rows + effective_trail) * 16L) {
       drip.active = 0;
       continue;
     }
 
-    // Palette 0 supplies built-in icy winter colours.
-    // Every other palette ID uses the normal segment palette lookup.
+    // Obtain the moving trail colour from Palette1.
     uint32_t body_colour;
     uint32_t head_colour;
 
@@ -28246,23 +28252,24 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
       else if (drip.colour < 128) body_colour = RGBW32(70, 170, 245, 0);
       else if (drip.colour < 192) body_colour = RGBW32(150, 215, 255, 0);
       else body_colour = RGBW32(200, 235, 255, 0);
-      head_colour = enable_palette2_head ? RGBW32(235, 250, 255, 0) : body_colour;
+
+      head_colour = palette2_ready ? SEGMENT.GetPalette2Colour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : (enable_palette2_head ? RGBW32(235, 250, 255, 0) : body_colour);
     }
 
-    const int16_t head_y = drip.position >> 4;
+    const int32_t head_y = drip.position >> 4;
 
-    // Render the leading droplet pixel.
+    // Draw the bright leading droplet pixel.
     if (head_y >= 0 && head_y < rows) {
       SEGMENT.addPixelColorXY(x, head_y, head_colour);
     }
 
-    // Optional moving tail with decreasing brightness.
-    // This is independent of the persistent framebuffer afterglow.
-    if (!enable_trail || trail_length == 0) continue;
+    // Optional moving trail with progressively decreasing brightness.
+    // This is independent of the framebuffer afterglow.
+    if (!enable_trails || trail_length == 0) continue;
 
     for (uint8_t t = 1; t <= trail_length; t++)
     {
-      const int16_t tail_y = head_y - t;
+      const int32_t tail_y = head_y - t;
       if (tail_y < 0 || tail_y >= rows) continue;
 
       const uint8_t brightness = ((uint16_t)(trail_length - t + 1U) * 220U) / (trail_length + 1U);
@@ -28271,9 +28278,9 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips()
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
-"Icicle Drips@"
-"Fall Speed,Density,Trail Length,Afterglow Decay,Variation,Trail,Afterglow,Pal2 Head,,!"
+static const char PM_EFFECT_CONFIG__2D__MELTING_DRIPS[] PROGMEM =
+"Melting Drips@"
+"Fall Speed,Density,Trail Length,Afterglow Decay,Variation,Trails,Afterglow,Pal2 Head,,!"
 ";"
 ""
 ";"
@@ -28284,48 +28291,62 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
 "sx=127,ix=100,c1=85,c2=120,c3=16,o1=1,o2=0,o3=0,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DRIPS[] PROGMEM =
-"Independent falling ice droplets with configurable trails and afterglow.\n\r"
-"Each icicle supports up to two independently moving droplets.\n\r"
-"Moving trails and persistent afterglow can be enabled separately.\n\r"
-"SX: Falling velocity\n\r"
-"IX: Drip generation density\n\r"
+static const char PM_EFFECT_DESCRI__2D__MELTING_DRIPS[] PROGMEM =
+"Independent falling vertical drips with optional moving trails and persistent afterglow.\n\r"
+"Each matrix column supports up to two independently falling droplets.\n\r"
+"Droplets have individual velocities and colours.\n\r"
+"Moving trails and persistent framebuffer afterglow operate independently.\n\r"
+"SX: Droplet falling speed\n\r"
+"IX: Droplet generation density\n\r"
 "C1: Moving trail length (0-12 pixels)\n\r"
 "C2: Afterglow decay (0=slow fading, 255=fast fading)\n\r"
 "C3: Individual velocity variation (0-31)\n\r"
-"O1: Enable moving fading trails\n\r"
-"O2: Enable persistent afterglow from previous frames\n\r"
+"O1: Enable moving droplet trails\n\r"
+"O2: Enable persistent framebuffer afterglow\n\r"
 "O3: Use Palette2 for the leading droplet pixel\n\r"
-"Palette 0: Built-in ice blue, cyan, pale blue and ice white\n\r"
-"Palette 1+: Selected Palette1 colours for droplet bodies and trails\n\r"
-"Palette2: Optional leading pixel colours when O3 is enabled";
+"Palette 0: Built-in blue, cyan, pale blue and white colours\n\r"
+"Palette 1+: Palette1 supplies droplet bodies and moving trails\n\r"
+"Palette2: Optional leading droplet colour when O3 is enabled";
 #endif
 
 
 
+
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleMeltingDroplets
- * @description : Independently falling droplets with bright leading pixels.
+ * @function    : EffectAnim__2D__MeltingDroplets
+ * @description : Independent liquid droplets with accelerating movement, rounded 2D bodies, subpixel smoothing and optional impact splashes.
  *
- * Each column supports one active droplet containing:
- *   - A leading pixel at maximum brightness
- *   - A variable-length body with progressively fading brightness
- *   - Independent falling velocity and palette colour
- *   - Optional subpixel interpolation for smooth movement
+ * Droplets form near the upper edge of the matrix and accelerate downwards.
+ * Each droplet has an independently selected size, velocity and palette colour.
  *
- * Speed     : Falling velocity
+ * Unlike MeltingDrips, this effect does not draw conventional fading tails.
+ * Instead, each droplet has a compact, vertically elongated liquid body.
+ * Optional horizontal illumination gives larger droplets a rounded 2D shape.
+ *
+ * Vertical positions use 1/16-pixel precision. Subpixel smoothing divides
+ * illumination between adjacent rows to reduce visible stepping.
+ *
+ * Droplets may produce a short-lived impact splash when reaching the bottom.
+ * The splash consists of a bright centre and outward-spreading side pixels.
+ *
+ * Speed     : Base falling velocity
  * Intensity : Droplet generation density
- * Custom1   : Maximum droplet length (1-5 pixels)
- * Custom2   : Subpixel smoothing
- * Custom3   : Velocity variation (0-31)
- * Check2    : Use Palette2 for the leading pixel
+ * Custom1   : Maximum droplet size (1-5 pixels)
+ * Custom2   : Vertical subpixel smoothing strength (0-255)
+ * Custom3   : Gravity / downward acceleration (0-31)
+ * Check1    : Enable rounded 2D droplet bodies
+ * Check2    : Enable Palette2 for the bright droplet core
+ * Check3    : Enable impact splashes
  *
- * Palette1 supplies the droplet body.
- * Palette2 optionally supplies the leading pixel.
- * All movement remains within the originating column.
- * Uses the existing PulSar effect frame scheduler.
+ * Palette 0 : Built-in water colours (deep blue, cyan, pale blue and white)
+ * Palette 1+: Palette1 supplies the droplet body and splash colours
+ * Palette2  : Optional bright core colour when Check2 is enabled
+ *
+ * One droplet state is maintained per matrix column.
+ * Movement uses elapsed milliseconds rather than frame count.
+ * Requires a 2D matrix and no seasonal effects feature flag.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets()
+void mAnimatorLight::EffectAnim__2D__MeltingDroplets()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -28336,100 +28357,156 @@ void mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets()
   const uint16_t rows = SEG_H;
   if (!cols || !rows) return;
 
-  struct IcicleDroplet {
-    int16_t position;
-    uint8_t velocity;
-    uint8_t length;
+  struct Droplet {
+    int32_t position;
+    uint16_t velocity;
+    uint16_t splash_remaining;
+    uint8_t size;
     uint8_t colour;
     uint8_t active;
   };
 
-  // One independent droplet per column.
-  const size_t data_size = cols * sizeof(IcicleDroplet);
+  const size_t data_size = (size_t)cols * sizeof(Droplet);
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
-  IcicleDroplet* droplets = reinterpret_cast<IcicleDroplet*>(SEGENV.data);
+  Droplet* droplets = reinterpret_cast<Droplet*>(SEGENV.data);
+  const uint32_t now = millis();
+
   if (SEGENV.call == 0) {
     memset(droplets, 0, data_size);
     SEGMENT.fill(BLACK);
+    SEGENV.step = now;
   }
 
-  const uint8_t base_speed = 1 + (SEGMENT.speed >> 4);
-  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t max_length = 1 + ((uint16_t)SEGMENT.custom1 * 4U / 255U);
+  const uint32_t elapsed = min<uint32_t>(now - SEGENV.step, 100UL);
+  SEGENV.step = now;
+
+  const uint8_t max_size = 1 + ((uint16_t)SEGMENT.custom1 * 4U / 255U);
   const uint8_t smoothing = SEGMENT.custom2;
-  const uint8_t variation = SEGMENT.custom3 * 8U;
-  const bool use_palette2_head = SEGMENT.check2;
+  const uint8_t gravity = SEGMENT.custom3;
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 3);
+  const uint8_t spawn_chance = min<uint32_t>(255UL, (uint32_t)SEGMENT.intensity * elapsed / 1500UL);
 
-  // Load the selected secondary palette once, or whenever its ID changes.
-  // Fall back to Palette1 if Palette2 cannot be loaded.
-  const bool palette2_ready = use_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  const bool rounded_body = SEGMENT.check1;
+  const bool use_palette2_core = SEGMENT.check2;
+  const bool enable_splash = SEGMENT.check3;
+  const bool use_palette = SEGMENT.palette_id != 0;
+  const bool palette2_ready = use_palette && use_palette2_core && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
 
-  // Droplets are reconstructed each frame without accumulated trails.
+  auto droplet_colour = [&](uint8_t index) -> uint32_t {
+    if (use_palette) return SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    if (index < 64) return RGBW32(20, 75, 160, 0);
+    if (index < 128) return RGBW32(40, 150, 235, 0);
+    if (index < 192) return RGBW32(100, 200, 255, 0);
+    return RGBW32(185, 235, 255, 0);
+  };
+
   SEGMENT.fill(BLACK);
 
   for (uint16_t x = 0; x < cols; x++)
   {
-    IcicleDroplet& droplet = droplets[x];
+    Droplet& droplet = droplets[x];
 
-    // Generate a new droplet when the column is available.
+    // Render a splash while the droplet is inactive.
+    if (!droplet.active && droplet.splash_remaining)
+    {
+      if (!enable_splash) {
+        droplet.splash_remaining = 0;
+      } else {
+        const uint16_t remaining = droplet.splash_remaining;
+        const uint8_t brightness = ((uint32_t)remaining * 255U) / 300U;
+        const uint32_t colour = droplet_colour(droplet.colour);
+        const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : (use_palette ? colour : RGBW32(235, 250, 255, 0));
+        const uint8_t spread = remaining > 150U ? 1U : 2U;
+
+        SEGMENT.addPixelColorXY(x, rows - 1, color_blend(BLACK, core_colour, brightness));
+
+        if (x >= spread) SEGMENT.addPixelColorXY(x - spread, rows - 1, color_blend(BLACK, colour, brightness / 2U));
+        if (x + spread < cols) SEGMENT.addPixelColorXY(x + spread, rows - 1, color_blend(BLACK, colour, brightness / 2U));
+
+        if (rows > 1 && remaining > 100U) {
+          SEGMENT.addPixelColorXY(x, rows - 2, color_blend(BLACK, colour, brightness / 3U));
+        }
+
+        droplet.splash_remaining = elapsed >= remaining ? 0 : remaining - elapsed;
+      }
+
+      continue;
+    }
+
+    // Independently spawn a droplet above each available column.
     if (!droplet.active)
     {
-      if (hw_random8() >= spawn_chance) continue;
+      if (!spawn_chance || hw_random8() >= spawn_chance) continue;
+
       droplet.active = 1;
       droplet.position = -16 * (1 + hw_random8(2));
-      droplet.velocity = hw_random8();
-      droplet.length = 1 + hw_random8(max_length);
+      droplet.velocity = base_speed + hw_random8(max<uint8_t>(1, base_speed / 2U));
+      droplet.size = 1 + hw_random8(max_size);
       droplet.colour = hw_random8();
-      continue;
+      droplet.splash_remaining = 0;
     }
 
-    // Apply individual velocity variation while retaining downward movement.
-    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)droplet.velocity * variation / 255U);
-    const uint16_t movement = max<uint16_t>(1, ((uint16_t)base_speed * velocity_scale + 128U) >> 8);
-    droplet.position += movement;
+    // Accelerate under gravity while retaining a bounded falling velocity.
+    const uint32_t acceleration = ((uint32_t)gravity * elapsed) / 20UL;
+    droplet.velocity = min<uint32_t>(256UL, (uint32_t)droplet.velocity + acceleration);
+    droplet.position += ((uint32_t)droplet.velocity * elapsed) / 20UL;
 
-    // Remove the droplet after its entire body passes the bottom.
-    if (droplet.position >= (int16_t)((rows + droplet.length) * 16U)) {
-      droplet.active = 0;
-      continue;
-    }
-
-    // Resolve body colour from Palette1.
-    const uint32_t body_colour = SEGMENT.GetPaletteColour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
-
-    // Check2 optionally selects Palette2 for the leading pixel only.
-    const uint32_t head_colour = palette2_ready
-      ? SEGMENT.GetPalette2Colour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
-      : body_colour;
-
-    const int16_t head_y = droplet.position >> 4;
-    const uint8_t fraction = droplet.position & 0x0F;
-    const uint8_t fractional_blend = ((uint16_t)fraction * smoothing) / 255U;
-
-    // Draw the head and the fading body behind it.
-    for (uint8_t t = 0; t < droplet.length; t++)
+    // Start an optional splash when the droplet reaches the lower edge.
+    if (droplet.position >= (int32_t)(rows - 1U) * 16)
     {
-      const int16_t y = head_y - t;
-      const uint8_t brightness = ((uint16_t)(droplet.length - t) * 255U) / droplet.length;
-      const uint32_t colour = (t == 0) ? head_colour : body_colour;
+      droplet.active = 0;
+      droplet.splash_remaining = enable_splash ? 300U : 0U;
+      continue;
+    }
 
-      // Split brightness between adjacent pixels for smooth movement.
-      const uint8_t upper_brightness = ((uint16_t)brightness * (16U - fractional_blend)) >> 4;
-      const uint8_t lower_brightness = ((uint16_t)brightness * fractional_blend) >> 4;
+    const uint32_t body_colour = droplet_colour(droplet.colour);
+    const uint32_t core_colour = palette2_ready ? SEGMENT.GetPalette2Colour(droplet.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE) : (use_palette ? body_colour : RGBW32(235, 250, 255, 0));
 
-      if (y >= 0 && y < rows) SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, upper_brightness));
-      if (lower_brightness && y + 1 >= 0 && y + 1 < rows) SEGMENT.addPixelColorXY(x, y + 1, color_blend(BLACK, colour, lower_brightness));
+    const int32_t head_y = droplet.position / 16;
+    const uint8_t fraction = (uint8_t)(droplet.position & 0x0FU);
+    const uint8_t blend = ((uint16_t)fraction * smoothing) / 255U;
+
+    // Render a compact, elongated droplet rather than a conventional trail.
+    for (uint8_t t = 0; t < droplet.size; t++)
+    {
+      const int32_t y = head_y - t;
+      const uint8_t body_brightness = ((uint16_t)(droplet.size - t) * 255U) / droplet.size;
+      const uint32_t colour = (t == 0) ? core_colour : body_colour;
+
+      const uint8_t upper_brightness = ((uint16_t)body_brightness * (16U - blend)) / 16U;
+      const uint8_t lower_brightness = ((uint16_t)body_brightness * blend) / 16U;
+
+      if (y >= 0 && y < rows) {
+        SEGMENT.addPixelColorXY(x, y, color_blend(BLACK, colour, upper_brightness));
+      }
+
+      if (lower_brightness && y + 1 >= 0 && y + 1 < rows) {
+        SEGMENT.addPixelColorXY(x, y + 1, color_blend(BLACK, colour, lower_brightness));
+      }
+
+      // Larger droplets expand sideways near the head and upper body.
+      if (rounded_body && droplet.size >= 3U && t <= droplet.size / 2U)
+      {
+        const uint8_t side_brightness = body_brightness / 3U;
+
+        if (y >= 0 && y < rows)
+        {
+          const uint32_t side_colour = color_blend(BLACK, body_colour, side_brightness);
+          if (x > 0) SEGMENT.addPixelColorXY(x - 1, y, side_colour);
+          if (x + 1 < cols) SEGMENT.addPixelColorXY(x + 1, y, side_colour);
+        }
+      }
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
-"Icicle Droplets@"
-"Speed,Density,Length,Smoothing,Variation,,Pal2 Head,,,!"
+static const char PM_EFFECT_CONFIG__2D__MELTING_DROPLETS[] PROGMEM =
+"Melting Droplets@"
+"Fall Speed,Density,Size,Smoothing,Gravity,Rounded,Pal2 Core,Splash,,!"
 ";"
 ""
 ";"
@@ -28437,42 +28514,71 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=100,c1=160,c2=200,c3=16,o2=0,ep=20";
+"sx=127,ix=100,c1=160,c2=200,c3=12,o1=1,o2=0,o3=1,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DROPLETS[] PROGMEM =
-"Independent multi-pixel droplets falling vertically down icicles.\n\r"
-"Each column supports one droplet with a bright leading head and fading body.\n\r"
-"Individual droplets vary in speed, length and palette colour.\n\r"
-"SX: Falling velocity\n\r"
+static const char PM_EFFECT_DESCRI__2D__MELTING_DROPLETS[] PROGMEM =
+"Independently falling liquid droplets with rounded bodies and optional impact splashes.\n\r"
+"Droplets form above the matrix and accelerate downwards under configurable gravity.\n\r"
+"Each droplet has an independently selected size, velocity and palette colour.\n\r"
+"Optional horizontal illumination gives larger droplets a rounded 2D shape.\n\r"
+"Subpixel interpolation provides smooth movement between matrix rows.\n\r"
+"Optional impact splashes appear when droplets reach the bottom.\n\r"
+"SX: Base falling velocity\n\r"
 "IX: Droplet generation density\n\r"
-"C1: Maximum droplet length (1-5 pixels)\n\r"
-"C2: Subpixel smoothing (0=sharp, 255=smooth)\n\r"
-"C3: Velocity variation\n\r"
-"O2: Use Palette2 for the leading pixel\n\r"
-"Palette1: Droplet body\n\r"
-"Palette2: Leading pixel when O2 is enabled";
+"C1: Maximum droplet size (1-5 pixels)\n\r"
+"C2: Vertical subpixel smoothing (0-255)\n\r"
+"C3: Gravity / downward acceleration (0-31)\n\r"
+"O1: Enable rounded 2D droplet bodies\n\r"
+"O2: Use Palette2 for bright droplet cores\n\r"
+"O3: Enable impact splashes\n\r"
+"Palette 0: Built-in blue, cyan, pale blue and white water colours\n\r"
+"Palette 1+: Selected Palette1 colours for droplet bodies and splashes\n\r"
+"Palette2: Optional bright droplet core colours when O2 is enabled";
 #endif
 
 
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleSequencedWaveDrips
- * @description : Horizontal waves sequentially trigger vertical falling drips.
+ * @function    : EffectAnim__2D__SequencedWaveDrips
+ * @description : Horizontal activation waves trigger independently falling vertical droplets across a two-dimensional matrix.
  *
- * A wave moves across the columns, starting a new drip as it passes.
- * Multiple waves can travel simultaneously with equal spacing.
- * Each triggered drip remains within its original column.
+ * One or more horizontal waves travel across the matrix, activating a new
+ * droplet whenever they reach a column.
  *
- * Speed     : Horizontal wave velocity
- * Intensity : Vertical drip velocity
- * Custom1   : Drip tail length (0-5 pixels)
- * Custom2   : Number of simultaneous waves (1-4)
- * Custom3   : Vertical velocity variation (0-31)
+ * Each activated droplet falls vertically within its original column.
+ * Droplets have independently selected velocities and palette colours.
+ * An optional moving trail extends behind each droplet with decreasing brightness.
+ *
+ * Multiple waves may operate simultaneously, equally spaced across the matrix.
+ * The horizontal propagation direction can be reversed independently of
+ * the vertical falling direction.
+ *
+ * Wave propagation and droplet movement use elapsed milliseconds.
+ * This prevents the animation from running faster simply because the
+ * effect scheduler or VirtualView is operating at a higher frame rate.
+ *
+ * Speed     : Horizontal wave propagation speed
+ * Intensity : Vertical droplet falling speed
+ * Custom1   : Moving trail length (0-8 pixels)
+ * Custom2   : Number of simultaneous horizontal waves (1-4)
+ * Custom3   : Individual droplet velocity variation (0-31)
+ * Check1    : Enable moving droplet trails
  * Check2    : Reverse horizontal wave direction
+ * Check3    : Enable Palette2 for the leading droplet pixel
+ *
+ * Palette 0 : Built-in neutral white and blue droplet colours
+ * Palette 1+: Palette1 supplies the droplet bodies and moving trails
+ * Palette2  : Optional leading pixel colour when Check3 is enabled
+ *
+ * Each column supports one active droplet, which may be restarted when
+ * another horizontal wave reaches that column.
+ *
+ * The effect is intended for general 2D matrices and does not depend
+ * on the specialised Ice and Snow effects.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips()
+void mAnimatorLight::EffectAnim__2D__SequencedWaveDrips()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -28484,48 +28590,80 @@ void mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips()
   if (!cols || !rows) return;
 
   struct WaveDrip {
-    int16_t position;
+    int32_t position;
     uint8_t velocity;
     uint8_t colour;
     uint8_t active;
   };
 
-  const size_t data_size = cols * sizeof(WaveDrip);
+  struct WaveState {
+    uint32_t last_ms;
+    uint32_t last_wave_step;
+    WaveDrip drips[1];
+  };
+
+  const size_t data_size = sizeof(WaveState) + (size_t)(cols - 1U) * sizeof(WaveDrip);
   if (!SEGENV.allocateData(data_size)) {
     EffectAnim__Static_Palette();
     return;
   }
 
-  WaveDrip* drips = reinterpret_cast<WaveDrip*>(SEGENV.data);
-  if (SEGENV.call == 0) {
-    memset(drips, 0, data_size);
-    SEGENV.step = 0;
+  WaveState* state = reinterpret_cast<WaveState*>(SEGENV.data);
+  WaveDrip* drips = state->drips;
+  const uint32_t now = millis();
+
+  const uint8_t wave_count = 1 + ((uint16_t)SEGMENT.custom2 * 3U / 255U);
+  const uint8_t trail_length = ((uint16_t)SEGMENT.custom1 * 8U) / 255U;
+  const uint8_t variation = min<uint8_t>(31, SEGMENT.custom3);
+  const uint8_t base_speed = 1 + (SEGMENT.intensity >> 4);
+  const uint32_t wave_interval_ms = 50UL + (uint32_t)(255U - SEGMENT.speed) * 3UL;
+  const uint32_t current_wave_step = now / wave_interval_ms;
+  const bool enable_trails = SEGMENT.check1;
+  const bool reverse = SEGMENT.check2;
+  const bool use_palette2_head = SEGMENT.check3;
+  const bool use_palette = SEGMENT.palette_id != 0;
+  const bool palette2_ready = use_palette2_head && SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id);
+  const uint8_t effective_trail = enable_trails ? trail_length : 0;
+
+  if (SEGENV.call == 0)
+  {
+    memset(state, 0, data_size);
+    state->last_ms = now;
+    state->last_wave_step = current_wave_step;
+    SEGMENT.fill(BLACK);
   }
 
-  const uint8_t wave_speed = 1 + (SEGMENT.speed >> 4);
-  const uint8_t drip_speed = 1 + (SEGMENT.intensity >> 4);
-  const uint8_t tail_length = ((uint16_t)SEGMENT.custom1 * 5U) / 255U;
-  const uint8_t wave_count = 1 + ((uint16_t)SEGMENT.custom2 * 3U) / 255U;
-  const uint8_t variation = SEGMENT.custom3 * 8U;
-  const bool reverse = SEGMENT.check2;
+  const uint32_t elapsed = min<uint32_t>(now - state->last_ms, 100UL);
+  state->last_ms = now;
 
-  const uint32_t previous_wave = SEGENV.step >> 4;
-  SEGENV.step += wave_speed;
-  const uint32_t current_wave = SEGENV.step >> 4;
+  // Determine how many columns have been crossed since the previous frame.
+  // Handle every crossed column rather than skipping columns at high speeds.
+  uint32_t crossed = 0;
 
-  // Trigger each column as the horizontal wave advances.
-  // Additional waves are distributed evenly across the matrix width.
-  if (SEGENV.call == 0 || current_wave != previous_wave)
+  if (SEGENV.call == 0) {
+    crossed = 1;
+  } else if (current_wave_step >= state->last_wave_step) {
+    crossed = min<uint32_t>(current_wave_step - state->last_wave_step, cols);
+  } else {
+    crossed = 1;
+  }
+
+  state->last_wave_step = current_wave_step;
+
+  // Activate droplets as one or more equally spaced waves cross columns.
+  for (uint32_t step_offset = 0; step_offset < crossed; step_offset++)
   {
+    const uint32_t wave_step = current_wave_step - crossed + step_offset + 1U;
+
     for (uint8_t w = 0; w < wave_count; w++)
     {
       const uint16_t offset = ((uint32_t)w * cols) / wave_count;
-      const uint16_t wave_x = ((current_wave + offset) % cols);
+      const uint16_t wave_x = (wave_step + offset) % cols;
       const uint16_t x = reverse ? (cols - 1U - wave_x) : wave_x;
 
       WaveDrip& drip = drips[x];
       drip.active = 1;
-      drip.position = -16;
+      drip.position = -256;
       drip.velocity = hw_random8();
       drip.colour = hw_random8();
     }
@@ -28533,39 +28671,70 @@ void mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips()
 
   SEGMENT.fill(BLACK);
 
+  // Update and render independently falling droplets.
   for (uint16_t x = 0; x < cols; x++)
   {
     WaveDrip& drip = drips[x];
     if (!drip.active) continue;
 
-    const uint16_t velocity_scale = 256U - (variation / 2U) + ((uint16_t)drip.velocity * variation / 255U);
-    const uint16_t movement = max<uint16_t>(1, ((uint16_t)drip_speed * velocity_scale + 128U) >> 8);
+    // Apply stable per-droplet velocity variation.
+    const uint16_t velocity_scale = 256U - (uint16_t)variation * 4U + ((uint16_t)drip.velocity * variation * 8U / 255U);
+
+    // Position uses 1/256-pixel precision, with velocity normalized to elapsed time.
+    const uint32_t movement = ((uint32_t)base_speed * velocity_scale * elapsed * 16UL) / (256UL * 20UL);
     drip.position += movement;
 
-    if (drip.position >= (int16_t)((rows + tail_length) * 16U)) {
+    // Remove the droplet after its head and any visible trail leave the matrix.
+    if (drip.position >= ((int32_t)rows + effective_trail) * 256L) {
       drip.active = 0;
       continue;
     }
 
-    const int16_t y = drip.position >> 4;
-    const uint32_t colour = SEGMENT.GetPaletteColour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    // Palette 0 provides neutral default colours.
+    // Other palettes use the selected PulSar palette.
+    uint32_t body_colour;
 
-    if (y >= 0 && y < rows) SEGMENT.addPixelColorXY(x, y, colour);
-
-    for (uint8_t t = 1; t <= tail_length; t++)
+    if (use_palette)
     {
-      const int16_t tail_y = y - t;
+      body_colour = SEGMENT.GetPaletteColour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+    }
+    else
+    {
+      if (drip.colour < 64) body_colour = RGBW32(70, 120, 210, 0);
+      else if (drip.colour < 128) body_colour = RGBW32(110, 180, 245, 0);
+      else if (drip.colour < 192) body_colour = RGBW32(175, 215, 255, 0);
+      else body_colour = RGBW32(230, 240, 255, 0);
+    }
+
+    // Optional Palette2 head, falling back to Palette1 or white.
+    const uint32_t head_colour = palette2_ready
+      ? SEGMENT.GetPalette2Colour(drip.colour, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE)
+      : (use_palette ? body_colour : RGBW32(255, 255, 255, 0));
+
+    const int32_t head_y = drip.position >> 8;
+
+    // Draw the bright leading pixel.
+    if (head_y >= 0 && head_y < rows) {
+      SEGMENT.addPixelColorXY(x, head_y, head_colour);
+    }
+
+    // Draw the optional fading tail behind the leading pixel.
+    if (!enable_trails || !trail_length) continue;
+
+    for (uint8_t t = 1; t <= trail_length; t++)
+    {
+      const int32_t tail_y = head_y - t;
       if (tail_y < 0 || tail_y >= rows) continue;
 
-      const uint8_t brightness = ((uint16_t)(tail_length - t + 1U) * 220U) / (tail_length + 1U);
-      SEGMENT.addPixelColorXY(x, tail_y, color_blend(BLACK, colour, brightness));
+      const uint8_t brightness = ((uint16_t)(trail_length - t + 1U) * 220U) / (trail_length + 1U);
+      SEGMENT.addPixelColorXY(x, tail_y, color_blend(BLACK, body_colour, brightness));
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
-"Icicle Sequenced Drips@"
-"Wave Speed,Drip Speed,Tail,Waves,Variation,,Reverse,,,!"
+static const char PM_EFFECT_CONFIG__2D__SEQUENCED_WAVE_DRIPS[] PROGMEM =
+"Sequenced Wave Drips@"
+"Wave Speed,Drip Speed,Trail Length,Wave Count,Variation,Trails,Reverse,Pal2 Head,,!"
 ";"
 ""
 ";"
@@ -28573,19 +28742,27 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=127,ix=127,c1=100,c2=0,c3=16,o2=0,ep=20";
+"sx=127,ix=127,c1=100,c2=0,c3=16,o1=1,o2=0,o3=0,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
-"Horizontal waves sequentially trigger falling drips across icicles.\n\r"
-"Each drip moves vertically within its original column.\n\r"
+static const char PM_EFFECT_DESCRI__2D__SEQUENCED_WAVE_DRIPS[] PROGMEM =
+"Horizontal activation waves trigger vertically falling droplets across the matrix.\n\r"
+"Each droplet moves independently within its original column.\n\r"
 "Multiple equally spaced waves may operate simultaneously.\n\r"
+"Horizontal wave propagation can be reversed.\n\r"
+"Optional moving tails extend behind each droplet with decreasing brightness.\n\r"
+"Wave propagation and droplet movement are normalized to elapsed time.\n\r"
 "SX: Horizontal wave propagation speed\n\r"
-"IX: Vertical drip falling speed\n\r"
-"C1: Drip tail length (0-5 pixels)\n\r"
-"C2: Number of simultaneous waves (1-4)\n\r"
-"C3: Individual drip velocity variation\n\r"
-"O2: Reverse horizontal wave direction";
+"IX: Vertical droplet falling speed\n\r"
+"C1: Moving trail length (0-8 pixels)\n\r"
+"C2: Number of simultaneous horizontal waves (1-4)\n\r"
+"C3: Individual droplet velocity variation (0-31)\n\r"
+"O1: Enable moving droplet trails\n\r"
+"O2: Reverse horizontal wave direction\n\r"
+"O3: Use Palette2 for the leading droplet pixel\n\r"
+"Palette 0: Built-in blue and white droplet colours\n\r"
+"Palette 1+: Selected Palette1 colours for droplets and moving tails\n\r"
+"Palette2: Optional leading pixel colours when O3 is enabled";
 #endif
 
 
@@ -28593,31 +28770,39 @@ static const char PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS[] PROGMEM =
 
 
 
-
-
 /*******************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__2D__IcicleAtmosphericWaterfall
- * @description : Frozen icicles slowly melting into independent falling droplets.
+ * @function    : EffectAnim__2D__FrozenMelt
+ * @description : Independently melting frozen surfaces with falling droplets, configurable trails, background illumination and glistening tips.
  *
- * A dim icy-blue background illuminates the icicles while individual
- * droplets form near the top and descend towards the tips.
- * Droplets accelerate as they fall, leaving short fading trails.
- * At the bottom, each droplet briefly glistens before disappearing.
+ * Each matrix column acts as an independently melting frozen surface.
+ * Droplets form near the upper edge and accelerate downwards.
+ * Randomized activation cycles prevent synchronized movement between columns.
  *
- * Each column uses a deterministic independent animation phase,
- * preventing the synchronized appearance of a conventional waterfall.
- * Droplet activation varies between cycles to create a natural thaw.
+ * The frozen background provides optional softly illuminated ice colours.
+ * Its brightness is independently controlled and does not limit droplet brightness.
  *
- * Speed     : Droplet falling speed
- * Intensity : Probability of active droplets per column
+ * Each droplet may have a moving trail with progressively fading brightness.
+ * An optional glistening highlight appears at the lower edge after the
+ * droplet completes its descent.
  *
- * Palette 0 : Built-in ice colours (deep blue, cyan, pale blue, white)
- * Palette 1+: Colours obtained through SEGMENT.GetPaletteColour()
+ * Speed     : Falling speed
+ * Intensity : Droplet activation probability and cycle frequency
+ * Custom1   : Frozen background brightness (0-255)
+ * Custom2   : Moving trail length (0-8 pixels)
+ * Custom3   : Tip glisten duration (0-31, 0=disabled, 1-31=150-1050 ms)
+ * Check1    : Enable frozen background illumination
+ * Check2    : Enable moving trails
+ * Check3    : Enable tip glistening
  *
- * Uses millis() for time-based animation independent of frame rate.
- * No dynamic allocations or persistent particle buffers required.
+ * Palette 0 : Built-in ice blue, cyan, pale blue and white colours
+ * Palette 1+: All colours obtained from SEGMENT.GetPaletteColour()
+ *
+ * Movement is derived from millis() and is independent of effect frame rate.
+ * Each column has a deterministic phase and randomized activation per cycle.
+ * No persistent particle buffers or dynamic allocations are required.
+ * Requires a 2D matrix.
  *******************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
+void mAnimatorLight::EffectAnim__2D__FrozenMelt()
 {
   if (!isMatrix || !SEGMENT.is2D()) {
     EffectAnim__Static_Palette();
@@ -28631,35 +28816,43 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
   const uint32_t now = millis();
   const uint8_t speed = SEGMENT.speed;
   const uint8_t intensity = SEGMENT.intensity;
+  const uint8_t background_brightness = SEGMENT.custom1;
+  const uint8_t trail_length = ((uint16_t)SEGMENT.custom2 * 8U) / 255U;
+  const uint8_t glisten_setting = min<uint8_t>(31, SEGMENT.custom3);
+  const uint16_t glisten_ms = glisten_setting ? 120U + (uint16_t)glisten_setting * 30U : 0U;
+  const bool enable_background = SEGMENT.check1;
+  const bool enable_trails = SEGMENT.check2;
+  const bool enable_glisten = SEGMENT.check3;
   const bool use_palette = SEGMENT.palette_id != 0;
 
   const uint32_t travel_ms = 4200UL - (uint32_t)speed * 12UL;
   const uint32_t rest_ms = 2800UL - (uint32_t)intensity * 8UL;
   const uint32_t cycle_ms = travel_ms + rest_ms;
-  const uint8_t background_bri = 8;
-  const uint8_t trail_length = 4;
-
-  auto scale_colour = [](uint32_t c, uint8_t bri) -> uint32_t {
-    return RGBW32((uint16_t)R(c) * bri / 255U, (uint16_t)G(c) * bri / 255U, (uint16_t)B(c) * bri / 255U, (uint16_t)W(c) * bri / 255U);
-  };
+  const uint8_t effective_trail = enable_trails ? trail_length : 0;
 
   auto ice_colour = [&](uint8_t index, uint8_t bri) -> uint32_t {
-    uint32_t c;
-    if (use_palette) {
-      c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
-    } else {
-      if (index < 64) c = RGBW32(35, 85, 165, 0);
-      else if (index < 128) c = RGBW32(95, 175, 255, 0);
-      else if (index < 192) c = RGBW32(175, 225, 255, 0);
-      else c = RGBW32(235, 250, 255, 0);
+    uint32_t colour;
+
+    if (use_palette)
+    {
+      colour = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
     }
-    return scale_colour(c, bri);
+    else
+    {
+      if (index < 64) colour = RGBW32(35, 85, 165, 0);
+      else if (index < 128) colour = RGBW32(95, 175, 255, 0);
+      else if (index < 192) colour = RGBW32(175, 225, 255, 0);
+      else colour = RGBW32(235, 250, 255, 0);
+    }
+
+    return color_blend(BLACK, colour, bri);
   };
 
   SEGMENT.fill(BLACK);
 
   for (uint16_t x = 0; x < cols; x++)
   {
+    // Stable independent seed for each matrix column.
     uint32_t seed = (uint32_t)x * 2654435761UL + 0x9E3779B9UL;
     seed ^= seed >> 16;
     seed *= 2246822519UL;
@@ -28671,59 +28864,65 @@ void mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall()
     const uint32_t cycle_number = local_time / cycle_ms;
     const uint32_t cycle_position = local_time % cycle_ms;
 
+    // Generate an independent activation decision for each melting cycle.
     uint32_t event_seed = seed ^ (cycle_number * 747796405UL);
     event_seed ^= event_seed >> 16;
     event_seed *= 2246822519UL;
     event_seed ^= event_seed >> 13;
 
-    const bool active = (event_seed & 255U) < (uint16_t)(24U + (uint16_t)intensity * 200U / 255U);
+    const bool active = (event_seed & 255U) < intensity;
 
-    // Dim frozen illumination remains visible between droplets.
-    for (uint16_t y = 0; y < rows; y++)
+    // Optional frozen background, varying gently with depth.
+    if (enable_background && background_brightness)
     {
-      const uint8_t depth = rows > 1 ? (uint32_t)y * 255U / (rows - 1U) : 255;
-      const uint8_t shimmer = (uint8_t)((now / 80UL + x * 19UL + y * 7UL) & 31U);
-      const uint8_t bri = background_bri + depth / 24U + shimmer / 12U;
-      SEGMENT.setPixelColorXY(x, y, ice_colour(palette_index, bri));
+      for (uint16_t y = 0; y < rows; y++)
+      {
+        const uint8_t depth = rows > 1 ? (uint32_t)y * 255U / (rows - 1U) : 255;
+        const uint8_t shimmer = (uint8_t)((now / 80UL + x * 19UL + y * 7UL) & 31U);
+        const uint8_t illumination = 160U + depth / 4U + shimmer;
+        const uint8_t bri = ((uint16_t)background_brightness * illumination) / 255U;
+        SEGMENT.setPixelColorXY(x, y, ice_colour(palette_index, bri));
+      }
     }
 
     if (!active) continue;
 
-    // Droplet descends with increasing velocity and a fading tail.
+    // Falling phase: quadratic acceleration and optional moving trail.
     if (cycle_position < travel_ms)
     {
-      const uint32_t progress = cycle_position * 65535UL / travel_ms;
-      const uint32_t accelerated = (progress * progress) / 65535UL;
-      const int32_t head_y = (int32_t)((accelerated * (uint32_t)(rows + trail_length) / 65535UL)) - trail_length;
+      const uint32_t progress = (uint64_t)cycle_position * 65535ULL / travel_ms;
+      const uint32_t accelerated = (uint64_t)progress * progress / 65535ULL;
+      const int32_t travel_pixels = (int32_t)rows + effective_trail + 1;
+      const int32_t head_y = (int32_t)((uint64_t)accelerated * travel_pixels / 65535ULL) - effective_trail - 1;
 
-      for (uint8_t t = 0; t <= trail_length; t++)
+      for (uint8_t t = 0; t <= effective_trail; t++)
       {
         const int32_t y = head_y - t;
         if (y < 0 || y >= rows) continue;
 
-        const uint8_t bri = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
+        const uint8_t brightness = t == 0 ? 255 : (uint8_t)(180U / (t + 1U));
         const uint8_t colour_index = t == 0 ? 240 : (uint8_t)(palette_index + t * 13U);
-        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, bri));
+        SEGMENT.setPixelColorXY(x, y, ice_colour(colour_index, brightness));
       }
     }
-    else
+    else if (enable_glisten && glisten_ms)
     {
-      // Brief glisten at the icicle tip before the droplet fades.
+      // Tip illumination fades after the droplet finishes its descent.
       const uint32_t after_travel = cycle_position - travel_ms;
-      if (after_travel >= 360UL) continue;
+      if (after_travel >= glisten_ms) continue;
 
-      const uint8_t fade = (uint32_t)(360UL - after_travel) * 255UL / 360UL;
-      const uint8_t sparkle = (uint32_t)fade * fade / 255UL;
+      const uint8_t fade = ((uint32_t)(glisten_ms - after_travel) * 255UL) / glisten_ms;
+      const uint8_t sparkle = ((uint16_t)fade * fade) / 255U;
+
       SEGMENT.setPixelColorXY(x, rows - 1, ice_colour(240, sparkle));
-
-      if (rows > 1) SEGMENT.setPixelColorXY(x, rows - 2, ice_colour(190, sparkle / 4));
+      if (rows > 1) SEGMENT.setPixelColorXY(x, rows - 2, ice_colour(190, sparkle / 4U));
     }
   }
 }
 
-static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
-"Icicle - Frozen Melt GOOD@"
-"Fall Speed,Drip Density,,,,,,,,!"
+static const char PM_EFFECT_CONFIG__2D__FROZEN_MELT[] PROGMEM =
+"Frozen Melt@"
+"Fall Speed,Drip Density,Background,Trail Length,Tip Duration,Background,Trails,Tip Glisten,,!"
 ";"
 ""
 ";"
@@ -28731,20 +28930,27 @@ static const char PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
 ";"
 "2"
 ";"
-"sx=100,ix=100,ep=20";
+"sx=100,ix=100,c1=12,c2=127,c3=8,o1=1,o2=1,o3=1,ep=20";
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL[] PROGMEM =
-"Frozen Christmas icicles with occasional melting droplets.\n\r"
-"Each icicle remains softly illuminated in icy colours.\n\r"
-"Individual droplets form near the top, accelerate downwards and leave a short fading trail.\n\r"
-"Droplets briefly glisten at the tips before disappearing.\n\r"
-"Columns operate independently with randomized activation cycles.\n\r"
+static const char PM_EFFECT_DESCRI__2D__FROZEN_MELT[] PROGMEM =
+"Melting frozen surfaces with independent falling droplets and optional glistening tips.\n\r"
+"Each column follows an independently randomized melting cycle.\n\r"
+"Droplets accelerate downwards and can leave a short moving trail.\n\r"
+"Optional frozen background illumination remains visible between droplets.\n\r"
+"Background brightness does not limit droplet brightness.\n\r"
 "SX: Droplet falling speed\n\r"
-"IX: Density and frequency of active droplets\n\r"
-"Palette 0: Built-in deep blue, cyan, pale blue and ice white\n\r"
-"Palette 1+: Use the selected palette for all illumination and droplets";
+"IX: Droplet activation probability and cycle frequency\n\r"
+"C1: Frozen background brightness (0-255)\n\r"
+"C2: Moving trail length (0-8 pixels)\n\r"
+"C3: Tip glisten duration (0=disabled, 1-31=150-1050 ms)\n\r"
+"O1: Enable frozen background illumination\n\r"
+"O2: Enable moving droplet trails\n\r"
+"O3: Enable glistening at the lower tips\n\r"
+"Palette 0: Built-in ice blue, cyan, pale blue and white\n\r"
+"Palette 1+: Selected palette supplies all background and droplet colours";
 #endif
+
 
 
 
