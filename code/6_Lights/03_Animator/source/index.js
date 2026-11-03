@@ -3,6 +3,8 @@ var loc = false, locip, locproto = "http:";
 var isOn = false, isLv = false, isInfo = false, isNodes = false, isStandby = false, syncSend = false;
 var hasWhite = false, hasRGB = false, hasCCT = false, has2D = false;
 
+let _selFxInterval = null;
+
 var segLmax = 0; // size (in pixels) of largest selected segment
 var selectedFx = 0;
 var selectedPal = 0;
@@ -2618,7 +2620,8 @@ function setEffectParameters(idx) {
 	}
   
 	setSelectedEffectPosition();
-	setInterval(setSelectedEffectPosition, 750);
+	if (_selFxInterval) clearInterval(_selFxInterval);
+	_selFxInterval = setInterval(setSelectedEffectPosition, 750);
   
 	// Set HTML color items on/off
 	var cslLabel = '';
