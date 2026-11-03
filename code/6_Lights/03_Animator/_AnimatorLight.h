@@ -1680,7 +1680,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__Soap();
     void EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels);
     void EffectAnim__2D__Octopus();
-    void EffectAnim__2D__ForkLightning();
     void EffectAnim__2D__ScrollingText();
     void EffectAnim__2D__ScrollingText_With_Baseline();
     void EffectAnim__2D__DigitalClock();
@@ -1689,6 +1688,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
 
     void EffectAnim__2D__HaloSparkle();
     void EffectAnim__2D__AuroraCurtains();
+    void EffectAnim__2D__ForkLightning();
     void EffectAnim__2D__FallingComets();
     void EffectAnim__2D__MeltingDrips();
     void EffectAnim__2D__MeltingDroplets();
@@ -2271,44 +2271,21 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
       // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
-      
+        
+      EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
       EFFECTS_FUNCTION__2D__HALO_SPARKLE,
       EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
-      EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
-      EFFECTS_FUNCTION__2D__FROZEN_MELT,
+      EFFECTS_FUNCTION__2D__FALLING_COMETS,
       EFFECTS_FUNCTION__2D__MELTING_DRIPS,
       EFFECTS_FUNCTION__2D__MELTING_DROPLETS,
       EFFECTS_FUNCTION__2D__SEQUENCED_WAVE_DRIPS,
       EFFECTS_FUNCTION__2D__FROZEN_MELT,
-
-
-
-
       #endif
-
       
       #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
-
-        // Icicle Melting - Independent vertical movement within each column
-        EFFECTS_FUNCTION__2D__ICICLE_MELTING_DRIPS,
-        EFFECTS_FUNCTION__2D__ICICLE_MELTING_DROPLETS,
-
-        // Icicle Sequenced - Coordinated activation across neighbouring columns
-        EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
-
-        // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
-        EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
-
-        // Snow - Falling snowflakes with optional wind and varying flake shapes
-        EFFECTS_FUNCTION__2D__SNOW_FALL,
-
-        // Snow - Moving snowflakes with bouncing, collisions and interactions
-        EFFECTS_FUNCTION__2D__SNOW_FLAKES,
-
-        // Snow - Stationary glowing flakes with optional Palette2 twinkles
-        EFFECTS_FUNCTION__2D__SNOW_GLOW,
-
+      EFFECTS_FUNCTION__2D__SNOW_FALL,
+      EFFECTS_FUNCTION__2D__SNOW_FLAKES,
+      EFFECTS_FUNCTION__2D__SNOW_GLOW,
       #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
             
 
