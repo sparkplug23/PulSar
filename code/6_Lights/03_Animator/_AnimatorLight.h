@@ -1678,7 +1678,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__DriftRose();
     void EffectAnim__2D__DistortionWaves();
     void EffectAnim__2D__Soap();
-    void     EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels);
+    void EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels);
     void EffectAnim__2D__Octopus();
     void EffectAnim__2D__ForkLightning();
     void EffectAnim__2D__ScrollingText();
@@ -2273,9 +2273,16 @@ static const uint8_t kPresetMetaParserVersion = 2;
 
       
       EFFECTS_FUNCTION__2D__HALO_SPARKLE,
-      EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
       EFFECTS_FUNCTION__2D__AURORA_CURTAINS,
+      EFFECTS_FUNCTION__2D__FORK_LIGHTNING,
       EFFECTS_FUNCTION__2D__FROZEN_MELT,
+      EFFECTS_FUNCTION__2D__MELTING_DRIPS,
+      EFFECTS_FUNCTION__2D__MELTING_DROPLETS,
+      EFFECTS_FUNCTION__2D__SEQUENCED_WAVE_DRIPS,
+      EFFECTS_FUNCTION__2D__FROZEN_MELT,
+
+
+
 
       #endif
 
