@@ -2548,21 +2548,15 @@ function setEffectParameters(idx) {
 		check.classList.toggle('hide', slOnOff.length <= 5 || label === undefined || label === "");
 	});
 
-  
-	// Handle sliders 5 (Effect Time Period) and 6 (Grouping)
+		
+	// Effect Period and Grouping: prefer effect-defined labels.
 	d.querySelectorAll("#sliders .sliderwrap").forEach((slider, i) => {
-		if (i == 5 || i == 6) {
-		let text = slider.getAttribute("title");
-		const dataIndex = i + 3; // Adjust the index to skip the 3 checkboxes
-		if (slOnOff.length > dataIndex && slOnOff[dataIndex] != "") {
-			text = slOnOff[dataIndex] != "!" ? slOnOff[dataIndex] : i == 5 ? "Effect Period" : "Grouping";
-			slider.setAttribute("title", text);
-			slider.parentElement.classList.remove('hide');
-		} else {
-			slider.parentElement.classList.add('hide');
-		}
-		}
+		if (i !== 5 && i !== 6) return;
+		const label = slOnOff[i + 3];
+		slider.title = label && label !== "!" ? label : slider.dataset.defaultTitle;
+		slider.parentElement.classList.toggle('hide', label === undefined || label === "");
 	});
+
 
 	// --------------------------------------------------------------------
 	// Perf controls override (Grouping + Decimate)
