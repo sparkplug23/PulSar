@@ -131,6 +131,19 @@ function tglHex()
 	applyCfg();
 }
 
+
+function tglAllEffectControls()
+{
+  if (!cfg.comp) cfg.comp = {};
+  cfg.comp.fxall = !cfg.comp.fxall;
+
+  localStorage.setItem('wledUiCfg', JSON.stringify(cfg));
+
+  updateSelectedFx();
+  showToast(cfg.comp.fxall ? "All effect controls: ON" : "All effect controls: AUTO", false);
+}
+
+
 function tglTheme()
 {
 	cfg.theme.base = (cfg.theme.base === "light") ? "dark":"light";
@@ -2577,6 +2590,58 @@ function setEffectParameters(idx) {
 		if (forcePerf) decRow.classList.remove('hide');
 		else           decRow.classList.add('hide');
 	}
+
+	
+// --------------------------------------------------------------------
+// Development override: show every effect slider and checkbox.
+// Overrides effect PROGMEM visibility without modifying any values.
+// --------------------------------------------------------------------
+const forceAll = !!(cfg.comp && cfg.comp.fxall);
+
+if (forceAll)
+{
+  const sliderDefaults = ["Speed", "Intensity", "Custom 1", "Custom 2", "Custom 3", "Effect Period", "Grouping", "Decimate"];
+
+  for (let i = 0; i < 8; i++)
+  {
+    const slider = gId('slider' + i);
+    if (!slider) continue;
+
+    slider.classList.remove('hide');
+
+    const wrap = slider.querySelector('.sliderwrap');
+    if (!wrap) continue;
+
+    const dataIndex = i < 5 ? i : i + 3;
+    const configuredLabel = slOnOff.length > dataIndex ? slOnOff[dataIndex] : '';
+    wrap.setAttribute('title', configuredLabel && configuredLabel !== '!' ? configuredLabel : sliderDefaults[i]);
+  }
+
+  const fxopt = gId('fxopt');
+  if (fxopt) fxopt.classList.remove('fade');
+
+  for (let i = 0; i < 3; i++)
+  {
+    const option = gId('opt' + i);
+    if (!option) continue;
+
+    option.classList.remove('hide');
+
+    const configuredLabel = slOnOff.length > 5 + i ? slOnOff[5 + i] : '';
+    option.setAttribute('title', configuredLabel && configuredLabel !== '!' ? configuredLabel : 'Check ' + (i + 1));
+  }
+}
+
+const modeLabel = gId('modeLabel');
+if (modeLabel)
+{
+  const icon = modeLabel.querySelector('.sel-icon');
+  if (icon) {
+    icon.style.opacity = forceAll ? '1' : '0.55';
+    icon.setAttribute('title', forceAll ? 'Show configured effect controls' : 'Show all effect controls');
+  }
+}
+
 
   
   
