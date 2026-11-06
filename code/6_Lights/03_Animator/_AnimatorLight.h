@@ -3494,12 +3494,48 @@ class Segment
      * Decimate is a multiplier, so 0 means none, with each value being a divisor. Decimate 10 would be only generate 10% of the leds, then repeat it 10 times on the output
      */
     uint8_t decimate = 0;
-    uint8_t grouping = 1;
     uint8_t  spacing = 0;
     uint8_t  opacity = 255,  cct;       // 0==1900K, 255==10091K
 
-    inline void grouping_set(uint8_t g){ grouping = g > 0 ? g : 1; } // Can never be ZERO
-    inline uint8_t grouping_get(void){ return grouping; } // Can never be ZERO
+    
+    uint8_t grouping = 1;
+    /**
+     * @brief Set grouping with segment-length, storage-width and optional debug limits.
+     * A non-empty segment always has grouping >= 1.
+     * An empty segment has grouping = 0.
+     */
+    inline void grouping_set(uint32_t g)
+    {
+      const uint32_t segment_length = length();
+      if(segment_length == 0) {
+        grouping = 0;
+        return;
+      }
+
+      uint32_t maximum = segment_length;
+      if(maximum > 255) maximum = 255;
+
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP
+        uint32_t limit = segment_length / 4;
+        if(limit < 1) limit = 1;
+        if(maximum > limit) maximum = limit;
+      #endif
+
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT
+        #if ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT > 0
+          uint32_t limit = segment_length / ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT;
+          if(limit < 1) limit = 1;
+          if(maximum > limit) maximum = limit;
+        #endif
+      #endif
+
+      if(g < 1) g = 1;
+      if(g > maximum) g = maximum;
+      grouping = (uint8_t)g;
+    }
+
+    inline uint8_t grouping_get(void) { return grouping; }
+
 
     /**
      * @brief

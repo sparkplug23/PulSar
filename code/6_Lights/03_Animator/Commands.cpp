@@ -540,33 +540,58 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
+        
+    /*******************************************************************************************************************************************************************************************************************
+     * Grouping:
+     *   Grouping      / GP  = Absolute pixels per group
+     *   GroupingPerc  / GPP = Percentage of segment length per group
+     *   GroupingBands / GPB = Requested number of bands across segment
+     *
+     * All commands pass through grouping_set(), which enforces:
+     *   0 for empty segments
+     *   1..min(255, segment length) for non-empty segments
+     *   Optional debug caps
+     *
+     * If multiple commands are supplied, precedence is GPB > GPP > GP.
+     *******************************************************************************************************************************************************************************************************************/
+
     if(jtok = getTokenIncludingAlias(jobj, PM_GROUPING, "GP"))
-    { 
-      SEGMENT_I(segment_index).grouping = jtok.getInt();  
-      ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP
-      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/4)){
-        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/4;
-        ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
-      }
-      #endif
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT
-      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT)){
-        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT;
-        ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
-      }
-      #endif
+    {
+      int32_t requested = jtok.getInt();
+      if(requested < 1) requested = 1;
+      SEGMENT_I(segment_index).grouping_set((uint32_t)requested);
+      ALOG_INF(PSTR(D_LOG_PIXEL "Grouping GP: requested=%ld applied=%u"), (long)requested, SEGMENT_I(segment_index).grouping_get());
       data_buffer.isserviced++;
     }
 
-    
-    if(jtok = jobj["GroupingPerc"])
+    if(jtok = getTokenIncludingAlias(jobj, "GroupingPerc", "GPP"))
     {
-      uint8_t percentage = jtok.getInt(); 
-      SEGMENT_I(segment_index).grouping = map(percentage,0,100,0,SEGMENT_I(segment_index).length());    
-      ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
+      int32_t percentage = jtok.getInt();
+      if(percentage < 0) percentage = 0;
+      if(percentage > 100) percentage = 100;
+
+      const uint32_t segment_length = SEGMENT_I(segment_index).length();
+      const uint32_t calculated = ((uint32_t)percentage * segment_length + 50U) / 100U;
+
+      SEGMENT_I(segment_index).grouping_set(calculated);
+      ALOG_INF(PSTR(D_LOG_PIXEL "Grouping GPP: percentage=%ld length=%lu applied=%u"), (long)percentage, (unsigned long)segment_length, SEGMENT_I(segment_index).grouping_get());
       data_buffer.isserviced++;
     }
+
+    if(jtok = getTokenIncludingAlias(jobj, "GroupingBands", "GPB"))
+    {
+      int32_t requested_bands = jtok.getInt();
+      if(requested_bands < 1) requested_bands = 1;
+
+      const uint32_t segment_length = SEGMENT_I(segment_index).length();
+      const uint32_t bands = (uint32_t)requested_bands;
+      const uint32_t calculated = segment_length / bands + (segment_length % bands != 0);
+
+      SEGMENT_I(segment_index).grouping_set(calculated);
+      ALOG_INF(PSTR(D_LOG_PIXEL "Grouping GPB: bands=%ld length=%lu applied=%u"), (long)requested_bands, (unsigned long)segment_length, SEGMENT_I(segment_index).grouping_get());
+      data_buffer.isserviced++;
+    }
+
 
 
     if(jtok = getTokenIncludingAlias(jobj, PM_DECIMATE, "DC"))
