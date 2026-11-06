@@ -3,7 +3,7 @@ var loc = false, locip, locproto = "http:";
 var isOn = false, isLv = false, isInfo = false, isNodes = false, isStandby = false, syncSend = false;
 var hasWhite = false, hasRGB = false, hasCCT = false, has2D = false;
 
-let _selFxInterval = null;
+var _selFxInterval = null; // interval ID for selected effect position update
 
 var segLmax = 0; // size (in pixels) of largest selected segment
 var selectedFx = 0;

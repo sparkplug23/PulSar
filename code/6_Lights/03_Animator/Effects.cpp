@@ -24704,7 +24704,6 @@ static const char PM_EFFECT_CONFIG__2D__WAVING_CELL[] PROGMEM =
 static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM =
 "2D interference waving cells\n\r"
 "SX: speed  |  IX: blur  |  C1: X amp  |  C2: Y amp  |  C3: Y cos amp  |  CB2: flow toggle";
-#endif
 
 /*******************************************************************************************************************************************************************************************************************
  * @function    : EffectAnim__2D__HaloSparkle
@@ -25565,6 +25564,7 @@ static const char PM_EFFECT_DESCRI__2D__FROZEN_MELT[] PROGMEM =
 "Palette 1+: Selected palette supplies all background and droplet colours";
 #endif
 
+#endif // end 2d matrix
 
 
 

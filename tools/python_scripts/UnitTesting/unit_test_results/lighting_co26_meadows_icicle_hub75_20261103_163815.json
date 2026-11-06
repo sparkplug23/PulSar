@@ -1,0 +1,26 @@
+{
+  "device": "co26_meadows_icicle_hub75",
+  "timestamp": "2026-11-03T16:38:15",
+  "mqtt": {
+    "broker": "192.168.0.155",
+    "port": 1883,
+    "command_topic": "co26_meadows_icicle_hub75/set/python",
+    "echo_topic": "co26_meadows_icicle_hub75/status/unit_test",
+    "lwt_topic": "co26_meadows_icicle_hub75/LWT"
+  },
+  "configuration": {
+    "palette_count": 179,
+    "effect_count": 185,
+    "palette_dwell_seconds": 2,
+    "effect_dwell_seconds": 3,
+    "palette_effect_dwell_seconds": 3,
+    "preset_dwell_seconds": 10,
+    "response_timeout_allowance_seconds": 120
+  },
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "results": []
+}

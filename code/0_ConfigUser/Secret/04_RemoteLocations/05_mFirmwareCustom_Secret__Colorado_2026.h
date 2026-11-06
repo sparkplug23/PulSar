@@ -41,6 +41,9 @@
 // #define DEVICE_COLORADO26__LIGHT01__HALLOWEEN
 // #define DEVICE_COLORADO26__LIGHT02__HALLOWEEN
 // #define DEVICE_COLORADO26__LIGHT03__HALLOWEEN
+// #define DEVICE_COLORADO26__LIGHT01__WHITEHALL_FRONT
+// #define DEVICE_COLORADO26__LIGHT02__MEADOWS_FRONT
+// #define DEVICE_COLORADO26__LIGHT03__MEADOWS_SIDE
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
 // #define DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
@@ -576,6 +579,501 @@
 
 #endif
 
+
+/////////////////////////////////////////////////////////////////////// xmas testers now
+
+
+
+
+#ifdef DEVICE_COLORADO26__LIGHT01__WHITEHALL_FRONT
+
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR "col26__light01__halloween"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Colorado Halloween 100 LEDs#Outside"
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+    #define DEVICENAME_DESCRIPTION_CTR "Colorado Halloween;Optional SoftAP"
+  #endif
+
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
+
+// making show as physically there, or, in test in full compile method
+  // #define USE_TEMPLATE_INI_OVERRIDE__LEDS_100
+  // #define USE_TEMPLATE_INI_OVERRIDE__LEDS_FULL
+
+  // =========================================================
+  // Network
+  // =========================================================
+
+  #define USE_NETWORK_TEMPLATE
+  #define USE_NETWORK_TEMPLATE__OVERRIDE
+
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":true"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" DEVICENAME_CTR "\","
+        "\"Password\":\"Michael26\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":false"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  // =========================================================
+  // Lighting: 100 WS2812 LEDs, GPIO13
+  // =========================================================
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Halloween",
+        "PixelRange":[0,100],
+        "ColourPalette":"Holloween OPY",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":100
+  }
+  )=====";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif
+
+
+#ifdef DEVICE_COLORADO26__LIGHT02__MEADOWS_FRONT
+
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR "col26__light02__halloween"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Colorado Halloween 100 LEDs#Outside"
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+    #define DEVICENAME_DESCRIPTION_CTR "Colorado Halloween;Optional SoftAP"
+  #endif
+
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
+
+  // =========================================================
+  // Network
+  // =========================================================
+
+  #define USE_NETWORK_TEMPLATE
+  #define USE_NETWORK_TEMPLATE__OVERRIDE
+
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":true"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" DEVICENAME_CTR "\","
+        "\"Password\":\"Michael26\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":false"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  // =========================================================
+  // Lighting: 100 WS2812 LEDs, GPIO13
+  // =========================================================
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Halloween",
+        "PixelRange":[0,100],
+        "ColourPalette":"Holloween OP",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":100
+  }
+  )=====";
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif
+
+
+
+
+#ifdef DEVICE_COLORADO26__LIGHT03__MEADOWS_SIDE
+
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR "col26__light03__halloween"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Colorado Halloween 100 LEDs#Outside"
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+    #define DEVICENAME_DESCRIPTION_CTR "Colorado Halloween;Optional SoftAP"
+  #endif
+
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
+
+  // =========================================================
+  // Network
+  // =========================================================
+
+  #define USE_NETWORK_TEMPLATE
+  #define USE_NETWORK_TEMPLATE__OVERRIDE
+
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":true"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" DEVICENAME_CTR "\","
+        "\"Password\":\"Michael26\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":false"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  // =========================================================
+  // Lighting: 100 WS2812 LEDs, GPIO13
+  // =========================================================
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Halloween",
+        "PixelRange":[0,100],
+        "ColourPalette":"Holloween OPY",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":100
+  }
+  )=====";
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif
+
+
+//////////////////////////
 
 
 
