@@ -1,0 +1,33 @@
+{
+  "n": "IceCream,TwiWipe",
+  "Pal": "IceCream Floats",
+  "Effects": {
+    "FX": "Tri Wipe",
+    "IX": 255,
+    "SX": 151,
+    "GP": 1,
+    "DC": 0,
+    "RA": 23
+  },
+  "SegColour0": {
+    "RGBWC": [
+      255,
+      0,
+      0,
+      0,
+      0
+    ],
+    "BrightnessRGB": 100
+  },
+  "SegColour1": {
+    "RGBWC": [
+      0,
+      255,
+      0,
+      0,
+      0
+    ],
+    "BrightnessRGB": 100
+  },
+  "BrightnessRGB": 100
+}

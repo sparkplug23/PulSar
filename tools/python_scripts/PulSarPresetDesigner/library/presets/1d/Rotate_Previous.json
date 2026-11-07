@@ -1,0 +1,14 @@
+{
+  "n": "*Rotate Previous",
+  "Effects": {
+    "FX": "Rotate Previous",
+    "IX": 1,
+    "SX": 10,
+    "GP": 1,
+    "DC": 0,
+    "Custom1": 0,
+    "Check2": 1,
+    "RA": 20
+  },
+  "BrightnessRGB": 100
+}

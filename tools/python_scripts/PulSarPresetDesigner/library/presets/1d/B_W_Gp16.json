@@ -1,0 +1,13 @@
+{
+  "n": "B&W,Gp16",
+  "Pal": "Blue and White",
+  "Effects": {
+    "FX": "Static",
+    "IX": 20,
+    "SX": 255,
+    "GroupingPerc": 16,
+    "DC": 0,
+    "RA": 20
+  },
+  "BrightnessRGB": 100
+}

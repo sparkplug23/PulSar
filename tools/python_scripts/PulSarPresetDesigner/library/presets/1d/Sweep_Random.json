@@ -1,0 +1,13 @@
+{
+  "n": "Sweep Random",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Sweep Random",
+    "SX": 80,
+    "IX": 50,
+    "GP": 1,
+    "DC": 0,
+    "RA": 25
+  },
+  "BrightnessRGB": 100
+}

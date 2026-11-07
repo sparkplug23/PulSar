@@ -1,0 +1,45 @@
+{
+  "playlist": {
+    "ps": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      55,
+      7,
+      40,
+      10
+    ],
+    "dur": [
+      100,
+      100,
+      200,
+      100,
+      50,
+      200,
+      100,
+      200,
+      200,
+      200
+    ],
+    "repeat": 0,
+    "end": 0,
+    "r": 1,
+    "psn": [
+      "3Jan26a Static Snowy02",
+      "FastPops Snowy02",
+      "Steps 2ColG1",
+      "*Steps 2ColG150",
+      "*Static ColG150",
+      "*Rotate Previous",
+      "Rot Prev Fast",
+      "Spanned Random Gradient",
+      "Twinkle W/Snow",
+      "*Twinkle Colours"
+    ]
+  },
+  "on": true,
+  "n": "N1 Init Test"
+}

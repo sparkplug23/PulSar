@@ -1,0 +1,20 @@
+{
+  "n": "Rainbow Runner",
+  "SegColour0": {
+    "RGBWC": [
+      20,
+      20,
+      20,
+      0,
+      0
+    ]
+  },
+  "Effects": {
+    "FX": "Rainbow Runner",
+    "IX": 133,
+    "SX": 11,
+    "GP": 1,
+    "RA": 40
+  },
+  "BrightnessRGB": 100
+}

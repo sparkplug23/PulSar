@@ -1,0 +1,14 @@
+{
+  "n": "*Twinkle Colours",
+  "Pal": "Snowy 02",
+  "Pal2": "Cold White",
+  "Effects": {
+    "FX": "Twinkle Colours",
+    "IX": 255,
+    "SX": 255,
+    "GP": 1,
+    "DC": 50,
+    "RA": 20
+  },
+  "BrightnessRGB": 100
+}

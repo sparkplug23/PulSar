@@ -1,0 +1,16 @@
+{
+  "n": "*Meteor Orange&Teal",
+  "Pal": "Orange & Teal",
+  "Effects": {
+    "FX": "Meteor",
+    "IX": 50,
+    "SX": 255,
+    "GP": 1,
+    "Check1": 1,
+    "Check2": 1,
+    "Check3": 1,
+    "DC": 0,
+    "RA": 25
+  },
+  "BrightnessRGB": 100
+}

@@ -1,0 +1,15 @@
+{
+  "n": "Spanned Random Gradient",
+  "Pal": "Hue Cyclone",
+  "Effects": {
+    "FX": "Gradient",
+    "PalIX": 10,
+    "IX": 255,
+    "SX": 1,
+    "GP": 1,
+    "Custom1": 255,
+    "DC": 0,
+    "RA": 2000
+  },
+  "BrightnessRGB": 100
+}

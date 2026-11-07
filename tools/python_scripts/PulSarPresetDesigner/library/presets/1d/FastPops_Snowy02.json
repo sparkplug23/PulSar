@@ -1,0 +1,13 @@
+{
+  "n": "FastPops Snowy02",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Firefly",
+    "IX": 20,
+    "SX": 255,
+    "GP": 1,
+    "DC": 7,
+    "RA": 50
+  },
+  "BrightnessRGB": 100
+}

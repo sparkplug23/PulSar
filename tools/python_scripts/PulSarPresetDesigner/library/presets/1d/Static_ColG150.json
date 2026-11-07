@@ -1,0 +1,13 @@
+{
+  "n": "*Static ColG150",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Static",
+    "IX": 20,
+    "SX": 200,
+    "GP": 150,
+    "DC": 0,
+    "RA": 4000
+  },
+  "BrightnessRGB": 100
+}

@@ -1,0 +1,19 @@
+{
+  "playlist": {
+    "psn": [
+      "*FastPops Snowy02",
+      "*Steps 2ColG1",
+      "*Steps 2ColG150"
+    ],
+    "dur": [
+      100,
+      100,
+      200
+    ],
+    "repeat": 0,
+    "end": 0,
+    "r": 1
+  },
+  "on": true,
+  "n": "2025 Test 201"
+}

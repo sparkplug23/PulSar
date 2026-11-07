@@ -1,0 +1,14 @@
+{
+  "n": "Soft Warm White 60%",
+  "Pal": "Warm White",
+  "Effects": {
+    "FX": "Static",
+    "IX": 127,
+    "SX": 255,
+    "GP": 1,
+    "DC": 0,
+    "Reverse": 0,
+    "RA": 4000
+  },
+  "BrightnessRGB": 60
+}

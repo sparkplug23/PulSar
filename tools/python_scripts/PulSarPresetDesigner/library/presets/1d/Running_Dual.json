@@ -1,0 +1,23 @@
+{
+  "n": "Running Dual",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Running Dual",
+    "IX": 255,
+    "SX": 64,
+    "GP": 1,
+    "DC": 0,
+    "RA": 23
+  },
+  "SegColour1": {
+    "RGBWC": [
+      53,
+      49,
+      53,
+      0,
+      0
+    ],
+    "BrightnessRGB": 20
+  },
+  "BrightnessRGB": 100
+}

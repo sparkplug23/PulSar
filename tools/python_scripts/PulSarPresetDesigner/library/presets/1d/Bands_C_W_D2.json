@@ -1,0 +1,13 @@
+{
+  "n": "Bands C&W D2",
+  "Pal": "Colour and White Stripe",
+  "Effects": {
+    "FX": "Bands",
+    "IX": 1,
+    "SX": 127,
+    "GP": 1,
+    "DC": 0,
+    "RA": 2000
+  },
+  "BrightnessRGB": 100
+}

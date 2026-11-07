@@ -1,0 +1,13 @@
+{
+  "n": "RotatePrev 1pix TEST",
+  "Effects": {
+    "FX": "Rotate Previous",
+    "IX": 1,
+    "SX": 255,
+    "GP": 1,
+    "Custom1": 0,
+    "DC": 0,
+    "RA": 30
+  },
+  "BrightnessRGB": 100
+}

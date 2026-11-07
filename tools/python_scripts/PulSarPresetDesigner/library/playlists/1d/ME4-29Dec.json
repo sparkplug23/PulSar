@@ -1,0 +1,63 @@
+{
+  "playlist": {
+    "ps": [
+      153,
+      163,
+      4,
+      5,
+      112,
+      83,
+      7,
+      152,
+      68,
+      151,
+      46,
+      111,
+      112,
+      2,
+      110,
+      112
+    ],
+    "dur": [
+      100,
+      200,
+      200,
+      200,
+      200,
+      100,
+      300,
+      300,
+      300,
+      200,
+      500,
+      100,
+      300,
+      100,
+      100,
+      100
+    ],
+    "repeat": 0,
+    "end": 0,
+    "r": 1,
+    "psn": [
+      "Static Override",
+      "Steps 2ColG1b",
+      "*Steps 2ColG150",
+      "*Static ColG150",
+      "RotatePrev 1pix",
+      "Rot Prev Fast",
+      "Spanned Random Gradient",
+      "*Twinkle Colours",
+      "Rainbow Runner",
+      "Saw C/W",
+      "Twinkle W/cycleBL",
+      "Palettes InterLit RetroClown/dW",
+      "RotatePrev 1pix",
+      "FastPops Snowy02",
+      "Bands C&W D2",
+      "RotatePrev 1pix"
+    ]
+  },
+  "on": true,
+  "n": "ME4-29Dec"
+}

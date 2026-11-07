@@ -1,0 +1,13 @@
+{
+  "n": "Twinkle FastIn/SlowOut",
+  "Pal": "Party 16",
+  "Effects": {
+    "FX": "Twinkle FastIn/SlowOut",
+    "IX": 255,
+    "SX": 213,
+    "GP": 1,
+    "DC": 5,
+    "RA": 23
+  },
+  "BrightnessRGB": 100
+}

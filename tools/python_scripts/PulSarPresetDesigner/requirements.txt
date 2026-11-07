@@ -1,0 +1,5 @@
+# tkinter is included in a normal Windows Python installation.
+# Required for _pulsar._tcp.local. mDNS discovery; manual IP works without it.
+zeroconf>=0.130
+# Optional: full JavaScript-enabled device WebUI in a separate window.
+# pywebview>=5

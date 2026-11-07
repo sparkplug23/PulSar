@@ -4,6 +4,67 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
+
+/*******************************************************************************************************************************************************************************************************************
+ * COLORADO 2026 — NOVEMBER CHRISTMAS LIGHTING DEVELOPMENT PLAN
+ *
+ * Goal: Develop and validate all Christmas 2026 presets/playlists during November,
+ * using test hardware, ready for deployment on the full installations in December.
+ *
+ * TODO:
+ * 1. OUTSIDE TREES: Run three ESP32 controllers with 100 LEDs each, testing presets
+ *    intended for the full 2000–4000 LED installations. Maintain one presets.json
+ *    for both TEST1 and DEPLOYED configurations.
+ *
+ * 2. PRESET MIGRATION: Review 2025 presets individually and update for the new
+ *    effects, blending and transition architecture. Replace absolute grouping
+ *    with GPB (GroupingBands) or GPP (GroupingPerc) where appropriate.
+ *
+ * 3. PLAYLIST NAME REFERENCES: Make playlist.psn[] the authoritative list of
+ *    preset names, with playlist.ps[] generated as cached numeric IDs.
+ *    Runtime playlist loading must prefer ps[] and retain entries in RAM.
+ *
+ * 4. MANUAL REINDEX: Improve the existing PSN-to-PS scanner with duplicate/missing
+ *    name validation, safe file updates and a manual "Reindex Playlists" button
+ *    in /lights/playlist_viewer. Avoid expensive automatic rescanning.
+ *
+ * 5. PYTHON PRESET LIBRARY: Develop a reusable collection of named presets and a
+ *    Python generator to assemble device-specific presets.json files, assign IDs,
+ *    resolve playlist names and validate references before deployment.
+ *
+ * 6. 2D ICICLES: Use one HUB75 panel configured as 120x10 (120 vertical drops of
+ *    10 LEDs) to develop and test icicle effects and playlists for the physical
+ *    house installation.
+ *
+ * 7. 2D HUB75: Use the second HUB75 panel to independently develop and test
+ *    general 2D effects, presets and playlists.
+ *
+ * 8. NOVEMBER SOAK TESTING: Run independent playlists across all three device
+ *    categories, monitoring crashes, MQTT responsiveness, effect performance,
+ *    transitions and visual consistency.
+ *
+ * 9. DECEMBER DEPLOYMENT: Switch outside-tree firmware from TEST1 to DEPLOYED,
+ *    retaining the validated preset files. Deploy physical icicles and finalize
+ *    the production playlists.
+ *
+ * Preset directories:
+ *   notes/PresetJsonFiles/November2026/xmas26_outside_trees/
+ *   notes/PresetJsonFiles/November2026/2d_icicles/
+ *   notes/PresetJsonFiles/November2026/2d_hub75/
+ * 
+ * right, so the "python library of presets/playlists to let me create presets.json file" will be a long term goal. I think a nice python script which actually creates a GUI (like I did for spectra) to design the playlists from the preset list read from the library, then have it able to create presets and playlists, to update the library, and to write out as /folder/presets.json where folder is the datetime so we easily have new presets made, later we can also target a device IP to upload the file directly, equally, load/read the presets.json from a esp32 into the gui over the IP?
+This will be a nice way to centrally generate, and perhaps a nicer way to sidestep the long psn to ps on device creation. 
+
+
+
+
+
+while the thought is in my head, can you also use the node discovery we did on the esp32, to find any esp32 with pulsar on it? and hence, have a tab on the gui which lets me find devices, and download (load into the UI), download their presets.json, upload new etc
+
+
+*******************************************************************************************************************************************************************************************************************/
+
+
 /***
  * Devices:
  * hollow1 -> xmas1  [100 leds as start of xmas whitehall]
@@ -1066,7 +1127,7 @@
     #define DEVICENAME_DESCRIPTION_CTR "Colorado Halloween;Optional SoftAP"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "Colorado"
-  
+
 // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
   // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
 

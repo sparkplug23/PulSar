@@ -1,0 +1,21 @@
+{
+  "playlist": {
+    "ps": [
+      222,
+      224
+    ],
+    "dur": [
+      50,
+      50
+    ],
+    "repeat": 0,
+    "end": 0,
+    "r": 1,
+    "psn": [
+      "Rainbow Gradient",
+      "RotatePrev 40IX TEST"
+    ]
+  },
+  "on": true,
+  "n": "TBRotate NoGrp"
+}

@@ -1,0 +1,13 @@
+{
+  "n": "Juggle Snowy 02",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Juggle",
+    "RA": 0,
+    "SX": 255,
+    "IX": 49,
+    "DC": 5,
+    "GP": 1
+  },
+  "BrightnessRGB": 100
+}

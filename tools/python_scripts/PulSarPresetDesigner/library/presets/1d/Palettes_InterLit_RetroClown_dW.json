@@ -1,0 +1,16 @@
+{
+  "n": "Palettes InterLit RetroClown/dW",
+  "Pal": "Retro Clown",
+  "Effects": {
+    "FX": "Palettes InterLit",
+    "IX": 44,
+    "SX": 20,
+    "Custom1": 255,
+    "Custom2": 3,
+    "Check1": 1,
+    "GP": 1,
+    "DC": 0,
+    "RA": 5000
+  },
+  "BrightnessRGB": 100
+}

@@ -1,0 +1,16 @@
+{
+  "n": "Twinkle W/Snow",
+  "Pal": "Snowy 02",
+  "Pal2": "Cold White",
+  "Effects": {
+    "FX": "Flicker Palettes",
+    "IX": 1,
+    "SX": 0,
+    "GP": 1,
+    "DC": 10,
+    "Custom1": 255,
+    "Custom2": 200,
+    "RA": 20
+  },
+  "BrightnessRGB": 100
+}

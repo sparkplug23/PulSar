@@ -1,0 +1,13 @@
+{
+  "n": "*Candles Snowy 02",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Candles",
+    "IX": 255,
+    "SX": 255,
+    "GP": 1,
+    "DC": 6,
+    "RA": 0
+  },
+  "BrightnessRGB": 100
+}

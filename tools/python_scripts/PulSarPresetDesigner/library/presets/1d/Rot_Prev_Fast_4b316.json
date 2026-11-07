@@ -1,0 +1,13 @@
+{
+  "n": "Rot Prev Fast",
+  "Pal": "Snowy 02",
+  "Effects": {
+    "FX": "Rotate Previous",
+    "IX": 2,
+    "SX": 255,
+    "GP": 1,
+    "DC": 0,
+    "RA": 20
+  },
+  "BrightnessRGB": 100
+}
