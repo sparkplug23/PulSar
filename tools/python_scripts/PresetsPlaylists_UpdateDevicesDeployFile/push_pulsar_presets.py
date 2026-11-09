@@ -28,9 +28,8 @@ dest_devices = [
     ]
 filesystem_path = "/presets.json"
 
-backup_directory = r"notes\PresetJsonFiles\backups\"
+backup_directory = Path(__file__).resolve().parent / "preset_upload_backups"
 
-backup_directory = Path("preset_upload_backups")
 http_timeout_seconds = 15
 # Set to False to ask before overwriting each device.
 auto_confirm = False
