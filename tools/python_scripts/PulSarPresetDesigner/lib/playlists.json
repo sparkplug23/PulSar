@@ -1,0 +1,490 @@
+[
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours"
+      ]
+    },
+    "on": true,
+    "n": "2025 N1 Test"
+  },
+  {
+    "playlist": {
+      "psn": [
+        "*FastPops Snowy02",
+        "*Steps 2ColG1",
+        "*Steps 2ColG150"
+      ],
+      "dur": [
+        100,
+        100,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "2025 Test 201"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        50,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "3Jan26a Static Snowy02",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours"
+      ]
+    },
+    "on": true,
+    "n": "2025 Whitehall N1"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        400,
+        400,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours",
+        "Twinkle W/Blue",
+        "Twinkle W/Green"
+      ]
+    },
+    "on": true,
+    "n": "25WhiteN2"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "Static Override",
+        "Steps 2ColG1b",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "RotatePrev 1pix",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "*Twinkle Colours",
+        "Rainbow Runner",
+        "Saw C/W",
+        "Twinkle W/Blue",
+        "Twinkle W/Green",
+        "Twinkle W/DOrange",
+        "Twinkle W/Red",
+        "Palettes InterLit RetroClown/dW",
+        "RotatePrev 1pix",
+        "FastPops Snowy02",
+        "Bands C&W D2",
+        "RotatePrev 1pix"
+      ]
+    },
+    "on": true,
+    "n": "ME3"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        500,
+        100,
+        300,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "Static Override",
+        "Steps 2ColG1b",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "RotatePrev 1pix",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "*Twinkle Colours",
+        "Rainbow Runner",
+        "Saw C/W",
+        "Twinkle W/cycleBL",
+        "Palettes InterLit RetroClown/dW",
+        "RotatePrev 1pix",
+        "FastPops Snowy02",
+        "Bands C&W D2",
+        "RotatePrev 1pix"
+      ]
+    },
+    "on": true,
+    "n": "ME4-29Dec"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "FastPops Snowy02",
+        "3Jan26a Static Snowy02",
+        "Steps 2ColG1b",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "RotatePrev 1pix",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "*Twinkle Colours",
+        "Rainbow Runner",
+        "Saw C/W",
+        "Twinkle W/Blue",
+        "Twinkle W/Green",
+        "Twinkle W/DOrange",
+        "Twinkle W/Red",
+        "Bands C&W D2",
+        "RotatePrev 1pix",
+        "Palettes InterLit RetroClown/dW",
+        "RotatePrev 1pix"
+      ]
+    },
+    "on": true,
+    "n": "ME BoxingDay N2"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        200,
+        100,
+        200,
+        80,
+        200,
+        400
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "FastPops Snowy02",
+        "3Jan26a Static Snowy02",
+        "Steps 2ColG1b",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "RotatePrev 1pix",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "*Twinkle Colours"
+      ]
+    },
+    "on": true,
+    "n": "MeFront N1"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours"
+      ]
+    },
+    "on": true,
+    "n": "N1 Init Test"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours",
+        "Twinkle W/Blue",
+        "Twinkle W/Green"
+      ]
+    },
+    "on": true,
+    "n": "N2 Night"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        100,
+        400,
+        400,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "3Jan26a Static Snowy02",
+        "FastPops Snowy02",
+        "Steps 2ColG1",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "*Rotate Previous",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "Twinkle W/Snow",
+        "*Twinkle Colours",
+        "Twinkle W/Blue",
+        "Twinkle W/Green"
+      ]
+    },
+    "on": true,
+    "n": "N3 Night"
+  },
+  {
+    "playlist": {
+      "dur": [
+        50,
+        50
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "*Static ColG150",
+        "RotatePrev 1pix TEST"
+      ]
+    },
+    "on": true,
+    "n": "TBRotate Grp150"
+  },
+  {
+    "playlist": {
+      "dur": [
+        50,
+        50
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "Rainbow Gradient",
+        "RotatePrev 40IX TEST"
+      ]
+    },
+    "on": true,
+    "n": "TBRotate NoGrp"
+  },
+  {
+    "playlist": {
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        500,
+        100,
+        300,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1,
+      "psn": [
+        "Static Override",
+        "Steps 2ColG1b",
+        "*Steps 2ColG150",
+        "*Static ColG150",
+        "RotatePrev 1pix",
+        "Rot Prev Fast",
+        "Spanned Random Gradient",
+        "*Twinkle Colours",
+        "Rainbow Runner",
+        "Saw C/W",
+        "Twinkle W/cycleBL",
+        "Palettes InterLit RetroClown/dW",
+        "RotatePrev 1pix",
+        "FastPops Snowy02",
+        "Bands C&W D2",
+        "RotatePrev 1pix"
+      ]
+    },
+    "on": true,
+    "n": "WH4-29Dec"
+  }
+]

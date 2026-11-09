@@ -22,9 +22,11 @@ from effect_catalog import fetch_device_effects, find_effects_cpp, read_source_e
 from palette_catalog import find_palette_sources, read_source_palettes, fetch_device_palettes, palette_names_from_library
 
 BASE = pathlib.Path(__file__).resolve().parent
-LIBRARY = BASE / 'library'
+LIBRARY = BASE / 'lib'
+LEGACY_LIBRARY = BASE / 'library'
 EXPORTS = BASE / 'exports'
-CATEGORIES = ('1d', '2d', 'audio_reactive')
+WORKSPACE_FILE = BASE / 'workspace' / 'working_set.json'
+CATEGORIES = ('1d', '2d')
 SERVICE = '_pulsar._tcp.local.'
 MAX_PRESET_ID = 250  # compatible with current firmware's 1..250 preset-name scanner
 
@@ -67,60 +69,139 @@ def new_entry(name, kind):
 
 
 class Catalog:
+    """Exactly three source-of-truth JSON arrays. No device preset IDs in the library."""
     def __init__(self):
         self.entries = {}
-        self.id_store = LIBRARY / '_imported_ids.json'
-        try:
-            self.original_ids = read_json(self.id_store)
-        except (FileNotFoundError, ValueError, json.JSONDecodeError):
-            self.original_ids = {}
+        LIBRARY.mkdir(parents=True, exist_ok=True)
+        self.migrate_legacy_if_needed()
         self.refresh()
+        self.archive_obsolete_library_files()
+
+    @staticmethod
+    def storage_file(kind, category=None):
+        if kind == 'playlist':
+            return LIBRARY / 'playlists.json'
+        if kind == 'preset' and category in ('1d', '2d'):
+            return LIBRARY / f'presets_{category}.json'
+        raise ValueError('Presets must belong to 1d or 2d; all playlists belong to playlists.json')
+
+    @staticmethod
+    def key_for(kind, category, index):
+        return f'{kind}/{category}/{index}'
+
+    def migrate_legacy_if_needed(self):
+        """Import older arrays or old individual JSON resources only when the new file is absent."""
+        sources = (
+            ('preset', '1d', ('presets_1d.json',)),
+            ('preset', '2d', ('presets_2d.json', 'presets_audio_reactive.json')),
+            ('playlist', 'shared', ('playlists_1d.json', 'playlists_2d.json', 'playlists_audio_reactive.json')),
+        )
+        for kind, category, filenames in sources:
+            target = self.storage_file(kind, category)
+            if target.exists():
+                continue
+            records = []
+            source_files_found = False
+            for filename in filenames:
+                previous = LIBRARY / filename
+                if previous.is_file():
+                    source_files_found = True
+                    docs = read_json(previous)
+                    if not isinstance(docs, list):
+                        raise ValueError(f'Expected JSON array in {previous}')
+                    for doc in docs:
+                        if not isinstance(doc, dict) or not isinstance(doc.get('n'), str) or entry_type(doc) != kind:
+                            raise ValueError(f'Invalid record in {previous}')
+                        if kind == 'playlist':
+                            doc = copy.deepcopy(doc)
+                            doc['playlist'].pop('ps', None)
+                        records.append(doc)
+            if not source_files_found:
+                legacy_categories = ('1d', '2d', 'audio_reactive') if kind == 'playlist' else (('1d',) if category == '1d' else ('2d', 'audio_reactive'))
+                for old_category in legacy_categories:
+                    folder = LEGACY_LIBRARY / ('presets' if kind == 'preset' else 'playlists') / old_category
+                    if not folder.is_dir():
+                        continue
+                    for source in sorted(folder.glob('*.json')):
+                        doc = read_json(source)
+                        if isinstance(doc, dict) and isinstance(doc.get('n'), str) and entry_type(doc) == kind:
+                            if kind == 'playlist':
+                                doc = copy.deepcopy(doc)
+                                doc['playlist'].pop('ps', None)
+                            records.append(doc)
+            write_json(target, records)
+
+    def archive_obsolete_library_files(self):
+        """Keep only the three current JSON arrays inside lib/, saving obsolete arrays elsewhere."""
+        retired = ('presets_audio_reactive.json', 'playlists_1d.json', 'playlists_2d.json', 'playlists_audio_reactive.json', '_imported_ids.json')
+        paths = [LIBRARY / name for name in retired if (LIBRARY / name).exists()]
+        if not paths:
+            return
+        archive_root = LIBRARY.parent / 'migration_backups'
+        archive = archive_root / dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        archive.mkdir(parents=True, exist_ok=True)
+        for path in paths:
+            destination = archive / path.name
+            if destination.exists():
+                destination = archive / f'{path.stem}_{item_id()[:6]}{path.suffix}'
+            os.replace(path, destination)
 
     def refresh(self):
         self.entries = {}
-        for kind in ('preset', 'playlist'):
-            for cat in CATEGORIES:
-                folder = LIBRARY / ('presets' if kind == 'preset' else 'playlists') / cat
-                folder.mkdir(parents=True, exist_ok=True)
-                for path in sorted(folder.glob('*.json')):
-                    try:
-                        doc = read_json(path)
-                        if not isinstance(doc, dict) or not isinstance(doc.get('n'), str):
-                            continue
-                        key = f'{kind}/{cat}/{path.stem}'
-                        self.entries[key] = {'kind': kind, 'category': cat, 'data': doc, 'path': path, 'source_id': self.original_ids.get(key)}
-                    except Exception as exc:
-                        print(f'Skipping invalid library file {path}: {exc}')
+        for kind, category in (('preset', '1d'), ('preset', '2d'), ('playlist', 'shared')):
+            path = self.storage_file(kind, category)
+            if not path.exists():
+                write_json(path, [])
+            documents = read_json(path)
+            if not isinstance(documents, list):
+                raise ValueError(f'{path} must contain a JSON array')
+            for index, doc in enumerate(documents):
+                if not isinstance(doc, dict) or not isinstance(doc.get('n'), str) or entry_type(doc) != kind:
+                    raise ValueError(f'Invalid {kind} at {path}, entry {index}')
+                key = self.key_for(kind, category, index)
+                self.entries[key] = {'kind': kind, 'category': category, 'data': doc, 'path': path, 'index': index}
+
+    def save_group(self, kind, category):
+        records = [rec for rec in self.entries.values() if rec['kind'] == kind and rec['category'] == category]
+        records.sort(key=lambda rec: rec['index'])
+        if kind == 'playlist':
+            for rec in records:
+                rec['data'].get('playlist', {}).pop('ps', None)
+        if [rec['index'] for rec in records] != list(range(len(records))):
+            raise ValueError('Library array indices inconsistent; reload before saving')
+        write_json(self.storage_file(kind, category), [rec['data'] for rec in records])
 
     def save(self, key):
-        write_json(self.entries[key]['path'], self.entries[key]['data'])
+        rec = self.entries[key]
+        self.save_group(rec['kind'], rec['category'])
 
     def create(self, kind, category, name, data=None):
-        if category not in CATEGORIES:
-            raise ValueError(f'Unknown category {category}')
+        if kind == 'playlist':
+            category = 'shared'
+        elif category not in ('1d', '2d'):
+            raise ValueError('Choose 1d or 2d for a preset')
         if not name.strip():
             raise ValueError('Name must not be empty')
-        folder = LIBRARY / ('presets' if kind == 'preset' else 'playlists') / category
-        folder.mkdir(parents=True, exist_ok=True)
-        stem = file_key(name)
-        path = folder / f'{stem}.json'
-        while path.exists():
-            path = folder / f'{stem}_{item_id()[:5]}.json'
         doc = copy.deepcopy(data if data is not None else new_entry(name, kind))
         doc['n'] = name
-        key = f'{kind}/{category}/{path.stem}'
-        self.entries[key] = {'kind': kind, 'category': category, 'data': doc, 'path': path, 'source_id': None}
+        if kind == 'playlist' and isinstance(doc.get('playlist'), dict):
+            doc['playlist'].pop('ps', None)  # Device-only generated IDs, never library content
+        index = sum(rec['kind'] == kind and rec['category'] == category for rec in self.entries.values())
+        key = self.key_for(kind, category, index)
+        self.entries[key] = {'kind': kind, 'category': category, 'data': doc, 'path': self.storage_file(kind, category), 'index': index}
         self.save(key)
         return key
 
-    def save_original_ids(self):
-        write_json(self.id_store, self.original_ids)
-
     def delete(self, key):
-        self.entries[key]['path'].unlink()
-        del self.entries[key]
-        self.original_ids.pop(key, None)
-        self.save_original_ids()
+        rec = self.entries[key]
+        kind, category = rec['kind'], rec['category']
+        remaining = [r for k, r in self.entries.items() if k != key and r['kind'] == kind and r['category'] == category]
+        remaining.sort(key=lambda r: r['index'])
+        if kind == 'playlist':
+            for record in remaining:
+                record['data'].get('playlist', {}).pop('ps', None)
+        write_json(self.storage_file(kind, category), [r['data'] for r in remaining])
+        self.refresh()
 
     def names(self, kind, category=None):
         return [(key, rec['data'].get('n', key)) for key, rec in self.entries.items() if rec['kind'] == kind and (category is None or rec['category'] == category)]
@@ -128,33 +209,32 @@ class Catalog:
     def import_file(self, path, category, replace=False):
         obj = read_json(path)
         if not isinstance(obj, dict):
-            raise ValueError('Expected presets.json with an object keyed by numeric preset IDs')
+            raise ValueError('Expected device presets.json with numeric preset ID keys')
+        if category not in ('1d', '2d'):
+            raise ValueError('Choose 1d or 2d for imported presets')
         imported, skipped = 0, 0
         id_to_name = {str(k): str(v.get('n')) for k, v in obj.items() if isinstance(v, dict) and v.get('n') and 'playlist' not in v}
-        for old_id, data in sorted(obj.items(), key=lambda pair: int(pair[0]) if pair[0].isdigit() else -1):
-            if not isinstance(data, dict) or not data.get('n'):
+        for old_id, source in sorted(obj.items(), key=lambda pair: int(pair[0]) if str(pair[0]).isdigit() else -1):
+            if not isinstance(source, dict) or not source.get('n'):
                 skipped += 1
                 continue
-            data = copy.deepcopy(data)
+            data = copy.deepcopy(source)
             kind = entry_type(data)
             if kind == 'playlist':
                 pl = data['playlist']
                 if not pl.get('psn') and isinstance(pl.get('ps'), list):
-                    # Convert numeric-only historical playlists to editable names.
                     pl['psn'] = [id_to_name.get(str(v), f'UNRESOLVED_PRESET_{v}') for v in pl['ps']]
+                pl.pop('ps', None)
             name = str(data['n'])
-            matches = [(key, rec) for key, rec in self.entries.items() if rec['category'] == category and rec['kind'] == kind and rec['data'].get('n') == name]
+            dest_category = 'shared' if kind == 'playlist' else category
+            matches = [(key, rec) for key, rec in self.entries.items() if rec['category'] == dest_category and rec['kind'] == kind and rec['data'].get('n') == name]
             if matches and replace:
                 key, rec = matches[0]
-                rec['data'] = copy.deepcopy(data)
-                rec['source_id'] = int(old_id) if old_id.isdigit() else None
+                rec['data'] = data
                 self.save(key)
             else:
-                key = self.create(kind, category, name, data)
-                self.entries[key]['source_id'] = int(old_id) if old_id.isdigit() else None
-            self.original_ids[key] = int(old_id) if old_id.isdigit() else None
+                self.create(kind, dest_category, name, data)
             imported += 1
-        self.save_original_ids()
         return imported, skipped
 
 
@@ -177,21 +257,8 @@ def compile_export(catalog, category, preset_keys, playlist_keys):
         names[folded] = k
     if len(selected) > MAX_PRESET_ID:
         raise ValueError(f'At most {MAX_PRESET_ID} entries supported by current firmware')
-    # Preserve IDs when they were imported from a device, if possible. Fill other IDs sequentially.
-    keys_to_ids = {}
-    used = set()
-    for k in selected:
-        old = catalog.entries[k].get('source_id')
-        if isinstance(old, int) and 1 <= old <= MAX_PRESET_ID and old not in used:
-            keys_to_ids[k] = old
-            used.add(old)
-    next_id = 1
-    for k in selected:
-        if k not in keys_to_ids:
-            while next_id in used:
-                next_id += 1
-            keys_to_ids[k] = next_id
-            used.add(next_id)
+    # Numeric preset IDs exist ONLY in generated device presets.json, never the library.
+    keys_to_ids = {key: index for index, key in enumerate(selected, start=1)}
     out = {'0': {}}
     for k in selected:
         rec = catalog.entries[k]
@@ -218,6 +285,56 @@ def compile_export(catalog, category, preset_keys, playlist_keys):
         out[str(keys_to_ids[k])] = val
     out = dict(sorted(out.items(), key=lambda kv: int(kv[0])))
     return out, keys_to_ids
+
+
+class BuildWorkspace:
+    """Independent editable working set. Never writes to the master lib/ arrays."""
+    def __init__(self, path=WORKSPACE_FILE):
+        self.path = pathlib.Path(path)
+        self.entries = {}
+        self.load()
+
+    def load(self):
+        self.entries = {}
+        if not self.path.is_file():
+            return
+        raw = read_json(self.path)
+        if not isinstance(raw, list):
+            raise ValueError('Build workspace must be a JSON array')
+        for item in raw:
+            if not isinstance(item, dict) or not isinstance(item.get('data'), dict):
+                raise ValueError('Invalid workspace entry')
+            data = item['data']
+            kind = entry_type(data)
+            category = item.get('category', 'shared' if kind == 'playlist' else '1d')
+            key = item.get('key') or item_id()
+            if key in self.entries:
+                raise ValueError('Duplicate workspace entry key')
+            if kind == 'playlist':
+                data.get('playlist', {}).pop('ps', None)
+            self.entries[key] = {'kind': kind, 'category': category, 'data': data, 'origin': item.get('origin', '')}
+
+    def save(self):
+        write_json(self.path, [{'key':k, 'category':r['category'], 'origin':r.get('origin', ''), 'data':r['data']} for k,r in self.entries.items()])
+
+    def add(self, data, category, origin=''):
+        document = copy.deepcopy(data)
+        kind = entry_type(document)
+        if kind == 'playlist':
+            document['playlist'].pop('ps', None)
+            category = 'shared'
+        elif category not in ('1d', '2d'):
+            raise ValueError('Choose 1d or 2d for an effect preset')
+        key = item_id()
+        while key in self.entries:
+            key = item_id()
+        self.entries[key] = {'kind':kind, 'category':category, 'data':document, 'origin':origin}
+        self.save()
+        return key
+
+    def delete(self, key):
+        del self.entries[key]
+        self.save()
 
 
 def http_get_presets_bytes(ip, port=80, timeout=8):
@@ -257,6 +374,8 @@ class App(tk.Tk):
         self.geometry('1470x870')
         self.minsize(1120, 670)
         self.catalog = Catalog()
+        self.workspace = BuildWorkspace()
+        self.draft_key = None
         self.category = tk.StringVar(value='1d')  # Storage destination only; never filters the GUI
         self.current_key = None
         self.selected_export = {}
@@ -273,6 +392,7 @@ class App(tk.Tk):
         self.effects_source_label = tk.StringVar(value='No source catalog loaded')
         self.make_ui()
         self.refresh_library()
+        self.refresh_workspace()
         self.after(125, self.poll_workers)
         self.after(350, self.load_local_palettes_if_available)
         self.after(450, self.load_local_effects_if_available)
@@ -286,7 +406,6 @@ class App(tk.Tk):
         title = ttk.Frame(root)
         title.pack(fill='x', pady=(0, 8))
         ttk.Label(title, text='PulSar Preset & Playlist Designer', font=('Segoe UI', 17, 'bold')).pack(side='left')
-        ttk.Label(title, text='Unified library  •  1D / 2D / Audio stored in separate files').pack(side='left', padx=(24, 8))
         ttk.Button(title, text='Build / export', command=lambda: self.tabs.select(self.export_tab)).pack(side='right', padx=4)
         ttk.Button(title, text='Open presets.json', command=self.import_local).pack(side='right', padx=4)
         networkbar = ttk.Frame(root)
@@ -303,6 +422,7 @@ class App(tk.Tk):
         self.tabs = ttk.Notebook(root)
         self.tabs.pack(fill='both', expand=True)
         self.make_library_tab()
+        self.make_workspace_tab()
         self.make_playlist_tab()
         self.make_export_tab()
         self.make_devices_tab()
@@ -314,112 +434,392 @@ class App(tk.Tk):
         ttk.Label(root, textvariable=self.status_var, anchor='w').pack(fill='x', pady=(7, 0))
 
     def make_library_tab(self):
-        tab = ttk.Frame(self.tabs, padding=6)
-        self.tabs.add(tab, text='Preset library / JSON')
-        paned = ttk.Panedwindow(tab, orient='horizontal')
-        paned.pack(fill='both', expand=True)
-        left = ttk.Frame(paned)
-        right = ttk.Frame(paned)
-        paned.add(left, weight=1)
-        paned.add(right, weight=3)
+        tab = ttk.Frame(self.tabs, padding=7)
+        self.tabs.add(tab, text='Preset library')
+        panes = ttk.Panedwindow(tab, orient='horizontal')
+        panes.pack(fill='both', expand=True)
+        left, middle, right = ttk.Frame(panes), ttk.Frame(panes), ttk.Frame(panes)
+        panes.add(left, weight=2)
+        panes.add(middle, weight=3)
+        panes.add(right, weight=3)
         toolbar = ttk.Frame(left)
         toolbar.pack(fill='x', pady=3)
-        ttk.Button(toolbar, text='New preset', command=lambda: self.create_item('preset')).pack(side='left', padx=2)
+        ttk.Button(toolbar, text='New', command=lambda: self.create_item('preset')).pack(side='left', padx=2)
         ttk.Button(toolbar, text='Duplicate', command=self.duplicate_item).pack(side='left', padx=2)
         ttk.Button(toolbar, text='Delete', command=self.delete_item).pack(side='left', padx=2)
-        filterbar = ttk.Frame(left)
-        filterbar.pack(fill='x', pady=(3, 2))
-        ttk.Checkbutton(filterbar, text='Show only effects on target device', variable=self.only_supported, command=self.refresh_compatibility_views).pack(side='left')
+        ttk.Button(left, text='Copy to Device Build  →', command=self.add_selected_library_to_build).pack(fill='x', pady=5)
         self.search_var = tk.StringVar()
-        search = ttk.Entry(left, textvariable=self.search_var)
-        search.pack(fill='x', pady=5)
-        search.insert(0, '')
         self.search_var.trace_add('write', lambda *_: self.refresh_library_list())
-        self.library_tree = ttk.Treeview(left, columns=('kind', 'category', 'name'), show='headings', selectmode='browse')
-        self.library_tree.heading('kind', text='Type')
-        self.library_tree.heading('category', text='Library file')
-        self.library_tree.heading('name', text='Name')
-        self.library_tree.column('kind', width=75, stretch=False)
-        self.library_tree.column('category', width=105, stretch=False)
-        self.library_tree.column('name', width=260)
+        ttk.Entry(left, textvariable=self.search_var).pack(fill='x', pady=4)
+        ttk.Checkbutton(left, text='Only effects on target ESP32', variable=self.only_supported, command=self.refresh_compatibility_views).pack(anchor='w', pady=3)
+        self.library_tree = ttk.Treeview(left, columns=('name',), show='headings', selectmode='browse')
+        self.library_tree.heading('name', text='Preset templates')
+        self.library_tree.column('name', width=270)
         self.library_tree.pack(fill='both', expand=True)
         self.library_tree.bind('<<TreeviewSelect>>', self.selected_library)
-        quick = ttk.Frame(right)
-        quick.pack(fill='x', pady=(0, 5))
-        ttk.Label(quick, text='Effect').pack(side='left', padx=(0, 3))
+        ttk.Label(middle, text='Edit library preset', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=(3, 5))
+        quick = ttk.Frame(middle)
+        quick.pack(fill='x', pady=(0, 6))
+        ttk.Label(quick, text='Effect').pack(side='left')
         self.fx_var = tk.StringVar()
-        self.fx_choice = ttk.Combobox(quick, textvariable=self.fx_var, width=25)
-        self.fx_choice.pack(side='left', padx=(0, 8))
-        ttk.Label(quick, text='Palette').pack(side='left', padx=(0, 3))
+        self.fx_choice = ttk.Combobox(quick, textvariable=self.fx_var, width=21)
+        self.fx_choice.pack(side='left', padx=3, fill='x', expand=True)
+        ttk.Label(quick, text='Palette').pack(side='left')
         self.palette_var = tk.StringVar()
-        self.palette_choice = ttk.Combobox(quick, textvariable=self.palette_var, width=23)
-        self.palette_choice.pack(side='left', padx=(0, 8))
-        ttk.Label(quick, text='Group').pack(side='left', padx=(0, 3))
+        self.palette_choice = ttk.Combobox(quick, textvariable=self.palette_var, width=19)
+        self.palette_choice.pack(side='left', padx=3, fill='x', expand=True)
+        grouping = ttk.Frame(middle)
+        grouping.pack(fill='x', pady=(0, 5))
+        ttk.Label(grouping, text='Grouping').pack(side='left')
         self.group_var = tk.StringVar(value='GP')
-        self.group_choice = ttk.Combobox(quick, textvariable=self.group_var, values=['GP', 'GPP', 'GPB'], width=5, state='readonly')
-        self.group_choice.pack(side='left')
+        self.group_choice = ttk.Combobox(grouping, textvariable=self.group_var, values=['GP','GPP','GPB'], width=5, state='readonly')
+        self.group_choice.pack(side='left', padx=4)
         self.group_value = tk.StringVar(value='1')
-        ttk.Entry(quick, textvariable=self.group_value, width=6).pack(side='left', padx=3)
-        ttk.Button(quick, text='Apply', command=self.apply_quick).pack(side='left', padx=3)
-        ttk.Button(quick, text='Test live on ESP32', command=self.test_current_live).pack(side='left', padx=7)
-        ttk.Label(right, text='Structured parameters (double-click any scalar to edit)').pack(anchor='w', pady=(0, 4))
-        self.parameter_tree = ttk.Treeview(right, columns=('value',), show='tree headings', selectmode='browse')
-        self.parameter_tree.heading('#0', text='JSON property')
+        ttk.Entry(grouping, textvariable=self.group_value, width=7).pack(side='left')
+        ttk.Button(grouping, text='Apply to library', command=self.apply_quick).pack(side='right', padx=3)
+        self.parameter_tree = ttk.Treeview(middle, columns=('value',), show='tree headings', selectmode='browse')
+        self.parameter_tree.heading('#0', text='Property (double-click to edit)')
         self.parameter_tree.heading('value', text='Value')
-        self.parameter_tree.column('#0', width=240)
-        self.parameter_tree.column('value', width=300)
+        self.parameter_tree.column('#0', width=185)
+        self.parameter_tree.column('value', width=180)
         self.parameter_tree.pack(fill='both', expand=True)
         self.parameter_tree.bind('<Double-1>', self.change_param)
+        ttk.Label(right, text='Library JSON — exact preset body', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=(3, 5))
         bar = ttk.Frame(right)
-        bar.pack(fill='x', pady=(4, 3))
-        ttk.Label(bar, text='JSON entry body (paste this directly after "1": in presets.json)').pack(side='left')
+        bar.pack(fill='x', pady=(0, 5))
         ttk.Button(bar, text='Copy JSON', command=self.copy_json).pack(side='right', padx=3)
-        ttk.Button(bar, text='Apply JSON / Save', command=self.apply_json).pack(side='right', padx=3)
-        self.raw_text = tk.Text(right, height=14, font=('Consolas', 10), wrap='none', undo=True)
+        ttk.Button(bar, text='Save to library', command=self.apply_json).pack(side='right', padx=3)
+        self.raw_text = tk.Text(right, font=('Consolas', 10), wrap='none', undo=True)
         self.raw_text.pack(fill='both', expand=True)
-        ttk.Label(right, text='Edits in the structured tree refresh this JSON. After pasting, click Apply JSON / Save. Playlist JSON can be edited here too.').pack(anchor='w')
+        ttk.Label(right, text='Changes here update the master library only when saved.').pack(anchor='w', pady=5)
+
+    def make_workspace_tab(self):
+        tab = ttk.Frame(self.tabs, padding=7)
+        self.tabs.add(tab, text='Device Build')
+        self.workspace_tab = tab
+        panes = ttk.Panedwindow(tab, orient='horizontal')
+        panes.pack(fill='both', expand=True)
+        left, middle, right = ttk.Frame(panes), ttk.Frame(panes), ttk.Frame(panes)
+        panes.add(left, weight=2)
+        panes.add(middle, weight=3)
+        panes.add(right, weight=3)
+        ttk.Label(left, text='Working presets / playlists', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
+        sourcebar = ttk.Frame(left)
+        sourcebar.pack(fill='x', pady=3)
+        self.template_choice = ttk.Combobox(sourcebar, state='readonly')
+        self.template_choice.pack(side='left', fill='x', expand=True, padx=(0, 3))
+        ttk.Button(sourcebar, text='Add copy', command=self.workspace_add_template).pack(side='left')
+        buttons = ttk.Frame(left)
+        buttons.pack(fill='x', pady=(2, 6))
+        ttk.Button(buttons, text='Duplicate', command=self.workspace_duplicate).pack(side='left', padx=2)
+        ttk.Button(buttons, text='Remove', command=self.workspace_remove).pack(side='left', padx=2)
+        self.workspace_tree = ttk.Treeview(left, columns=('name',), show='headings', selectmode='browse')
+        self.workspace_tree.heading('name', text='Device build items')
+        self.workspace_tree.column('name', width=290)
+        self.workspace_tree.pack(fill='both', expand=True)
+        self.workspace_tree.bind('<<TreeviewSelect>>', self.workspace_selected)
+        ttk.Label(middle, text='Edit working copy', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
+        tools = ttk.Frame(middle)
+        tools.pack(fill='x', pady=(0, 5))
+        ttk.Button(tools, text='Save copy to library', command=self.workspace_save_to_library).pack(side='left', padx=2)
+        ttk.Button(tools, text='Test live', command=self.workspace_test_live).pack(side='left', padx=2)
+        self.workspace_params = ttk.Treeview(middle, columns=('value',), show='tree headings')
+        self.workspace_params.heading('#0', text='Property (double-click to edit)')
+        self.workspace_params.heading('value', text='Value')
+        self.workspace_params.column('#0', width=190)
+        self.workspace_params.column('value', width=185)
+        self.workspace_params.pack(fill='both', expand=True)
+        self.workspace_params.bind('<Double-1>', self.workspace_edit_parameter)
+        ttk.Label(right, text='Working JSON — device build source', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
+        toolsright = ttk.Frame(right)
+        toolsright.pack(fill='x', pady=(0, 5))
+        ttk.Button(toolsright, text='Copy JSON', command=self.workspace_copy_json).pack(side='right', padx=3)
+        ttk.Button(toolsright, text='Apply JSON to copy', command=self.workspace_apply_json).pack(side='right', padx=3)
+        self.workspace_raw = tk.Text(right, font=('Consolas', 10), wrap='none', undo=True)
+        self.workspace_raw.pack(fill='both', expand=True)
+        ttk.Label(right, text='Edits stay in Device Build; templates remain unchanged until explicitly saved to library.').pack(anchor='w', pady=5)
+
+    def refresh_workspace(self):
+        if not hasattr(self, 'workspace_tree'):
+            return
+        selection = self.draft_key
+        self.workspace_tree.delete(*self.workspace_tree.get_children())
+        for key, rec in self.workspace.entries.items():
+            self.workspace_tree.insert('', 'end', iid=key, values=(('♫ ' if rec['kind']=='playlist' else '◉ ') + rec['data'].get('n','Unnamed'),))
+        self.template_sources = {}
+        choices = []
+        for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: pair[1]['data'].get('n','').casefold()):
+            label = f'{"Playlist" if rec["kind"]=="playlist" else rec["category"].upper()} · {rec["data"].get("n", "")}'
+            if label in self.template_sources:
+                label += f' [{key}]'
+            self.template_sources[label] = key
+            choices.append(label)
+        self.template_choice['values'] = choices
+        if choices and self.template_choice.get() not in self.template_sources:
+            self.template_choice.set(choices[0])
+        if selection in self.workspace.entries:
+            self.workspace_tree.selection_set(selection)
+            self.workspace_tree.see(selection)
+            self.workspace_display()
+        else:
+            self.draft_key = None
+            self.workspace_params.delete(*self.workspace_params.get_children())
+            self.workspace_raw.delete('1.0', 'end')
+        self.refresh_export()
+
+    def add_selected_library_to_build(self):
+        if not self.current_key or self.current_key not in self.catalog.entries:
+            messagebox.showinfo('Select template', 'Select a library preset first.')
+            return
+        self.workspace_copy_from_key(self.current_key)
+
+    def workspace_add_template(self):
+        key = self.template_sources.get(self.template_choice.get())
+        if key:
+            self.workspace_copy_from_key(key)
+
+    def workspace_copy_from_key(self, key):
+        rec = self.catalog.entries[key]
+        self.draft_key = self.workspace.add(rec['data'], rec['category'], origin=rec['data']['n'])
+        self.refresh_workspace()
+        self.tabs.select(self.workspace_tab)
+        self.status(f'Working copy created from {rec["data"]["n"]}; library remains unchanged')
+
+    def workspace_selected(self, event=None):
+        selected = self.workspace_tree.selection()
+        if selected:
+            self.draft_key = selected[0]
+            self.workspace_display()
+
+    def workspace_display(self):
+        self.workspace_params.delete(*self.workspace_params.get_children())
+        if self.draft_key not in self.workspace.entries:
+            return
+        data = self.workspace.entries[self.draft_key]['data']
+        self.workspace_paths = {}
+        def descend(parent, obj, path):
+            if isinstance(obj, dict):
+                items = obj.items()
+            elif isinstance(obj, list):
+                items = enumerate(obj)
+            else:
+                return
+            for k, value in items:
+                label = str(k) if isinstance(obj, dict) else f'[{k}]'
+                display = f'{{{len(value)} fields}}' if isinstance(value, dict) else f'[{len(value)} items]' if isinstance(value, list) else json.dumps(value, ensure_ascii=False)
+                iid = self.workspace_params.insert(parent, 'end', text=label, values=(display,), open=not isinstance(value, list))
+                self.workspace_paths[iid] = path + [k]
+                descend(iid, value, path + [k])
+        descend('', data, [])
+        self.workspace_raw.delete('1.0','end')
+        self.workspace_raw.insert('1.0', json.dumps(data, indent=2, ensure_ascii=False))
+
+    def workspace_edit_parameter(self, event):
+        if self.draft_key not in self.workspace.entries:
+            return
+        iid = self.workspace_params.identify_row(event.y)
+        if iid not in getattr(self, 'workspace_paths', {}):
+            return
+        path = self.workspace_paths[iid]
+        obj = self.workspace.entries[self.draft_key]['data']
+        for step in path[:-1]:
+            obj = obj[step]
+        previous = obj[path[-1]]
+        if isinstance(previous, (list, dict)):
+            messagebox.showinfo('JSON editor', 'Edit arrays/objects in the JSON panel.')
+            return
+        raw = simpledialog.askstring('Edit working value', '/'.join(map(str,path)), initialvalue=json.dumps(previous,ensure_ascii=False), parent=self)
+        if raw is None:
+            return
+        try:
+            value = json.loads(raw)
+        except json.JSONDecodeError:
+            value = raw
+        if path == ['n'] and (not isinstance(value, str) or not value.strip()):
+            messagebox.showerror('Invalid name', 'Name must be a nonempty string.')
+            return
+        obj[path[-1]] = value
+        self.workspace.entries[self.draft_key]['data'].get('playlist', {}).pop('ps', None)
+        self.workspace.save()
+        self.refresh_workspace()
+        self.status('Working copy updated (library unchanged)')
+
+    def workspace_apply_json(self):
+        if self.draft_key not in self.workspace.entries:
+            return
+        try:
+            value = json.loads(self.workspace_raw.get('1.0','end'))
+            if not isinstance(value, dict) or not isinstance(value.get('n'), str) or not value['n'].strip():
+                raise ValueError('JSON must have a nonempty n name')
+            rec = self.workspace.entries[self.draft_key]
+            if entry_type(value) != rec['kind']:
+                raise ValueError('Cannot change a preset into a playlist or vice versa')
+            if rec['kind']=='playlist':
+                value['playlist'].pop('ps',None)
+            rec['data'] = value
+            self.workspace.save()
+            self.refresh_workspace()
+            self.status('Working JSON saved (library unchanged)')
+        except Exception as exc:
+            messagebox.showerror('Invalid working JSON', str(exc))
+
+    def workspace_copy_json(self):
+        try:
+            data = json.loads(self.workspace_raw.get('1.0','end'))
+            if not isinstance(data, dict):
+                raise ValueError('Expected JSON object')
+        except Exception as exc:
+            messagebox.showerror('Invalid JSON', str(exc))
+            return
+        self.clipboard_clear()
+        self.clipboard_append(json.dumps(data, indent=2, ensure_ascii=False))
+        self.status('Working JSON copied')
+
+    def workspace_duplicate(self):
+        if self.draft_key not in self.workspace.entries:
+            return
+        rec = self.workspace.entries[self.draft_key]
+        data = copy.deepcopy(rec['data'])
+        name = simpledialog.askstring('Duplicate build item', 'New name:', initialvalue=data['n']+' Copy', parent=self)
+        if not name:
+            return
+        data['n'] = name
+        self.draft_key = self.workspace.add(data, rec['category'], origin=rec.get('origin',''))
+        self.refresh_workspace()
+
+    def workspace_remove(self):
+        if self.draft_key not in self.workspace.entries:
+            return
+        rec = self.workspace.entries[self.draft_key]
+        if messagebox.askyesno('Remove working item', f'Remove {rec["data"]["n"]!r} from the device build? This does not delete its library template.'):
+            self.workspace.delete(self.draft_key)
+            self.draft_key = None
+            self.refresh_workspace()
+
+    def workspace_save_to_library(self):
+        if self.draft_key not in self.workspace.entries:
+            return
+        rec = self.workspace.entries[self.draft_key]
+        data = rec['data']
+        name = data['n']
+        matches = [(k,r) for k,r in self.catalog.entries.items() if r['kind']==rec['kind'] and r['data']['n'].casefold()==name.casefold()]
+        if matches:
+            if len(matches) > 1:
+                messagebox.showerror('Ambiguous library name', 'Multiple library templates have this name. Rename the working item first.')
+                return
+            if not messagebox.askyesno('Replace library template?', f'Overwrite existing library entry {name!r} with this working copy?'):
+                return
+            key, original = matches[0]
+            original['data'] = copy.deepcopy(data)
+            self.catalog.save(key)
+        else:
+            if not messagebox.askyesno('Add to library?', f'Add {name!r} to the master library?'):
+                return
+            key = self.catalog.create(rec['kind'],rec['category'], name, data)
+        self.refresh_library()
+        self.refresh_workspace()
+        self.status(f'Library template saved: {name}')
+
+    def workspace_test_live(self):
+        if self.draft_key not in self.workspace.entries:
+            return
+        if self.workspace.entries[self.draft_key]['kind'] != 'preset':
+            messagebox.showinfo('Live test', 'Select a working preset rather than a playlist.')
+            return
+        try:
+            doc = json.loads(self.workspace_raw.get('1.0','end'))
+        except Exception as exc:
+            messagebox.showerror('Invalid JSON',str(exc))
+            return
+        self.send_live_preset(doc)
 
     def make_playlist_tab(self):
-        tab = ttk.Frame(self.tabs, padding=6)
-        self.tabs.add(tab, text='Playlist designer')
-        outer = ttk.Panedwindow(tab, orient='horizontal')
-        outer.pack(fill='both', expand=True)
-        left, right = ttk.Frame(outer), ttk.Frame(outer)
-        outer.add(left, weight=1)
-        outer.add(right, weight=3)
+        tab = ttk.Frame(self.tabs, padding=7)
+        self.tabs.add(tab, text='Playlist editor')
+        self.playlist_tab = tab
+        panes = ttk.Panedwindow(tab, orient='horizontal')
+        panes.pack(fill='both', expand=True)
+        left, middle, right = ttk.Frame(panes), ttk.Frame(panes), ttk.Frame(panes)
+        panes.add(left, weight=2)
+        panes.add(middle, weight=3)
+        panes.add(right, weight=3)
+        ttk.Label(left, text='Library playlists', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
         ttk.Button(left, text='New playlist', command=lambda: self.create_item('playlist')).pack(fill='x', pady=3)
+        ttk.Button(left, text='Copy playlist to Device Build  →', command=self.playlist_copy_to_build).pack(fill='x', pady=3)
         self.playlist_list = tk.Listbox(left, exportselection=False)
         self.playlist_list.pack(fill='both', expand=True)
         self.playlist_list.bind('<<ListboxSelect>>', self.selected_playlist)
-        top = ttk.Frame(right)
-        top.pack(fill='x', pady=5)
-        ttk.Label(top, text='Preset name:').pack(side='left')
-        self.preset_choice = ttk.Combobox(top, state='readonly', width=47)
-        self.preset_choice.pack(side='left', padx=5)
-        ttk.Button(top, text='Add to playlist', command=self.add_to_playlist).pack(side='left', padx=3)
-        ttk.Button(top, text='Save playlist', command=self.save_playlist).pack(side='right')
-        self.playlist_steps = ttk.Treeview(right, columns=('name', 'duration'), show='headings', height=15)
-        self.playlist_steps.heading('name', text='Preset (psn, authoritative)')
-        self.playlist_steps.heading('duration', text='Duration (100ms ticks)')
-        self.playlist_steps.column('name', width=350)
-        self.playlist_steps.column('duration', width=170)
+        ttk.Label(middle, text='Playlist sequence / durations', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
+        addbar = ttk.Frame(middle)
+        addbar.pack(fill='x', pady=5)
+        self.preset_choice = ttk.Combobox(addbar, state='readonly', width=34)
+        self.preset_choice.pack(side='left', fill='x', expand=True, padx=(0, 4))
+        ttk.Button(addbar, text='Add', command=self.add_to_playlist).pack(side='left')
+        self.playlist_steps = ttk.Treeview(middle, columns=('name', 'duration'), show='headings', height=15)
+        self.playlist_steps.heading('name', text='Preset name (psn)')
+        self.playlist_steps.heading('duration', text='Duration (100ms)')
+        self.playlist_steps.column('name', width=250)
+        self.playlist_steps.column('duration', width=110)
         self.playlist_steps.pack(fill='both', expand=True)
         self.playlist_steps.bind('<Double-1>', self.edit_playlist_duration)
-        tools = ttk.Frame(right)
+        tools = ttk.Frame(middle)
         tools.pack(fill='x', pady=6)
-        for label, handler in [('Move up', lambda: self.move_step(-1)), ('Move down', lambda: self.move_step(1)), ('Remove step', self.remove_step)]:
+        for label, handler in [('Up', lambda: self.move_step(-1)), ('Down', lambda: self.move_step(1)), ('Remove', self.remove_step)]:
             ttk.Button(tools, text=label, command=handler).pack(side='left', padx=3)
-        ttk.Label(right, text='The displayed list edits psn and dur. Numeric ps is regenerated during export. For advanced fields, edit the playlist JSON in the library tab.').pack(anchor='w')
+        ttk.Label(right, text='Library playlist JSON', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=5)
+        controls = ttk.Frame(right)
+        controls.pack(fill='x', pady=(0, 5))
+        ttk.Button(controls, text='Copy JSON', command=self.copy_playlist_json).pack(side='right', padx=3)
+        ttk.Button(controls, text='Save playlist JSON', command=self.apply_playlist_json).pack(side='right', padx=3)
+        self.playlist_raw = tk.Text(right, font=('Consolas', 10), wrap='none', undo=True)
+        self.playlist_raw.pack(fill='both', expand=True)
+        ttk.Label(right, text='psn is the source of truth. Generated numeric ps never belongs in the library.').pack(anchor='w', pady=5)
         self.playlist_key = None
+
+    def playlist_copy_to_build(self):
+        if self.playlist_key not in self.catalog.entries:
+            messagebox.showinfo('Select playlist', 'Select a playlist in the left column first.')
+            return
+        self.workspace_copy_from_key(self.playlist_key)
+
+    def apply_playlist_json(self):
+        if self.playlist_key not in self.catalog.entries:
+            return
+        try:
+            doc = json.loads(self.playlist_raw.get('1.0','end'))
+            if not isinstance(doc, dict) or not isinstance(doc.get('n'),str) or not doc['n'].strip():
+                raise ValueError('Playlist must have an n name')
+            if not isinstance(doc.get('playlist'),dict):
+                raise ValueError('Expected playlist object')
+            doc['playlist'].pop('ps',None)
+            self.catalog.entries[self.playlist_key]['data'] = doc
+            self.catalog.save(self.playlist_key)
+            self.refresh_playlists()
+            self.refresh_workspace()
+            self.refresh_viewer()
+            self.status('Library playlist JSON saved')
+        except Exception as exc:
+            messagebox.showerror('Invalid playlist JSON',str(exc))
+
+    def copy_playlist_json(self):
+        try:
+            doc = json.loads(self.playlist_raw.get('1.0','end'))
+            if not isinstance(doc,dict):
+                raise ValueError('Expected object')
+        except Exception as exc:
+            messagebox.showerror('Invalid playlist JSON',str(exc))
+            return
+        self.clipboard_clear()
+        self.clipboard_append(json.dumps(doc, indent=2, ensure_ascii=False))
 
     def make_export_tab(self):
         tab = ttk.Frame(self.tabs, padding=12)
         self.tabs.add(tab, text='Build / export')
         self.export_tab = tab
-        ttk.Label(tab, text='Select library entries for the device file', font=('Segoe UI', 13, 'bold')).pack(anchor='w')
-        ttk.Label(tab, text='Presets and playlists are stored separately in the library. Export combines them, resolves psn names into ps IDs, and validates dependencies.').pack(anchor='w', pady=(2, 10))
+        ttk.Label(tab, text='Select working copies for the device file', font=('Segoe UI', 13, 'bold')).pack(anchor='w')
+        ttk.Label(tab, text='Only items in Device Build are exported. Numeric IDs and playlist ps arrays are generated here; the library is unchanged.').pack(anchor='w', pady=(2, 10))
         self.export_tree = ttk.Treeview(tab, columns=('selected', 'kind', 'category', 'name'), show='headings', selectmode='extended')
-        for col, txt, width in [('selected', 'Export', 80), ('kind', 'Type', 95), ('category', 'Library file', 125), ('name', 'Library name', 600)]:
+        for col, txt, width in [('selected', 'Export', 80), ('kind', 'Type', 95), ('category', 'Type', 100), ('name', 'Working name', 600)]:
             self.export_tree.heading(col, text=txt)
             self.export_tree.column(col, width=width, stretch=(col == 'name'))
         self.export_tree.pack(fill='both', expand=True)
@@ -620,19 +1020,22 @@ class App(tk.Tk):
         self.refresh_effect_catalog_view()
         self.update_palette_choices()
         self.refresh_viewer()
-        self.status(f'Loaded {len(self.catalog.entries)} items from all 1D, 2D and audio-reactive library files')
+        self.refresh_workspace()
+        self.status(f'Loaded {len(self.catalog.entries)} presets and playlists')
 
     def refresh_library_list(self):
         if not hasattr(self, 'library_tree'):
             return
         self.library_tree.delete(*self.library_tree.get_children())
         term = self.search_var.get().casefold()
-        for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: (pair[1]['kind'], pair[1]['data'].get('n','').casefold())):
+        for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: pair[1]['data'].get('n','').casefold()):
+            if rec['kind'] != 'preset':
+                continue
             if not self.is_visible_compatible(key):
                 continue
             if term and term not in rec['data'].get('n', '').casefold() and term not in key.casefold():
                 continue
-            self.library_tree.insert('', 'end', iid=key, values=(rec['kind'], rec['category'], rec['data'].get('n')))
+            self.library_tree.insert('', 'end', iid=key, values=(rec['data'].get('n'),))
 
     def selected_library(self, event=None):
         selected = self.library_tree.selection()
@@ -647,8 +1050,8 @@ class App(tk.Tk):
             return
         data = self.catalog.entries[self.current_key]['data']
         effects = data.get('Effects', {}) if self.catalog.entries[self.current_key]['kind'] == 'preset' else {}
-        self.fx_choice['values'] = sorted({rec['data'].get('Effects', {}).get('FX', '') for rec in self.catalog.entries.values() if rec['kind'] == 'preset' and rec['data'].get('Effects', {}).get('FX')})
-        self.palette_choice['values'] = sorted({rec['data'].get('Pal', '') for rec in self.catalog.entries.values() if rec['kind'] == 'preset' and rec['data'].get('Pal')})
+        self.update_effect_choices()
+        self.update_palette_choices()
         self.fx_var.set(effects.get('FX', effects.get('Function', '')))
         self.palette_var.set(data.get('Pal', ''))
         grouping = next((key for key in ('GPB', 'GPP', 'GP', 'GroupingPerc', 'Grouping') if key in effects), 'GP')
@@ -762,18 +1165,18 @@ class App(tk.Tk):
         self.status('Copied standalone entry JSON body (without numeric ID)')
 
     def choose_storage_category(self):
-        value = simpledialog.askstring('Library storage', 'Which file should store this item?\n1d / 2d / audio_reactive', initialvalue=self.category.get(), parent=self)
+        value = simpledialog.askstring('Library storage', 'Preset storage file (both visible in GUI):\n1d / 2d', initialvalue=self.category.get(), parent=self)
         if value is None:
             return None
         value = value.strip().lower()
-        if value not in CATEGORIES:
-            messagebox.showerror('Invalid library file', 'Choose 1d, 2d or audio_reactive')
+        if value not in ('1d', '2d'):
+            messagebox.showerror('Invalid library file', 'Choose 1d or 2d')
             return None
         self.category.set(value)
         return value
 
     def create_item(self, kind):
-        category = self.choose_storage_category()
+        category = 'shared' if kind == 'playlist' else self.choose_storage_category()
         if category is None:
             return
         name = simpledialog.askstring('New ' + kind, f'{kind.title()} name:', parent=self)
@@ -783,12 +1186,21 @@ class App(tk.Tk):
         self.refresh_library_list()
         self.refresh_playlists()
         self.refresh_export()
-        self.current_key = key
         if kind == 'preset':
+            self.current_key = key
             self.tabs.select(0)
             self.library_tree.selection_set(key)
             self.library_tree.see(key)
-        self.display_current()
+            self.display_current()
+        else:
+            self.playlist_key = key
+            self.tabs.select(self.playlist_tab)
+            self.refresh_playlists()
+            if key in self.playlist_keys:
+                index = self.playlist_keys.index(key)
+                self.playlist_list.selection_clear(0, 'end')
+                self.playlist_list.selection_set(index)
+                self.display_playlist()
         self.status(f'Created {name}')
 
     def duplicate_item(self):
@@ -851,6 +1263,8 @@ class App(tk.Tk):
         for i, name in enumerate(names):
             duration = durs[i] if isinstance(durs, list) and i < len(durs) else '?'
             self.playlist_steps.insert('', 'end', iid=str(i), values=(name, duration))
+        self.playlist_raw.delete('1.0', 'end')
+        self.playlist_raw.insert('1.0', json.dumps(self.catalog.entries[self.playlist_key]['data'], indent=2, ensure_ascii=False))
 
     def add_to_playlist(self):
         if not self.playlist_key:
@@ -933,16 +1347,16 @@ class App(tk.Tk):
     def save_playlist(self):
         if self.playlist_key:
             self.catalog.save(self.playlist_key)
-            self.status('Playlist saved; numeric IDs will be resolved during export')
+            self.display_playlist()
+            self.status('Playlist template saved; numeric IDs are generated during export')
 
     def refresh_export(self):
         if not hasattr(self, 'export_tree'):
             return
         self.export_tree.delete(*self.export_tree.get_children())
-        for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: (pair[1]['kind'], pair[1]['data'].get('n','').casefold())):
-            if self.is_visible_compatible(key):
-                selected = self.selected_export.get(key, True)
-                self.export_tree.insert('', 'end', iid=key, values=('[x]' if selected else '[ ]', rec['kind'], rec['category'], rec['data'].get('n')))
+        for key, rec in self.workspace.entries.items():
+            selected = self.selected_export.get(key, True)
+            self.export_tree.insert('', 'end', iid=key, values=('[x]' if selected else '[ ]', rec['kind'], rec['category'], rec['data'].get('n')))
 
     def toggle_export(self, event):
         iid = self.export_tree.identify_row(event.y)
@@ -956,21 +1370,32 @@ class App(tk.Tk):
         self.refresh_export()
 
     def select_dependencies(self):
+        # Explicitly copy missing playlist prerequisites from the library, leaving originals untouched.
+        present = {r['data']['n'].casefold() for r in self.workspace.entries.values() if r['kind']=='preset'}
+        to_add = []
         for key in self.export_tree.get_children():
-            rec = self.catalog.entries[key]
-            if rec['kind'] != 'playlist' or not self.selected_export.get(key, True):
+            rec = self.workspace.entries[key]
+            if rec['kind']!='playlist' or not self.selected_export.get(key, True):
                 continue
             for name in rec['data']['playlist'].get('psn', []):
-                for candidate, cre in self.catalog.entries.items():
-                    if cre['kind'] == 'preset' and cre['data']['n'].casefold() == str(name).casefold():
-                        self.selected_export[candidate] = True
-        self.refresh_export()
+                if str(name).casefold() in present:
+                    continue
+                matches = [r for r in self.catalog.entries.values() if r['kind']=='preset' and r['data']['n'].casefold()==str(name).casefold()]
+                if len(matches)!=1:
+                    messagebox.showerror('Missing or ambiguous template', f'Cannot resolve library preset {name!r}; found {len(matches)} matches.')
+                    return
+                to_add.append(matches[0])
+                present.add(str(name).casefold())
+        for rec in to_add:
+            self.workspace.add(rec['data'], rec['category'], origin=rec['data']['n'])
+        self.refresh_workspace()
+        self.status(f'Added {len(to_add)} missing preset dependencies to Device Build')
 
     def compile(self):
         keys = [k for k in self.export_tree.get_children() if self.selected_export.get(k, True)]
-        presets = [k for k in keys if self.catalog.entries[k]['kind'] == 'preset']
-        playlists = [k for k in keys if self.catalog.entries[k]['kind'] == 'playlist']
-        return compile_export(self.catalog, 'all', presets, playlists)
+        presets = [k for k in keys if self.workspace.entries[k]['kind']=='preset']
+        playlists = [k for k in keys if self.workspace.entries[k]['kind']=='playlist']
+        return compile_export(self.workspace, 'all', presets, playlists)
 
     def export_dialog(self):
         try:
@@ -983,7 +1408,7 @@ class App(tk.Tk):
             dest = EXPORTS / (dest.name + '_' + item_id()[:4])
         dest.mkdir(parents=True)
         write_json(dest / 'presets.json', doc)
-        write_json(dest / 'manifest.json', {'created_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'category': 'all', 'names_to_ids': {self.catalog.entries[k]['data']['n']: val for k, val in ids.items()}, 'entry_count': len(ids)})
+        write_json(dest / 'manifest.json', {'created_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'category': 'all', 'names_to_ids': {self.workspace.entries[k]['data']['n']: val for k, val in ids.items()}, 'entry_count': len(ids)})
         self.export_info.config(state='normal')
         self.export_info.delete('1.0', 'end')
         self.export_info.insert('1.0', f'Exported {len(ids)} entries\n{dest / "presets.json"}\n{dest / "manifest.json"}\n')
@@ -1000,7 +1425,7 @@ class App(tk.Tk):
         category = self.choose_storage_category()
         if category is None:
             return
-        replace = messagebox.askyesno('Import matching names', f'Import into {category} storage file?\n\nYes: replace same-name entries in that file. No: create additional entries.')
+        replace = messagebox.askyesno('Import matching names', f'Presets → lib/presets_{category}.json\nPlaylists → lib/playlists.json\n\nYes: replace same-name entries. No: append.')
         try:
             added, skipped = self.catalog.import_file(path, category, replace=replace)
         except Exception as exc:
@@ -1120,7 +1545,7 @@ class App(tk.Tk):
             backup = EXPORTS / dt.datetime.now().strftime('device_%Y-%m-%d_%H-%M-%S')
             write_json(backup / 'presets.json', data)
             self.device_log(f'Download saved: {backup / "presets.json"}')
-            if messagebox.askyesno('Import downloaded presets', f'Import {len(data)} downloaded entries into the unified library?\nDevice: {device["ip"]}\n\nChoose No to keep the downloaded backup without importing.'):
+            if messagebox.askyesno('Import downloaded presets', f'Import {len(data)} downloaded entries into the preset library?\nDevice: {device["ip"]}\n\nChoose No to keep the downloaded backup without importing.'):
                 category = self.choose_storage_category()
                 if category is None:
                     return
@@ -1456,7 +1881,7 @@ class App(tk.Tk):
         if not key:
             return
         self.playlist_key=key
-        self.tabs.select(1)
+        self.tabs.select(self.playlist_tab)
         self.refresh_playlists()
         if key in getattr(self,'playlist_keys',[]):
             i=self.playlist_keys.index(key)
@@ -1506,24 +1931,24 @@ class App(tk.Tk):
 
     def test_current_live(self):
         if self.current_key is None or self.current_key not in self.catalog.entries:
-            messagebox.showinfo('Live test', 'Select a preset in the library first.')
-            return
-        rec=self.catalog.entries[self.current_key]
-        if rec['kind'] != 'preset':
-            messagebox.showinfo('Live test', 'Select an effect preset, rather than a playlist, for direct live preview.')
-            return
-        dev=self.chosen_device()
-        if dev is None:
+            messagebox.showinfo('Live test', 'Select a library preset first.')
             return
         try:
-            data=json.loads(self.raw_text.get('1.0','end'))
-            if not isinstance(data,dict):
-                raise ValueError('Selected preset must be a JSON object')
-            payload={k:v for k,v in data.items() if k not in ('n','ql','ps','playlist')}
-            payload['v']=True
+            data = json.loads(self.raw_text.get('1.0','end'))
         except Exception as exc:
-            messagebox.showerror('Live test',str(exc))
+            messagebox.showerror('Invalid JSON',str(exc))
             return
+        self.send_live_preset(data)
+
+    def send_live_preset(self, data):
+        if not isinstance(data,dict) or 'playlist' in data:
+            messagebox.showinfo('Live test','Select an effect preset, not a playlist.')
+            return
+        dev = self.chosen_device()
+        if dev is None:
+            return
+        payload={k:v for k,v in data.items() if k not in ('n','ql','ps','playlist')}
+        payload['v']=True
         def work():
             request=Request(f'http://{dev["ip"]}:{dev["port"]}/json/si',data=json.dumps(payload,separators=(',',':')).encode('utf-8'),headers={'Content-Type':'application/json; charset=UTF-8'},method='POST')
             with urlopen(request,timeout=10) as resp:
@@ -1534,7 +1959,7 @@ class App(tk.Tk):
                 messagebox.showerror('Live test',str(error))
             else:
                 self.device_log(f'Live preset sent to {dev["ip"]}: HTTP {result[0]} — {data.get("n", "unnamed")}')
-        self.device_log(f'Sending live effect preview to {dev["ip"]} (does not write presets.json)')
+        self.device_log(f'Sending live effect preview to {dev["ip"]} (no filesystem write)')
         self.worker(work,done)
 
 

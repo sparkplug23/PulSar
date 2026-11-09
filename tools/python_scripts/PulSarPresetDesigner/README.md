@@ -1,63 +1,54 @@
-# PulSar Preset & Playlist Designer — v0.4
+# PulSar Preset & Playlist Designer
 
-A Windows-friendly Tkinter editor for PulSar effects, palettes, device playlists and JSON. Source libraries are stored as individual JSON resource files under `library/presets/{1d,2d,audio_reactive}` and `library/playlists/{1d,2d,audio_reactive}`. Older 1d JSON resource collections and their original ID index are retained for compatibility.
+Desktop editor for authoring reusable PulSar presets and playlists. All presets and playlists are shown together in one GUI. The library has **exactly three authoritative JSON files**:
 
-## Start (Windows)
-
-Double-click `Launch_PulSar_Designer.cmd`, or from PowerShell run:
-
-```powershell
-& "$HOME\.local\bin\python3.15.exe" .\main.py
+```text
+lib/
+    presets_1d.json
+    presets_2d.json
+    playlists.json
 ```
 
-The standard Tkinter desktop GUI requires no GUI dependency installation. The interface starts in dark mode.
+Each file is a JSON **array** containing the complete preset/playlist bodies. No device preset IDs are stored in these files. Playlists reference presets via `playlist.psn` (names); `playlist.ps` is generated only during device export.
 
-## What is included
+Presets are stored in the 1D or 2D file based on the preset's intended effect type. Playlists can use both 1D and 2D presets and therefore all share `playlists.json`.
 
-- **Preset library / JSON:** browse, create, duplicate and delete, edit scalar/nested JSON parameters, choose Effect and Palette from catalogs, copy/paste the **entire JSON body** corresponding to one numeric entry in `presets.json`. Use **Apply JSON / Save** to persist changes.
-- **Unified library:** all 1D, 2D and audio-reactive presets/playlists are shown together. Category is a storage-file property, not a global GUI mode. The library and export tables display the source category. When creating or importing, choose which category folder should hold the files.
-- **Playlist designer:** build `psn[]`-based sequences; edit order and duration. `ps[]` is generated at export, never used as the editable source of truth.
-- **Playlist visualizer / matrix:** offline playlist usage matrix (presets as rows, playlists as columns) and a playlist detail view with ordered preset names and durations. Double-click a preset row to open the JSON editor.
-- **Palettes / colours:** scan `mPalette_Progmem.h`, `mPalette.h`, language headers and related C++ sources in the local PulSar repository for literal palette labels; fall back to names used by existing preset resources. If a target is selected, fetch its authoritative `GET /json/palettes` list. Slash-separated firmware aliases are included.
-- **Effects:** automatically read effect names from the PulSar checkout (`code/6_Lights/03_Animator/Effects.cpp` and related files) when the GUI starts; fetch `GET /json/effects` from an ESP32. The latter is the authority on what the firmware has enabled. Optional filtering hides incompatible presets without deleting them.
-- **Devices / sync:** use mDNS `_pulsar._tcp.local.` or type `192.168.x.y` / hostname into the persistent IP field at the top. Select a target, fetch its presets file, import it into your chosen storage category, upload a generated export, or open its WebUI.
-- **Live preset test:** select a preset and click **Test live on ESP32**; POST the currently edited JSON parameters to `/json/si`. This is a runtime effect test and does not save to `/presets.json`.
-- **Live WebUI:** open the full browser directly. The **Live test / device WebUI** tab can optionally launch an independent `pywebview` desktop window, which supports the firmware's JavaScript UI. Tkinter itself cannot embed the full interactive browser without such an extra engine.
+## Running
 
-## mDNS discovery on Windows
-
-mDNS requires the `zeroconf` module in the **same interpreter that launches the GUI**. In v0.2 it was missing and caused the error in your screenshot.
-
-Use `Install_mDNS.cmd`, or the **Install mDNS dependency** button within the Devices tab, or run:
+From the PulSar checkout:
 
 ```powershell
-& "$HOME\.local\bin\python3.15.exe" -m pip install --break-system-packages zeroconf
+& "$env:APPDATA\uv\python\cpython-3.15.1-windows-x86_64-none\python.exe" ".\tools\python_scripts\PulSarPresetDesigner\main.py"
 ```
 
-Manual IP entry, HTTP downloads and uploads work even if `zeroconf` is not installed. Discovery finds devices on the same reachable mDNS network segment; routers/VLANs may block multicast discovery.
+For mDNS discovery, install `zeroconf` into the interpreter running the GUI. Manual IP operation does not require mDNS.
 
-## Import, generate and deploy
+## Workflow (v0.8)
 
-1. Browse and edit presets/playlists from **all library files together**. The storage category appears in a separate table column.
-2. Click **Open presets.json** and select your existing November source, e.g. `notes/PresetJsonFiles/November2026/xmas26_outside_trees/presets.json`. When importing, choose 1d, 2d or audio_reactive as the file storage destination. Import can append or replace matching names in that destination.
-3. Edit individual presets in either view. The JSON body editor matches the inner value of `"1": {...}`.
-4. Build playlists by name, then use **Build / export** to select entries and generate `exports/YYYY-MM-DD_HH-MM-SS/presets.json` and `manifest.json`.
-5. Use the Devices tab to choose a discovered/manual target and upload the generated file.
+1. **Preset library**: Browse preset templates from both `lib/presets_1d.json` and `lib/presets_2d.json` in one list. Three columns: preset list, structured editor, raw JSON. Library changes are written to the master file only when you deliberately edit/save a template.
+2. **Device Build**: Select any library preset or playlist and click **Add copy**; or select a preset in the library and click **Copy to Device Build**. Edit copies using the structured editor or raw JSON. Working changes are persisted in `workspace/working_set.json`, not in `lib/`.
+3. If a working preset is worth reusing, use **Save copy to library**. It asks before adding or replacing the template.
+4. **Playlist editor**: Edit playlist templates by name and duration, stored only in `lib/playlists.json`. To include a playlist in the device build, copy it into Device Build. You can edit working playlist JSON there without changing the source playlist.
+5. **Build / export**: Only working copies are eligible for export. **Select playlist dependencies** copies referenced presets into the working set from the library. Export validates names and generates numeric IDs and `playlist.ps` into a timestamped `exports/.../presets.json`.
+6. **Devices**: Can fetch/import presets, send a working preset live, and upload a generated file. Upload first downloads and verifies an exact-byte backup of the existing device file, and verifies after transfer.
 
-**Safety:** Every upload first GETs the current `/presets.json`, saves the **original bytes** to `exports/device_backups/<host>/<timestamp>/presets.json`, creates a checksum manifest, verifies local backup integrity, and only then submits POST `/upload`. If the existing file cannot be fetched or the backup fails, **upload is cancelled**. After uploading, the device file is downloaded and compared to the proposed JSON; failure is reported explicitly. Do not interrupt device power during upload.
+The master library contains **exactly three authoritative arrays**. `workspace/working_set.json` is an independent editable draft/session, **not** another library. Re-importing a device collection does not change the master library unless explicitly requested through the import workflow.
 
-**Limitations:** Not tested against your actual physical ESP32 devices from this environment. The selected device's exposed WebUI endpoints may differ on older firmware builds. Source scanning is best-effort; effect/palette lists obtained from the device are authoritative. Native playlist visualization depicts the sequence and preset usage, **not a pixel-accurate simulation** of LED effects. The full PulSar effect preview must run on a device and is accessed via the live WebUI. The default libraries are the earlier 2025 sample; import the current November 2026 file explicitly to migrate it.
+## Library and exports
 
-## Tests
+- Create, duplicate, edit, and delete 1D/2D presets in their appropriate source array.
+- All playlist definitions are kept in `lib/playlists.json`, irrespective of the presets they reference.
+- Edit an individual entry through the GUI parameter table or its standalone raw JSON body.
+- Import an ESP32 `presets.json`: preset IDs are discarded; playlist `ps` references are converted to names when `psn` is missing.
+- Build/export: select the desired working entries, validate unique names and references, generate numeric IDs and `playlist.ps`, and write a timestamped `exports/.../presets.json`.
+- Select a PulSar device to fetch its existing presets or deploy a new export. Uploads must first back up the device's existing file.
 
-```powershell
-py test_core.py
-py test_effect_catalog.py
-py test_v03.py
-```
+## Migration from v0.6
 
-`test_gui_v03.py` requires a graphical desktop session (or a virtual display on Linux).
+When `lib/playlists.json` is absent, the GUI merges older `lib/playlists_1d.json`, `lib/playlists_2d.json`, and `lib/playlists_audio_reactive.json` arrays into the single playlist file and removes the generated numeric `ps` arrays from the new source library. Obsolete aggregate files are moved to `migration_backups/YYYY-MM-DD_HH-MM-SS/` so `lib/` contains only the three current JSON files; their contents remain available for rollback. Existing `lib/presets_1d.json` and `lib/presets_2d.json` are retained. If the new preset files don't exist, the GUI imports corresponding older arrays or legacy individual preset files.
 
-## Automatic firmware effect catalog (v0.5)
+The old `lib/_imported_ids.json` file is **not used**. Numeric IDs belong only to the generated device `presets.json` and its export manifest. The new package contains only three library JSON files.
 
-When launched inside the PulSar repository, the designer automatically locates `code/6_Lights/03_Animator/Effects.cpp` relative to its own script path and parses effect labels when it opens. There is no source file selector or manual parsing step. The **Refresh source catalog** button rescans the current checkout after firmware edits. The device capability filter continues to use the connected board’s live `/json/effects` instead of assuming every effect in the repository is compiled.
+## Source catalogs
+
+The GUI discovers local PulSar C++ sources relative to the project to extract effect and palette names. A selected ESP32's `/json/effects` and `/json/palettes` provide its actual compiled capability list.
