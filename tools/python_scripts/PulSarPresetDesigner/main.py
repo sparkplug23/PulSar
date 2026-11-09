@@ -122,8 +122,8 @@ class Catalog:
         self.original_ids.pop(key, None)
         self.save_original_ids()
 
-    def names(self, kind, category):
-        return [(key, rec['data'].get('n', key)) for key, rec in self.entries.items() if rec['kind'] == kind and rec['category'] == category]
+    def names(self, kind, category=None):
+        return [(key, rec['data'].get('n', key)) for key, rec in self.entries.items() if rec['kind'] == kind and (category is None or rec['category'] == category)]
 
     def import_file(self, path, category, replace=False):
         obj = read_json(path)
@@ -257,7 +257,7 @@ class App(tk.Tk):
         self.geometry('1470x870')
         self.minsize(1120, 670)
         self.catalog = Catalog()
-        self.category = tk.StringVar(value='1d')
+        self.category = tk.StringVar(value='1d')  # Storage destination only; never filters the GUI
         self.current_key = None
         self.selected_export = {}
         self.worker_events = queue.Queue()
@@ -275,6 +275,7 @@ class App(tk.Tk):
         self.refresh_library()
         self.after(125, self.poll_workers)
         self.after(350, self.load_local_palettes_if_available)
+        self.after(450, self.load_local_effects_if_available)
 
     def status(self, message):
         self.status_var.set(message)
@@ -285,10 +286,7 @@ class App(tk.Tk):
         title = ttk.Frame(root)
         title.pack(fill='x', pady=(0, 8))
         ttk.Label(title, text='PulSar Preset & Playlist Designer', font=('Segoe UI', 17, 'bold')).pack(side='left')
-        profilebar = ttk.Frame(title)
-        profilebar.pack(side='left', padx=(24, 8))
-        for text, value in [('●  1D', '1d'), ('▦  2D', '2d'), ('♫  Audio reactive', 'audio_reactive')]:
-            ttk.Radiobutton(profilebar, text=text, value=value, variable=self.category, command=self.refresh_library, style='Profile.TRadiobutton').pack(side='left', padx=3)
+        ttk.Label(title, text='Unified library  •  1D / 2D / Audio stored in separate files').pack(side='left', padx=(24, 8))
         ttk.Button(title, text='Build / export', command=lambda: self.tabs.select(self.export_tab)).pack(side='right', padx=4)
         ttk.Button(title, text='Open presets.json', command=self.import_local).pack(side='right', padx=4)
         networkbar = ttk.Frame(root)
@@ -337,10 +335,12 @@ class App(tk.Tk):
         search.pack(fill='x', pady=5)
         search.insert(0, '')
         self.search_var.trace_add('write', lambda *_: self.refresh_library_list())
-        self.library_tree = ttk.Treeview(left, columns=('kind', 'name'), show='headings', selectmode='browse')
+        self.library_tree = ttk.Treeview(left, columns=('kind', 'category', 'name'), show='headings', selectmode='browse')
         self.library_tree.heading('kind', text='Type')
+        self.library_tree.heading('category', text='Library file')
         self.library_tree.heading('name', text='Name')
-        self.library_tree.column('kind', width=80, stretch=False)
+        self.library_tree.column('kind', width=75, stretch=False)
+        self.library_tree.column('category', width=105, stretch=False)
         self.library_tree.column('name', width=260)
         self.library_tree.pack(fill='both', expand=True)
         self.library_tree.bind('<<TreeviewSelect>>', self.selected_library)
@@ -418,8 +418,8 @@ class App(tk.Tk):
         self.export_tab = tab
         ttk.Label(tab, text='Select library entries for the device file', font=('Segoe UI', 13, 'bold')).pack(anchor='w')
         ttk.Label(tab, text='Presets and playlists are stored separately in the library. Export combines them, resolves psn names into ps IDs, and validates dependencies.').pack(anchor='w', pady=(2, 10))
-        self.export_tree = ttk.Treeview(tab, columns=('selected', 'kind', 'name'), show='headings', selectmode='extended')
-        for col, txt, width in [('selected', 'Export', 80), ('kind', 'Type', 110), ('name', 'Library name', 600)]:
+        self.export_tree = ttk.Treeview(tab, columns=('selected', 'kind', 'category', 'name'), show='headings', selectmode='extended')
+        for col, txt, width in [('selected', 'Export', 80), ('kind', 'Type', 95), ('category', 'Library file', 125), ('name', 'Library name', 600)]:
             self.export_tree.heading(col, text=txt)
             self.export_tree.column(col, width=width, stretch=(col == 'name'))
         self.export_tree.pack(fill='both', expand=True)
@@ -478,11 +478,8 @@ class App(tk.Tk):
         self.tabs.add(tab, text='Effect catalog / compatibility')
         top = ttk.Frame(tab)
         top.pack(fill='x', pady=4)
-        ttk.Label(top, text='Firmware Effects.cpp:').pack(side='left')
-        self.effects_path = tk.StringVar()
-        ttk.Entry(top, textvariable=self.effects_path).pack(side='left', padx=4, fill='x', expand=True)
-        ttk.Button(top, text='Browse', command=self.browse_effects_cpp).pack(side='left', padx=3)
-        ttk.Button(top, text='Parse source', command=self.load_source_effects).pack(side='left', padx=3)
+        ttk.Label(top, text='Firmware effect catalog — read automatically from local PulSar C++ sources').pack(side='left')
+        ttk.Button(top, text='Refresh source catalog', command=self.load_local_effects_if_available).pack(side='right', padx=3)
         ttk.Label(tab, textvariable=self.effects_source_label).pack(anchor='w', pady=(2, 7))
         controls = ttk.Frame(tab)
         controls.pack(fill='x', pady=5)
@@ -511,9 +508,9 @@ class App(tk.Tk):
             for name in self.source_effects:
                 self.effect_list.insert('', 'end', values=('', name, 'Source (possible)'))
         if available is not None:
-            presets = [rec for rec in self.catalog.entries.values() if rec['category'] == self.category.get() and rec['kind'] == 'preset']
+            presets = [rec for rec in self.catalog.entries.values() if rec['kind'] == 'preset']
             n_ok = sum(preset_compatible(rec['data'], available) for rec in presets)
-            self.compat_label.set(f'{target}: {len(available)} enabled effects; {n_ok}/{len(presets)} library presets compatible in {self.category.get()}')
+            self.compat_label.set(f'{target}: {len(available)} enabled effects; {n_ok}/{len(presets)} library presets compatible')
         else:
             self.compat_label.set(f'{len(self.source_effects)} source effect names; choose a target and fetch /json/effects for accurate filtering.')
         self.update_effect_choices()
@@ -521,29 +518,23 @@ class App(tk.Tk):
 
     def load_local_effects_if_available(self):
         path = find_effects_cpp()
-        if path:
-            self.effects_path.set(str(path))
-            self.load_source_effects()
-        else:
-            self.effects_source_label.set('Browse to local PulSar/code/6_Lights/03_Animator/Effects.cpp to build the complete source catalog.')
-
-    def browse_effects_cpp(self):
-        path = filedialog.askopenfilename(title='Choose PulSar Effects.cpp', filetypes=[('C++ files','*.cpp'),('All files','*.*')])
-        if path:
-            self.effects_path.set(path)
-            self.load_source_effects()
-
-    def load_source_effects(self):
-        try:
-            path = pathlib.Path(self.effects_path.get())
-            names = read_source_effects(path)
-            self.source_effects = names
-            self.effects_source_label.set(f'{len(names)} effect names found in {path.name} and related source. Source catalog is not a build-specific enabled list.')
+        if path is None:
+            self.source_effects = []
+            self.effects_source_label.set('PulSar checkout not found. Run the designer inside the PulSar repository to load its effect catalog.')
             self.refresh_effect_catalog_view()
-            if not names:
-                self.status('No named effect configs extracted; device catalog still works. Check firmware naming format.')
-        except Exception as exc:
-            messagebox.showerror('Effect source error', str(exc))
+            return
+        try:
+            names = read_source_effects(path)
+        except (OSError, UnicodeError, ValueError) as exc:
+            self.source_effects = []
+            self.effects_source_label.set(f'Could not read firmware effects: {exc}')
+            self.refresh_effect_catalog_view()
+            return
+        self.source_effects = names
+        self.effects_source_label.set(f'{len(names)} firmware effect names from {path.parent} (automatic; source is not device-specific)')
+        self.refresh_effect_catalog_view()
+        if not names:
+            self.status('No effect names extracted from the firmware source. Check registration/config format.')
 
     def target_changed(self):
         target = self.target_device.get()
@@ -629,7 +620,7 @@ class App(tk.Tk):
         self.refresh_effect_catalog_view()
         self.update_palette_choices()
         self.refresh_viewer()
-        self.status(f'Loaded {len(self.catalog.entries)} library items. Active category: {self.category.get()}')
+        self.status(f'Loaded {len(self.catalog.entries)} items from all 1D, 2D and audio-reactive library files')
 
     def refresh_library_list(self):
         if not hasattr(self, 'library_tree'):
@@ -637,13 +628,11 @@ class App(tk.Tk):
         self.library_tree.delete(*self.library_tree.get_children())
         term = self.search_var.get().casefold()
         for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: (pair[1]['kind'], pair[1]['data'].get('n','').casefold())):
-            if rec['category'] != self.category.get():
-                continue
             if not self.is_visible_compatible(key):
                 continue
             if term and term not in rec['data'].get('n', '').casefold() and term not in key.casefold():
                 continue
-            self.library_tree.insert('', 'end', iid=key, values=(rec['kind'], rec['data'].get('n')))
+            self.library_tree.insert('', 'end', iid=key, values=(rec['kind'], rec['category'], rec['data'].get('n')))
 
     def selected_library(self, event=None):
         selected = self.library_tree.selection()
@@ -772,11 +761,25 @@ class App(tk.Tk):
         self.clipboard_append(text)
         self.status('Copied standalone entry JSON body (without numeric ID)')
 
+    def choose_storage_category(self):
+        value = simpledialog.askstring('Library storage', 'Which file should store this item?\n1d / 2d / audio_reactive', initialvalue=self.category.get(), parent=self)
+        if value is None:
+            return None
+        value = value.strip().lower()
+        if value not in CATEGORIES:
+            messagebox.showerror('Invalid library file', 'Choose 1d, 2d or audio_reactive')
+            return None
+        self.category.set(value)
+        return value
+
     def create_item(self, kind):
+        category = self.choose_storage_category()
+        if category is None:
+            return
         name = simpledialog.askstring('New ' + kind, f'{kind.title()} name:', parent=self)
         if not name:
             return
-        key = self.catalog.create(kind, self.category.get(), name)
+        key = self.catalog.create(kind, category, name)
         self.refresh_library_list()
         self.refresh_playlists()
         self.refresh_export()
@@ -821,10 +824,10 @@ class App(tk.Tk):
             return
         self.playlist_list.delete(0, 'end')
         self.playlist_keys = []
-        for key, name in sorted(self.catalog.names('playlist', self.category.get()), key=lambda v: v[1].casefold()):
+        for key, name in sorted(self.catalog.names('playlist', None), key=lambda v: v[1].casefold()):
             self.playlist_keys.append(key)
             self.playlist_list.insert('end', name)
-        preset_names = [name for key, name in sorted(self.catalog.names('preset', self.category.get()), key=lambda v: v[1].casefold()) if self.is_visible_compatible(key)]
+        preset_names = [name for key, name in sorted(self.catalog.names('preset', None), key=lambda v: v[1].casefold()) if self.is_visible_compatible(key)]
         self.preset_choice['values'] = preset_names
         if preset_names and not self.preset_choice.get():
             self.preset_choice.set(preset_names[0])
@@ -937,9 +940,9 @@ class App(tk.Tk):
             return
         self.export_tree.delete(*self.export_tree.get_children())
         for key, rec in sorted(self.catalog.entries.items(), key=lambda pair: (pair[1]['kind'], pair[1]['data'].get('n','').casefold())):
-            if rec['category'] == self.category.get() and self.is_visible_compatible(key):
+            if self.is_visible_compatible(key):
                 selected = self.selected_export.get(key, True)
-                self.export_tree.insert('', 'end', iid=key, values=('[x]' if selected else '[ ]', rec['kind'], rec['data'].get('n')))
+                self.export_tree.insert('', 'end', iid=key, values=('[x]' if selected else '[ ]', rec['kind'], rec['category'], rec['data'].get('n')))
 
     def toggle_export(self, event):
         iid = self.export_tree.identify_row(event.y)
@@ -959,7 +962,7 @@ class App(tk.Tk):
                 continue
             for name in rec['data']['playlist'].get('psn', []):
                 for candidate, cre in self.catalog.entries.items():
-                    if cre['kind'] == 'preset' and cre['category'] == self.category.get() and cre['data']['n'].casefold() == str(name).casefold():
+                    if cre['kind'] == 'preset' and cre['data']['n'].casefold() == str(name).casefold():
                         self.selected_export[candidate] = True
         self.refresh_export()
 
@@ -967,7 +970,7 @@ class App(tk.Tk):
         keys = [k for k in self.export_tree.get_children() if self.selected_export.get(k, True)]
         presets = [k for k in keys if self.catalog.entries[k]['kind'] == 'preset']
         playlists = [k for k in keys if self.catalog.entries[k]['kind'] == 'playlist']
-        return compile_export(self.catalog, self.category.get(), presets, playlists)
+        return compile_export(self.catalog, 'all', presets, playlists)
 
     def export_dialog(self):
         try:
@@ -980,7 +983,7 @@ class App(tk.Tk):
             dest = EXPORTS / (dest.name + '_' + item_id()[:4])
         dest.mkdir(parents=True)
         write_json(dest / 'presets.json', doc)
-        write_json(dest / 'manifest.json', {'created_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'category': self.category.get(), 'names_to_ids': {self.catalog.entries[k]['data']['n']: val for k, val in ids.items()}, 'entry_count': len(ids)})
+        write_json(dest / 'manifest.json', {'created_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'category': 'all', 'names_to_ids': {self.catalog.entries[k]['data']['n']: val for k, val in ids.items()}, 'entry_count': len(ids)})
         self.export_info.config(state='normal')
         self.export_info.delete('1.0', 'end')
         self.export_info.insert('1.0', f'Exported {len(ids)} entries\n{dest / "presets.json"}\n{dest / "manifest.json"}\n')
@@ -994,15 +997,18 @@ class App(tk.Tk):
         path = filedialog.askopenfilename(title='Import existing PulSar presets.json', filetypes=[('JSON', '*.json'), ('All', '*.*')])
         if not path:
             return
-        replace = messagebox.askyesno('Import matching names', 'Replace existing entries with matching names in this category?\n\nYes: update existing. No: create additional library entries.')
+        category = self.choose_storage_category()
+        if category is None:
+            return
+        replace = messagebox.askyesno('Import matching names', f'Import into {category} storage file?\n\nYes: replace same-name entries in that file. No: create additional entries.')
         try:
-            added, skipped = self.catalog.import_file(path, self.category.get(), replace=replace)
+            added, skipped = self.catalog.import_file(path, category, replace=replace)
         except Exception as exc:
             messagebox.showerror('Import failed', str(exc))
             return
         self.refresh_library()
         self.status(f'Imported {added} entries; skipped {skipped} entries')
-        messagebox.showinfo('Import complete', f'Imported {added} entries. Skipped {skipped} unnamed/empty entries.\nCategory: {self.category.get()}')
+        messagebox.showinfo('Import complete', f'Imported {added} entries. Skipped {skipped} unnamed/empty entries.\nStored in: {category}')
 
     def worker(self, callback, done):
         def task():
@@ -1114,9 +1120,12 @@ class App(tk.Tk):
             backup = EXPORTS / dt.datetime.now().strftime('device_%Y-%m-%d_%H-%M-%S')
             write_json(backup / 'presets.json', data)
             self.device_log(f'Download saved: {backup / "presets.json"}')
-            if messagebox.askyesno('Import downloaded presets', f'Import {len(data)} downloaded entries into the {self.category.get()} library?\nDevice: {device["ip"]}\n\nChoose No to keep the downloaded backup without importing.'):
+            if messagebox.askyesno('Import downloaded presets', f'Import {len(data)} downloaded entries into the unified library?\nDevice: {device["ip"]}\n\nChoose No to keep the downloaded backup without importing.'):
+                category = self.choose_storage_category()
+                if category is None:
+                    return
                 path = backup / 'presets.json'
-                count, skipped = self.catalog.import_file(path, self.category.get(), replace=False)
+                count, skipped = self.catalog.import_file(path, category, replace=False)
                 self.refresh_library()
                 self.tabs.select(0)
                 self.device_log(f'Imported {count} entries, skipped {skipped}. Existing names were not overwritten.')
@@ -1381,9 +1390,8 @@ class App(tk.Tk):
     def refresh_viewer(self):
         if not hasattr(self, 'viewer_playlists'):
             return
-        category = self.category.get()
-        presets = [(k, v) for k, v in self.catalog.entries.items() if v['category']==category and v['kind']=='preset']
-        playlists = [(k, v) for k, v in self.catalog.entries.items() if v['category']==category and v['kind']=='playlist']
+        presets = [(k, v) for k, v in self.catalog.entries.items() if v['kind']=='preset']
+        playlists = [(k, v) for k, v in self.catalog.entries.items() if v['kind']=='playlist']
         playlists.sort(key=lambda t: t[1]['data'].get('n', '').casefold())
         names = {v['data'].get('n','').casefold():k for k,v in presets}
         if self.only_supported.get() and self.target_device.get() in self.device_effect_cache:
