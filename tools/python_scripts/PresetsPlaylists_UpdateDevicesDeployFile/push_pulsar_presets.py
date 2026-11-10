@@ -115,14 +115,14 @@ def main():
     # Temporary deployment marker: DDMMHHMM, refreshed on each invocation.
     # Only preset 1 is renamed; IDs, effects and playlist references remain untouched.
     old_name = preset1["n"]
-    clean_name = re.sub(r"^(?:\\d{2}[A-Za-z]{3}\\d{2}[a-z]|\\d{8})\\s+", "", old_name)
+    clean_name = re.sub(r"^(?:\d{2}[A-Za-z]{3}\d{2}[a-z]|\d{8})\s+", "", old_name)
     new_name = datetime.now().strftime("%d%m%H%M") + " " + clean_name
     preset1["n"] = new_name
 
     # Keep the on-disk presets.json synchronized with the uploaded bytes.
     # One compact JSON object per preset/playlist instead of a single huge line.
     entries = [f'  {json.dumps(key)}:{json.dumps(value, ensure_ascii=False, separators=(",", ":"))}' for key, value in parsed.items()]
-    payload = ("{\\n" + ",\\n".join(entries) + "\\n}\\n").encode("utf-8")
+    payload = ("{\n" + ",\n".join(entries) + "\n}\n").encode("utf-8")
     src.write_bytes(payload)
     print(f"Preset 1 revision: {old_name!r} -> {new_name!r}")
 
