@@ -1968,7 +1968,8 @@ if (jtok_pwi && jtok_pwi.isArray())
 
 
   if(jtok = obj["Preset"].getObject()["Load"]){
-    uint8_t ps = jtok.getInt();
+    uint16_t ps = jtok.getInt();
+    ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_2KEY_NVALUE_K("Preset","Load")), ps);
     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
     #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     unloadPlaylist();          // applying a preset unloads the playlist, to stop any already running playlist

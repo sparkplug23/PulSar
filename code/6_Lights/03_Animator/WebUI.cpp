@@ -569,13 +569,13 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   //   ps:
   //     The request contains only a preset ID. Load that preset asynchronously
   //     from the preset file and stop any running playlist.
-  byte presetToRestore = 0;
+  uint16_t presetToRestore = 0;
 
   if (!root["pd"].isNull())
   {
-    const byte appliedPreset = root[F("pd")] | 0;
+    const uint16_t appliedPreset = root[F("pd")] | 0;
 
-    if (appliedPreset > 0 && appliedPreset < 251)
+    if (appliedPreset > PRESET_ID_NONE && appliedPreset < PRESET_ID_TEMP)
     {
       currentPreset = appliedPreset;
 
@@ -600,8 +600,8 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
     if (
       root["win"].isNull() &&
       getVal(root["ps"], ps, (uint16_t)0, (uint16_t)0) &&
-      ps > 0 &&
-      ps < 251 &&
+      ps > PRESET_ID_NONE &&
+      ps < PRESET_ID_TEMP &&
       ps != currentPreset
     )
     {
@@ -2717,12 +2717,10 @@ void sendDataWs(AsyncWebSocketClient * client)
   }
   serializeJson(*tkr_jsona->pDoc, (char *)buffer.data(), len);
 
-  ALOG_INF(PSTR("Sending WS data "));
+  ALOG_INF(PSTR("Sending WS data to %d clients"), client ? 1 : tkr_anim->websocket_lights->count());
   if (client) {
-    ALOG_INF(PSTR("to a single client."));
     client->text(std::move(buffer));
   } else {
-    ALOG_INF(PSTR("to multiple clients."));
     tkr_anim->websocket_lights->textAll(std::move(buffer));
   }
 
