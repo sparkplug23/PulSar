@@ -10,6 +10,7 @@ from urllib.request import Request, build_opener, ProxyHandler
 from urllib.error import HTTPError, URLError
 import hashlib
 import json
+import re
 import socket
 import sys
 import uuid
@@ -101,13 +102,29 @@ def main():
     if not src.is_file():
         sys.exit(f"ERROR: Source file not found: {src.resolve()}")
 
-    payload = src.read_bytes()
     try:
-        parsed = json.loads(payload.decode("utf-8-sig"))
+        parsed = json.loads(src.read_text(encoding="utf-8-sig"))
         if not isinstance(parsed, dict):
             raise ValueError("Top-level JSON must be an object")
+        preset1 = parsed.get("1")
+        if not isinstance(preset1, dict) or not isinstance(preset1.get("n"), str):
+            raise ValueError('Preset index 1 must contain a string "n"')
     except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
         sys.exit(f"ERROR: Invalid presets JSON: {exc}")
+
+    # Temporary deployment marker: DDMMHHMM, refreshed on each invocation.
+    # Only preset 1 is renamed; IDs, effects and playlist references remain untouched.
+    old_name = preset1["n"]
+    clean_name = re.sub(r"^(?:\\d{2}[A-Za-z]{3}\\d{2}[a-z]|\\d{8})\\s+", "", old_name)
+    new_name = datetime.now().strftime("%d%m%H%M") + " " + clean_name
+    preset1["n"] = new_name
+
+    # Keep the on-disk presets.json synchronized with the uploaded bytes.
+    # One compact JSON object per preset/playlist instead of a single huge line.
+    entries = [f'  {json.dumps(key)}:{json.dumps(value, ensure_ascii=False, separators=(",", ":"))}' for key, value in parsed.items()]
+    payload = ("{\\n" + ",\\n".join(entries) + "\\n}\\n").encode("utf-8")
+    src.write_bytes(payload)
+    print(f"Preset 1 revision: {old_name!r} -> {new_name!r}")
 
     if not dest_devices:
         sys.exit("ERROR: dest_devices is empty")
