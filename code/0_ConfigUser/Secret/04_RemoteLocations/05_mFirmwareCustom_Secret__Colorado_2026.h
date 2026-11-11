@@ -1273,6 +1273,164 @@ while the thought is in my head, can you also use the node discovery we did on t
 #endif
 
 
+
+#ifdef DEVICE_COLORADO26__LIGHT04__MEADOWS_SERIAL
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR "col26__light04__meadows_serial"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Colorado Meadows 04 Serial LEDs#Outside"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+    #define DEVICENAME_DESCRIPTION_CTR "Colorado Meadows;Optional SoftAP"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
+
+// #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
+  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
+
+
+  // =========================================================
+  // Lighting: 100 WS2812 LEDs, GPIO13
+  // =========================================================
+
+
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
+
+      #define USE_LIGHTING_TEMPLATE
+      DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+      R"=====(
+      {
+        "BusConfig":[      
+          {
+            "Pin":16,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":0,
+            "Length":300
+          },
+          {
+            "Pin":17,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":300,
+            "Length":300
+          },
+          {
+            "Pin":2,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":600,
+            "Length":300
+          },
+          {
+            "Pin":4,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":900,
+            "Length":300
+          },
+          {
+            "Pin":5,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":1200,
+            "Length":300
+          },
+          {
+            "Pin":12,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":1500,
+            "Length":300
+          },
+          {
+            "Pin":14,
+            "ColourOrder":"RGB",
+            "BusType":"WS2812_RGB",
+            "Start":1800,
+            "Length":200
+          }
+        ],
+        "Segments":[
+          {
+            "Name":"Bus 1",
+            "PixelRange": [
+              0,
+              2000
+            ],
+            "ColourPalette":"Snowy 02",
+            "ColourType":3,
+            "Effects": {
+              "Function":"Static",
+              "Speed":255,
+              "Intensity":127,
+              "Grouping":1,
+              "RateMs": 20
+            },
+            "BrightnessRGB": 100
+          }
+        ],
+        "BrightnessRGB": 100
+      }
+      )=====";
+
+  #endif
+
+  
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST1
+
+      #define USE_LIGHTING_TEMPLATE
+
+      DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+      R"=====(
+      {
+        "BusConfig":[
+          {
+            "Pin":13,
+            "ColourOrder":"GBR",
+            "BusType":"WS2812_RGB",
+            "Start":0,
+            "Length":100
+          }
+        ],
+        "Segments":[
+          {
+            "PixelRange":[0,100],
+            "ColourPalette":"Snowy 02",
+            "ColourType":3,
+            "Effects":{
+              "Function":"Candles",
+              "Speed":88,
+              "Intensity":255,
+              "Grouping":1,
+              "RateMs":20
+            },
+            "BrightnessRGB":100
+          }
+        ],
+        "BrightnessRGB":100
+      }
+      )=====";
+
+      #define USE_MODULE_TEMPLATE
+      DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+      "{"
+        "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+        "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+        "\"" D_GPIO_NUMBER "\":{"
+          "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+        "},"
+        "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+        "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+      "}";
+
+
+  #endif
+
+#endif
+
+
 //////////////////////////
 
 
@@ -1758,7 +1916,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   * SECTION: Enable Grouped
   ************************************/  
 
-  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
   // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
 
   /***********************************
@@ -1768,6 +1926,9 @@ while the thought is in my head, can you also use the node discovery we did on t
   /***********************************
    * SECTION: Lighting Configs
   ************************************/   
+
+  
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
 
 
   #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
