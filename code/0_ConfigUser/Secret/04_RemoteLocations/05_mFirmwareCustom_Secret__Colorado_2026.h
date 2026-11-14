@@ -2107,8 +2107,10 @@ while the thought is in my head, can you also use the node discovery we did on t
 
 #define RT_COVERAGE_DEBUG
 
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
+
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
+
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -2141,12 +2143,16 @@ while the thought is in my head, can you also use the node discovery we did on t
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects":{
-          "Function":"Spaceships",
-          "Speed":127,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs":20
-        },
+            "Function":"PS Ballpit",
+            "Speed":100,
+            "Intensity":220,
+            "Custom1":70,
+            "Custom2":180,
+            "Custom3":31,
+            "Check3":1,
+            "Grouping":1,
+            "RateMs":20
+          },
         "BrightnessRGB":100
       }
     ],
