@@ -6558,7 +6558,15 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
     i &= 0xFFFF;    //truncate vstrip index
     if (i >= vL) 
     {
-      ALOG_ERR(PSTR("return %d"),__LINE__);
+      // ALOG_ERR(PSTR("return %d"),__LINE__);
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PIXEL_OUT_OF_BOUNDS
+      static uint32_t lastWarningMs = 0;
+      if ((uint32_t)(millis() - lastWarningMs) >= 1000UL)
+      {
+        lastWarningMs = millis();
+        ALOG_ERR(PSTR("PIXEL OOB: i=%d vL=%d vStrip=%d map1D2D=%d"), i, vL, vStrip, map1D2D);
+      }
+      #endif
       return;  // if pixel would still fall out of segment just exit
     }
     #else

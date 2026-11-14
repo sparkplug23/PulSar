@@ -19,6 +19,9 @@
 
 #include "dynarray.h"
 
+#define ENABLE_FEATURE_PLAYLIST__DEBUG_MESSAGES
+#define ENABLE_DEBUGFEATURE_LIGHTING__PIXEL_OUT_OF_BOUNDS
+
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
   #include "ParticleSystem.h" // include particle system code only if at least one system is enabled
   #ifdef WLED_DISABLE_PARTICLESYSTEM2D

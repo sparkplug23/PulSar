@@ -610,6 +610,30 @@ void mAnimatorLight::SubTask_Playlist()
 
   uint32_t nowMs = millis();
 
+  #ifdef ENABLE_FEATURE_PLAYLIST__DEBUG_MESSAGES
+  if ((uint32_t)(nowMs - tSaved_playlist_debug) >= 1000UL)
+  {
+    tSaved_playlist_debug = nowMs;
+
+    if (playlistIndex >= 0 && playlistIndex < playlistLen)
+    {
+      const PlaylistEntry& entry = playlistEntries[playlistIndex];
+      const uint32_t durationMs = playlistEntryDur * 100UL;
+      const uint32_t elapsedMs = nowMs - presetCycledTime;
+      const uint32_t remainingMs = elapsedMs < durationMs ? durationMs - elapsedMs : 0;
+
+      ALOG_INF(PSTR("PLAYLIST %u | Entry %d/%u | Preset %u | Elapsed %lus | Remaining %lus | Duration %lus"),
+        (unsigned)currentPlaylist,
+        (int)playlistIndex + 1,
+        (unsigned)playlistLen,
+        (unsigned)entry.preset,
+        (unsigned long)(elapsedMs / 1000UL),
+        (unsigned long)(remainingMs / 1000UL),
+        (unsigned long)(durationMs / 1000UL));
+    }
+  }
+  #endif
+
   bool forceCycle = false;
 
 
