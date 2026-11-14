@@ -1,6 +1,6 @@
 {
   "0":{},
-  "1":{"n":"13111854 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
+  "1":{"n":"13112230 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
   "2":{"n":"FastPops Snowy02","Pal":"Snowy 02","Effects":{"FX":"Firefly","IX":20,"SX":255,"GP":1,"DC":7,"RA":50},"BrightnessRGB":100},
   "3":{"n":"Steps 2ColG1","Pal":"Colourful Pairs 01","Effects":{"FX":"Stepping Palette","IX":1,"SX":50,"GP":1,"DC":0,"RA":2000},"BrightnessRGB":100},
   "4":{"n":"*Steps 2ColG150","Pal":"Colourful Pairs 01","Effects":{"FX":"Stepping Palette","IX":0,"SX":20,"GP":150,"DC":0,"RA":1500},"BrightnessRGB":100},

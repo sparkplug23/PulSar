@@ -1973,6 +1973,26 @@ while the thought is in my head, can you also use the node discovery we did on t
 
   #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
 
+
+
+  #define USE_MODULE_LIGHTS_HUB75
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define BOARD_HAS_PSRAM
+
+
+
+
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
+
     #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
 
     
@@ -2044,6 +2064,97 @@ while the thought is in my head, can you also use the node discovery we did on t
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  
+  #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D_TEST
+  
+  #define USE_MODULE_LIGHTS_HUB75
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define BOARD_HAS_PSRAM
+
+
+
+
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+
+
+#define RT_COVERAGE_DEBUG
+
+#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Name":"HUB75E P2.5 CHIP",
+        "BusType":"HUB75E",
+        "ColourOrder":"GBR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Spaceships",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":100
+  }
+  )=====";
+      
+  #endif
 
 
 #endif // END DEVICE
