@@ -478,15 +478,26 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
    *************************************************************************/
   if(jtok_sub = getTokenIncludingAlias(obj, PM_EFFECTS, "EF"))//obj[PM_EFFECTS])
   {    
+    ALOG_INF(PSTR("EFFECTS COMMAND"));
     JsonParserObject jobj = jtok_sub.getObject();
 
     if(jtok = getTokenIncludingAlias(jobj, PM_FUNCTION, "FX"))
     { 
+    ALOG_INF(PSTR("FX COMMAND"));
       if(jtok.isStr())
       {
-        if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0)
+        const char* fx_name = jtok.getStr();
+        tmp_id = GetFlasherFunctionIDbyName(fx_name);
+
+        ALOG_INF(PSTR("FX lookup: '%s' -> %d"), fx_name, tmp_id);
+
+        if(tmp_id >= 0)
         {
           CommandSet_Flasher_FunctionID(tmp_id, segment_index);
+        }
+        else
+        {
+          ALOG_ERR(PSTR("FX NOT FOUND: '%s'"), fx_name);
         }
       }else
       if(jtok.isNum())

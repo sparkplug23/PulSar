@@ -106,7 +106,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 // #define DEVICE_COLORADO26__LIGHT02__MEADOWS_FRONT
 // #define DEVICE_COLORADO26__LIGHT03__MEADOWS_SIDE
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
-// #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
+#define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
 // #define DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
 
 /**
@@ -1901,16 +1901,16 @@ while the thought is in my head, can you also use the node discovery we did on t
  *
  */
 #ifdef DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
-  #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__redboard_01"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  // #ifndef DEVICENAME_CTR
+  // #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  // #endif
+  // #ifndef DEVICENAME_FRIENDLY_CTR
+  // #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  // #endif
+  // #ifndef DEVICENAME_DESCRIPTION_CTR
+  // #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  // #endif
+  // #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
   /***********************************
   * SECTION: Enable Grouped

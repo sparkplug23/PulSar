@@ -28,7 +28,8 @@ dest_devices = [
     # "192.168.0.173", # meadows side
     # "192.168.0.174", # 2d matrix
     # "192.168.0.160", # 2d matrix fridge
-    "192.168.0.162", # pink serial tester
+    # "192.168.0.162", # pink serial tester
+    "192.168.0.168", # esp32s3 serial tester
     ]
 filesystem_path = "/presets.json"
 
