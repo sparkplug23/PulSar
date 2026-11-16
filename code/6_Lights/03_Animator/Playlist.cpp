@@ -921,10 +921,17 @@ void mAnimatorLight::SubTask_Playlist()
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::serializePlaylist(JsonObject sObj)
 {
+  
+  if (playlistUsesEffects)
+  {
+    ALOG_WRN(PSTR("serializePlaylist: effect playlists not yet supported"));
+    return;
+  }
+
+  
   JsonObject playlist = sObj.createNestedObject(F("playlist"));
   
-  JsonArray ps = playlist.createNestedArray(playlistUsesEffects ? "pse" : "ps"); // check, but dont like this confusion
-
+  JsonArray ps = playlist.createNestedArray("ps");
   JsonArray dur = playlist.createNestedArray("dur");
   JsonArray transition = playlist.createNestedArray("transition");
 
