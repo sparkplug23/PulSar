@@ -3327,7 +3327,7 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer) - 1);
     lineBuffer[sizeof(lineBuffer) - 1] = '\0'; // terminate string
 
-    ALOG_INF(PSTR("lineBuffer i%d id%d %s"), i, effects.id[i], lineBuffer);
+    // ALOG_INF(PSTR("lineBuffer i%d id%d %s"), i, effects.id[i], lineBuffer);
 
     char* dataPtr = strchr(lineBuffer, '@');
     if (dataPtr) *dataPtr = '\0'; // replace name divider with null termination. Escape "name@data"

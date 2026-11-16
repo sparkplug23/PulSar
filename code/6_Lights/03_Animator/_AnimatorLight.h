@@ -1305,6 +1305,7 @@ uint32_t playlistEntryDur = 0;
 int32_t currentPlaylist = -1;
 
 bool playlistFallbackActive = false;
+bool playlistUsesEffects = false;
 
 uint32_t tSaved_playlist_debug = 0;
 

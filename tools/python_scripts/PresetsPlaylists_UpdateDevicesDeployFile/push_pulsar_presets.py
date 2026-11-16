@@ -16,7 +16,12 @@ import sys
 import uuid
 
 # ======================== CONFIGURATION ========================
-src_preset_file = r"notes\PresetJsonFiles\Christmas2026_Shared_9Nov26\presets.json"
+# src_preset_file = r"notes\PresetJsonFiles\Christmas2026_Shared_9Nov26\presets.json"
+src_preset_file = r"notes\PresetJsonFiles\Christmas2026_Shared_14Nov26_PSENDev\presets.json"
+
+
+
+
 # dest_devices = [
 #     "col26--light01--whitehall-front",  # replace with actual mDNS hostname
 #     "col26--light02--meadows-front",  # replace with actual mDNS hostname

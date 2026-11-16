@@ -49,6 +49,7 @@ void mAnimatorLight::unloadPlaylist()
   playlistDefaultPreset = 0;
 
   playlistFallbackActive = false;
+  playlistUsesEffects = false;
 
   ALOG_INF(PSTR("unloadPlaylist"));
 }
@@ -201,25 +202,25 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
   unloadPlaylist();
 
 
-  // ==================================================================
+    // ==================================================================
   // Determine playlist length
   // ==================================================================
 
-  JsonArray presets;
+  JsonArray presets = playlistObj["ps"];
   JsonArray psn = playlistObj["psn"];
+  JsonArray pse = playlistObj["pse"];
+  JsonArray psen = playlistObj["psen"];
 
-  bool useNames = false;
+  bool useNames = !psn.isNull() && psn.size() > 0;
+  bool useEffectIndices = !pse.isNull() && pse.size() > 0;
+  bool useEffectNames = !psen.isNull() && psen.size() > 0;
 
-  if (!psn.isNull() && psn.size() > 0)
-  {
-    useNames = true;
-    playlistLen = psn.size();
-  }
-  else
-  {
-    presets = playlistObj["ps"];
-    playlistLen = presets.size();
-  }
+  playlistUsesEffects = useEffectIndices || useEffectNames;
+
+  if (useEffectNames) playlistLen = psen.size();
+  else if (useEffectIndices) playlistLen = pse.size();
+  else if (useNames) playlistLen = psn.size();
+  else playlistLen = presets.size();
 
   if (playlistLen == 0)
   {
@@ -227,10 +228,7 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
     return -1;
   }
 
-  if (playlistLen > 100)
-  {
-    playlistLen = 100;
-  }
+  if (playlistLen > 100) playlistLen = 100;
 
 
   // ==================================================================
@@ -260,70 +258,107 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
   }
 
 
-  // ==================================================================
-  // Preset IDs
+    // ==================================================================
+  // Resolve playlist entries
   // ==================================================================
 
   uint8_t it = 0;
 
-  #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
-
-  if (useNames)
+  if (useEffectNames)
   {
+    ALOG_INF(PSTR("Loading playlist via effect names (psen)"));
+
+    for (const char* name : psen)
+    {
+      if (it >= playlistLen) break;
+
+      int16_t fx = GetFlasherFunctionIDbyName(name);
+
+      if (fx < 0 || fx >= getEffectCount())
+      {
+        ALOG_ERR(PSTR("Playlist: psen[%u] '%s' not found"), it, name ? name : "(null)");
+        unloadPlaylist();
+        return -1;
+      }
+
+      playlistEntries[it].preset = (uint16_t)fx;
+
+      ALOG_INF(PSTR("Playlist: psen[%u] '%s' -> effect %u"), it, name, (unsigned)fx);
+      it++;
+    }
+  }
+  else if (useEffectIndices)
+  {
+    ALOG_INF(PSTR("Loading playlist via effect indices (pse)"));
+
+    for (uint32_t fx : pse)
+    {
+      if (it >= playlistLen) break;
+
+      if (fx >= getEffectCount())
+      {
+        ALOG_ERR(PSTR("Playlist: pse[%u] invalid effect %lu"), it, (unsigned long)fx);
+        unloadPlaylist();
+        return -1;
+      }
+
+      playlistEntries[it].preset = (uint16_t)fx;
+
+      ALOG_INF(PSTR("Playlist: pse[%u] -> effect %u"), it, (unsigned)fx);
+      it++;
+    }
+  }
+  else if (useNames)
+  {
+    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
+
     ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
 
     for (const char* name : psn)
     {
-      if (it >= playlistLen)
-      {
-        break;
-      }
+      if (it >= playlistLen) break;
 
       uint16_t foundIndex = PRESET_ID_NONE;
 
-      for (byte p = 1; p < 251; p++)
+      for (uint16_t p = 1; p < 251; p++)
       {
         String pname;
 
-        if (getPresetName(p, pname))
+        if (getPresetName(p, pname) && pname.equalsIgnoreCase(name))
         {
-          if (pname.equalsIgnoreCase(name))
-          {
-            foundIndex = p;
-            break;
-          }
+          foundIndex = p;
+          break;
         }
       }
 
-      if (!foundIndex)
+      if (foundIndex == PRESET_ID_NONE)
       {
-        ALOG_ERR(PSTR("Playlist: preset name '%s' not found"), name ? name : "(null)");
+        ALOG_ERR(PSTR("Playlist: psn[%u] '%s' not found"), it, name ? name : "(null)");
       }
 
       playlistEntries[it].preset = foundIndex;
 
       ALOG_INF(PSTR("Playlist: psn[%u] '%s' -> preset %u"), it, name ? name : "(null)", foundIndex);
-
       it++;
     }
+
+    #else
+    ALOG_ERR(PSTR("Playlist: psn requires ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME"));
+    unloadPlaylist();
+    return -1;
+    #endif
   }
   else
-
-  #endif
   {
     ALOG_INF(PSTR("Loading playlist via preset indices (ps)"));
 
     for (uint32_t ps : presets)
     {
-      if (it >= playlistLen)
-      {
-        break;
-      }
+      if (it >= playlistLen) break;
 
       playlistEntries[it].preset = (ps > 0 && ps < PRESET_ID_TEMP) ? (uint16_t)ps : PRESET_ID_NONE;
 
       ALOG_INF(PSTR("Playlist: ps[%u] -> %u"), it, playlistEntries[it].preset);
-
       it++;
     }
   }
@@ -863,7 +898,21 @@ void mAnimatorLight::SubTask_Playlist()
 
   ALOG_INF(PSTR("Playlist%d index=%d/%u preset=%u dur=%lu transition=%lu"), currentPlaylist, playlistIndex, playlistLen, entry.preset, (unsigned long)entry.dur, (unsigned long)entry.tr);
 
-  applyPreset(entry.preset);
+    if (playlistUsesEffects)
+  {
+    ALOG_INF(PSTR("Playlist: applying effect %u with defaults"), entry.preset);
+
+    for (uint8_t i = 0; i < getSegmentsNum(); i++)
+    {
+      SEGMENT_I(i).setEffect(entry.preset, true);
+    }
+
+    force_update();
+  }
+  else
+  {
+    applyPreset(entry.preset);
+  }
 }
 
 
@@ -873,8 +922,9 @@ void mAnimatorLight::SubTask_Playlist()
 void mAnimatorLight::serializePlaylist(JsonObject sObj)
 {
   JsonObject playlist = sObj.createNestedObject(F("playlist"));
+  
+  JsonArray ps = playlist.createNestedArray(playlistUsesEffects ? "pse" : "ps"); // check, but dont like this confusion
 
-  JsonArray ps = playlist.createNestedArray("ps");
   JsonArray dur = playlist.createNestedArray("dur");
   JsonArray transition = playlist.createNestedArray("transition");
 
