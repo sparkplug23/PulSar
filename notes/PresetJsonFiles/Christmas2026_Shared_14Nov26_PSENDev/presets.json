@@ -1,6 +1,6 @@
 {
   "0":{},
-  "1":{"n":"14111032 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
+  "1":{"n":"15112141 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
   "10000":{"n":"2D Defaults Matrix","Effects":{"FX":"Matrix"},"LoadDefaults":true},
   "10001":{"n":"2D Defaults DNA","Effects":{"FX":"DNA"},"LoadDefaults":true},
   "10002":{"n":"2D Defaults Firenoise","Effects":{"FX":"Firenoise"},"LoadDefaults":true},

@@ -79,8 +79,8 @@
 #endif
 
 
-    #define PRESET_ID_NONE 0
-    #define PRESET_ID_TEMP 65535
+#define PRESET_ID_NONE 0
+#define PRESET_ID_TEMP 65535
 
 
 
@@ -5242,6 +5242,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     // - The remaining entries are ordered by their stage value (Release=0 … Unstable=4), stable within ties.
     void sortEffects(Effect_DevStage promote_first);
     #endif
+
+    int16_t GetEffectIndexByID(uint16_t effect_id) const;
 
     void waitForIt();                                // wait until frame is over (service() has finished or time for 1 frame has passed)
 
