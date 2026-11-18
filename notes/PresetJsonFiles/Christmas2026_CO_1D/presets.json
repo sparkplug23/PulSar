@@ -55,5 +55,5 @@
   "20210":{"playlist":{"ps":[1,2,3,4,5,6,55,7,40,10,41,42],"dur":[100,100,400,400,50,200,100,200,200,200,100,100],"repeat":0,"end":0,"r":1},"on":true,"n":"25WhiteN2"},
   "20220":{"playlist":{"ps":[5,223],"dur":[50,50],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate Grp150"},
   "20221":{"playlist":{"ps":[222,224],"dur":[50,50],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate NoGrp"},
-  "20222":{"n":"ME26-Dev1","playlist":{"ps":[153,163,4,5],"dur":[100,200,200,200],"repeat":0,"end":0,"r":1},"on":true}
+  "20222":{"n":"ME26-Dev1","playlist":{"dur":[100,200,200,200],"repeat":0,"end":0,"r":1,"psn":["Static Override","Steps 2ColG1b","*Steps 2ColG150","*Static ColG150"]},"on":true}
 }
