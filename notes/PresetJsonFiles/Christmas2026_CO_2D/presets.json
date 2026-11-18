@@ -1,6 +1,6 @@
 {
   "0":{},
-  "1":{"n":"15112141 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
+  "1":{"n":"17111853 Static Snowy02","Pal":"Snowy 02","Effects":{"FX":"Static Palette","IX":127,"SX":0,"GP":1,"DC":0,"Reverse":0,"RA":4000},"BrightnessRGB":100},
   "10000":{"n":"2D Defaults Matrix","Effects":{"FX":"Matrix"},"LoadDefaults":true},
   "10001":{"n":"2D Defaults DNA","Effects":{"FX":"DNA"},"LoadDefaults":true},
   "10002":{"n":"2D Defaults Firenoise","Effects":{"FX":"Firenoise"},"LoadDefaults":true},
@@ -22,7 +22,5 @@
   "20002":{"n":"2D All 66 FX Names","playlist":{"psen":["Palette2","Fireworks","Exploding Fireworks","Starburst","Rain","Tetrix","Exploding Fireworks (No Launch)","Fire 2012","Ripple","Ripple Rainbow","Black Hole","Colored Bursts","DNA","DNA Spiral","Drift","Firenoise","Frizzles","Game Of Life","Hipnotic","Julia","Lissajous","Matrix","Metaballs","Noise2D","Plasma Ball","Polar Lights","Pulser","Sindots","Squared Swirl","Sun Radiation","Tartan","Spaceships","Crazy Bees","Ghost Rider","Blobs","Scrolling Text","Scrolling Text with Baseline","Drift Rose","Digital Text Clock","Rotozoomer","Distortion Waves","Soap","Octopus","Waving Cell","Halo Sparkle","Aurora Curtains","Fork Lightning","Falling Comets","Melting Drips","Melting Droplets","Sequenced Wave Drips","Frozen Melt","Swirl","Waverly","GEQ","Funky Plank","Akemi","Snow Fall","Snow Flakes","Snow Glow","PS Volcano","PS Fire","PS Fireworks","PS Vortex","PS Fuzzy Noise","PS Ballpit"],"dur":[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],"repeat":0,"end":0,"r":0},"on":true},
   "20003":{"n":"2D Verified FX Indices","playlist":{"pse":[45],"dur":[100],"repeat":0,"end":0,"r":0},"on":true},
   "20004":{"n":"2D Verified FX Names","playlist":{"psen":["Palette2"],"dur":[100],"repeat":0,"end":0,"r":0},"on":true},
-
   "20005":{"n":"2D Minimal","playlist":{"psen":["Black Hole","PS Ballpit"],"dur":[100,100],"repeat":0,"end":0,"r":0},"on":true}
-
 }
