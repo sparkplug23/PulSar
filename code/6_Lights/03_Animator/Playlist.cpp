@@ -310,10 +310,43 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
   }
   else if (useNames)
   {
-    // Development-only psn resolution is disabled. Export numeric ps IDs before deployment.
-    ALOG_ERR(PSTR("Playlist: psn is disabled; use numeric ps entries"));
+    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
+
+    ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
+
+    for (const char* name : psn)
+    {
+      if (it >= playlistLen) break;
+
+      uint16_t foundIndex = PRESET_ID_NONE;
+
+      for (uint16_t p = 1; p < 251; p++)
+      {
+        String pname;
+
+        if (getPresetName(p, pname) && pname.equalsIgnoreCase(name))
+        {
+          foundIndex = p;
+          break;
+        }
+      }
+
+      if (foundIndex == PRESET_ID_NONE)
+      {
+        ALOG_ERR(PSTR("Playlist: psn[%u] '%s' not found"), it, name ? name : "(null)");
+      }
+
+      playlistEntries[it].preset = foundIndex;
+
+      ALOG_INF(PSTR("Playlist: psn[%u] '%s' -> preset %u"), it, name ? name : "(null)", foundIndex);
+      it++;
+    }
+
+    #else
+    ALOG_ERR(PSTR("Playlist: psn requires ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME"));
     unloadPlaylist();
     return -1;
+    #endif
   }
   else
   {
