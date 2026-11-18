@@ -1645,7 +1645,8 @@ void mAnimatorLight::SubTask_Effects()
         // ALOG_INF(PSTR("FX CALL: index=%u registered_id=%u fn=%p"), seg.effect_id, effects.id[seg.effect_id], *(void**)(&effects.function[seg.effect_id]));
         // (this->*effects.function[seg.effect_id])();
 
-        // (this->*effects.function[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
+        
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__EFFECTS_IDS_FIXED
         const int16_t effect_index = GetEffectIndexByID(seg.effect_id);
         if (effect_index >= 0)
         {
@@ -1655,6 +1656,9 @@ void mAnimatorLight::SubTask_Effects()
         {
           ALOG_ERR(PSTR("Effect not registered: id=%u"), seg.effect_id);
         }
+        #else
+        (this->*effects.function[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
+        #endif
 
 
         seg.call++;
@@ -1672,6 +1676,8 @@ void mAnimatorLight::SubTask_Effects()
           segO->beginDraw(prog);            // set up palette & colors (also sets draw dimensions), parent segment has transition progress
           _currentSegment = segO;           // set current segment
           // workaround for on/off transition to respect blending style
+
+          #ifdef ENABLE_DEVFEATURE_LIGHTS__EFFECTS_IDS_FIXED
           const int16_t segO_effect_index = GetEffectIndexByID(segO->effect_id);
           if (segO_effect_index >= 0)
           {
@@ -1681,6 +1687,10 @@ void mAnimatorLight::SubTask_Effects()
           {
             ALOG_ERR(PSTR("Effect not registered: id=%u"), segO->effect_id);
           }
+          #else
+          (this->*effects.function[segO->effect_id])();
+          #endif
+
           segO->call++;                     // increment old mode run counter
           Segment::modeBlend(false);        // unset flag
         }

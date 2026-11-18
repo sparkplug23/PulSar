@@ -601,8 +601,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
       root["win"].isNull() &&
       getVal(root["ps"], ps, (uint16_t)0, (uint16_t)0) &&
       ps > PRESET_ID_NONE &&
-      ps < PRESET_ID_TEMP &&
-      ps != currentPreset
+      ps < PRESET_ID_TEMP
     )
     {
       presetCycCurr = ps;
