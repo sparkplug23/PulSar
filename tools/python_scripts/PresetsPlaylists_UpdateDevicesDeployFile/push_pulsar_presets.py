@@ -16,28 +16,17 @@ import sys
 import uuid
 
 # ======================== CONFIGURATION ========================
-# src_preset_file = r"notes\PresetJsonFiles\Christmas2026_Shared_9Nov26\presets.json"
-src_preset_file = r"notes\PresetJsonFiles\Christmas2026_Shared_14Nov26_PSENDev\presets.json"
-
-
-
-
-# dest_devices = [
-#     "col26--light01--whitehall-front",  # replace with actual mDNS hostname
-#     "col26--light02--meadows-front",  # replace with actual mDNS hostname
-#     "col26--light03--meadows-side",  # replace with actual mDNS hostname
-    # ]
-dest_devices = [
-    # "192.168.0.170", # whitehall
-    # "192.168.0.172", # meadows front
-    # "192.168.0.173", # meadows side
-    "192.168.0.174", # 2d matrix p2
-    "192.168.0.160", # 2d matrix fridge p2.5
-
-    # "192.168.0.162", # pink serial tester
-    
-    # "192.168.0.168", # esp32s3 serial tester
-    ]
+# Each row: [device IP / hostname, source presets.json]
+# Reusing a source uploads the same timestamped contents to every matching device.
+device_presets = [
+    ["192.168.0.174", r"notes\PresetJsonFiles\Christmas2026_CO_2D\presets.json"],
+    ["192.168.0.160", r"notes\PresetJsonFiles\Christmas2026_CO_2D\presets.json"],
+    # ["192.168.0.170", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Whitehall
+    # ["192.168.0.172", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows front
+    # ["192.168.0.173", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows side
+    # ["192.168.0.162", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Serial tester
+    # ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # S3 serial tester
+]
 filesystem_path = "/presets.json"
 
 backup_directory = Path(__file__).resolve().parent / "preset_upload_backups"
@@ -108,10 +97,10 @@ def locate_source(filename):
             return candidate
     return source
 
-def main():
-    src = locate_source(src_preset_file)
+def prepare_source(source_path):
+    src = locate_source(source_path)
     if not src.is_file():
-        sys.exit(f"ERROR: Source file not found: {src.resolve()}")
+        raise ValueError(f"Source file not found: {src.resolve()}")
 
     try:
         parsed = json.loads(src.read_text(encoding="utf-8-sig"))
@@ -121,35 +110,48 @@ def main():
         if not isinstance(preset1, dict) or not isinstance(preset1.get("n"), str):
             raise ValueError('Preset index 1 must contain a string "n"')
     except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
-        sys.exit(f"ERROR: Invalid presets JSON: {exc}")
+        raise ValueError(f"Invalid presets JSON in {src}: {exc}") from exc
 
-    # Temporary deployment marker: DDMMHHMM, refreshed on each invocation.
-    # Only preset 1 is renamed; IDs, effects and playlist references remain untouched.
     old_name = preset1["n"]
-    clean_name = re.sub(r"^(?:\d{2}[A-Za-z]{3}\d{2}[a-z]|\d{8})\s+", "", old_name)
-    new_name = datetime.now().strftime("%d%m%H%M") + " " + clean_name
-    preset1["n"] = new_name
+    clean_name = re.sub(r"^(?:\\d{2}[A-Za-z]{3}\\d{2}[a-z]|\\d{8})\\s+", "", old_name)
+    preset1["n"] = datetime.now().strftime("%d%m%H%M") + " " + clean_name
 
-    # Keep the on-disk presets.json synchronized with the uploaded bytes.
-    # One compact JSON object per preset/playlist instead of a single huge line.
     entries = [f'  {json.dumps(key)}:{json.dumps(value, ensure_ascii=False, separators=(",", ":"))}' for key, value in parsed.items()]
-    payload = ("{\n" + ",\n".join(entries) + "\n}\n").encode("utf-8")
+    payload = ("{\\n" + ",\\n".join(entries) + "\\n}\\n").encode("utf-8")
     src.write_bytes(payload)
-    print(f"Preset 1 revision: {old_name!r} -> {new_name!r}")
-
-    if not dest_devices:
-        sys.exit("ERROR: dest_devices is empty")
 
     print(f"Source: {src.resolve()}")
+    print(f"Preset 1 revision: {old_name!r} -> {preset1['n']!r}")
     print(f"Entries: {len(parsed)} | Size: {len(payload)} bytes | SHA256: {sha256(payload)}")
-    print(f"Destination: {filesystem_path}")
+    return payload
 
-    results = []
 
-    for name in dest_devices:
-        print(f"\n--- {name} ---")
+def main():
+    if not device_presets:
+        sys.exit("ERROR: device_presets is empty")
+
+    # Preflight every configured source before contacting or overwriting any device.
+    # A source used by several devices is timestamped and written only once per run.
+    payloads = {}
+    targets = []
+    for name, source_path in device_presets:
         try:
             base = device_url(name)
+            source = locate_source(source_path).resolve()
+            if source not in payloads:
+                payloads[source] = prepare_source(source)
+            targets.append((name, base, source))
+        except (OSError, ValueError) as exc:
+            sys.exit(f"ERROR: {name}: {exc}")
+
+    print(f"Destination: {filesystem_path}")
+    results = []
+
+    for name, base, source in targets:
+        payload = payloads[source]
+        print(f"\\n--- {name} ---")
+        print(f"Source: {source}")
+        try:
             endpoint = base + "/edit"
 
             # Read current file first. Do not overwrite if a backup cannot be made.
@@ -181,8 +183,6 @@ def main():
                     results.append((name, "SKIPPED"))
                     continue
 
-            # FileEditor::handleUpload opens the incoming filename in write mode.
-            # The multipart form field must be named 'data'.
             response_text = http_post_file(endpoint, filesystem_path, payload)
             if "UPLOADED:" not in response_text or filesystem_path not in response_text:
                 raise RuntimeError(f"Unexpected upload response: {response_text[:200]!r}")
@@ -199,7 +199,7 @@ def main():
             print(f"FAILED: {exc}")
             results.append((name, "FAILED"))
 
-    print("\nSummary:")
+    print("\\nSummary:")
     for name, status in results:
         print(f"  {status:9} {name}")
     if any(status == "FAILED" for _, status in results):
