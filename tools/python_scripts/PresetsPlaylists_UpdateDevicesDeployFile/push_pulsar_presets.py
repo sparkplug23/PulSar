@@ -113,11 +113,11 @@ def prepare_source(source_path):
         raise ValueError(f"Invalid presets JSON in {src}: {exc}") from exc
 
     old_name = preset1["n"]
-    clean_name = re.sub(r"^(?:\\d{2}[A-Za-z]{3}\\d{2}[a-z]|\\d{8})\\s+", "", old_name)
+    clean_name = re.sub(r"^(?:\d{2}[A-Za-z]{3}\d{2}[a-z]|\d{8})\s+", "", old_name)
     preset1["n"] = datetime.now().strftime("%d%m%H%M") + " " + clean_name
 
     entries = [f'  {json.dumps(key)}:{json.dumps(value, ensure_ascii=False, separators=(",", ":"))}' for key, value in parsed.items()]
-    payload = ("{\\n" + ",\\n".join(entries) + "\\n}\\n").encode("utf-8")
+    payload = ("{\n" + ",\n".join(entries) + "\n}\n").encode("utf-8")
     src.write_bytes(payload)
 
     print(f"Source: {src.resolve()}")
@@ -149,7 +149,7 @@ def main():
 
     for name, base, source in targets:
         payload = payloads[source]
-        print(f"\\n--- {name} ---")
+        print(f"\n--- {name} ---")
         print(f"Source: {source}")
         try:
             endpoint = base + "/edit"
@@ -199,7 +199,7 @@ def main():
             print(f"FAILED: {exc}")
             results.append((name, "FAILED"))
 
-    print("\\nSummary:")
+    print("\nSummary:")
     for name, status in results:
         print(f"  {status:9} {name}")
     if any(status == "FAILED" for _, status in results):
