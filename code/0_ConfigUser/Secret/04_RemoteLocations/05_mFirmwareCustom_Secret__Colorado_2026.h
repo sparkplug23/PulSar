@@ -1725,62 +1725,30 @@ while the thought is in my head, can you also use the node discovery we did on t
 #endif // END DEVICE
 
 
-
-
-
 #ifdef DEVICE_COLORADO26__ROAMING__HUB75EP2_ESP32S3_AS_2D
+
   #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+    #define DEVICENAME_CTR "co26_roaming__hub75e_esp32s3__as_2d"
   #endif
   #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Roaming HUB75 2D"
   #endif
   #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
 
   #define USE_MODULE_LIGHTS_HUB75
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
   #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define BOARD_HAS_PSRAM
 
-
-
-
-  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
-
-
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
-
-  /***********************************
-  * SECTION: Enable Grouped
-  ************************************/  
-
-  /***********************************
-  * SECTION: Network Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/   
-
-
-    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
-
-
-#define RT_COVERAGE_DEBUG
-
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -1788,7 +1756,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   {
     "BusConfig":[
       {
-        "Name":"HUB75E P2.5 CHIP",
+        "Name":"HUB75E P2.5",
         "BusType":"HUB75E",
         "ColourOrder":"GBR",
         "Start":0,
@@ -1809,6 +1777,7 @@ while the thought is in my head, can you also use the node discovery we did on t
     ],
     "Segments":[
       {
+        "Name":"Full Matrix 128x64",
         "PixelRange":[0,8192],
         "ColourPalette":"Rainbow",
         "ColourType":3,
@@ -1822,80 +1791,46 @@ while the thought is in my head, can you also use the node discovery we did on t
         "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":100
+    "BrightnessRGB":30
   }
   )=====";
-      
+
   #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR "\""
     "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-#endif // END DEVICE
-
-
-
-
+#endif
 #ifdef DEVICE_COLORADO26__ROAMING__HUB75EP2_ESP32S3_AS_1D
+
   #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+    #define DEVICENAME_CTR "co26_roaming__hub75e_esp32s3__as_1d"
   #endif
   #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Roaming HUB75 1D"
   #endif
   #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
 
   #define USE_MODULE_LIGHTS_HUB75
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
   #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define BOARD_HAS_PSRAM
 
-
-
-
-  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
-
-
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
-
-  /***********************************
-  * SECTION: Enable Grouped
-  ************************************/  
-
-  /***********************************
-  * SECTION: Network Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/   
-
-
-    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
-
-
-#define RT_COVERAGE_DEBUG
-
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -1903,32 +1838,21 @@ while the thought is in my head, can you also use the node discovery we did on t
   {
     "BusConfig":[
       {
-        "Name":"HUB75E P2.5 CHIP",
+        "Name":"HUB75E P2.5 Linear",
         "BusType":"HUB75E",
         "ColourOrder":"GBR",
         "Start":0,
         "Length":8192
       }
     ],
-    "MatrixConfig":[
-      {
-        "Width":128,
-        "Height":64,
-        "BottomStart":0,
-        "RightStart":0,
-        "Vertical":0,
-        "Serpentine":0,
-        "xOffset":0,
-        "yOffset":0
-      }
-    ],
     "Segments":[
       {
+        "Name":"Linear 8192",
         "PixelRange":[0,8192],
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects":{
-          "Function":"Spaceships",
+          "Function":"Static",
           "Speed":127,
           "Intensity":127,
           "Grouping":1,
@@ -1937,76 +1861,50 @@ while the thought is in my head, can you also use the node discovery we did on t
         "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":100
+    "BrightnessRGB":30
   }
   )=====";
-      
+
   #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR "\""
     "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-#endif // END DEVICE
+#endif
 #ifdef DEVICE_COLORADO26__ROAMING__HUB75EP2_ESP32S3_AS_2D_ICICLE
+
   #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+    #define DEVICENAME_CTR "co26_roaming__hub75e_esp32s3__as_2d_icicle"
   #endif
   #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Roaming HUB75 Icicle 2D"
   #endif
   #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
 
   #define USE_MODULE_LIGHTS_HUB75
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
   #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define BOARD_HAS_PSRAM
 
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+  #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW_INTERVAL_MS 20
 
-
-
-  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
-
-
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
-
-  /***********************************
-  * SECTION: Enable Grouped
-  ************************************/  
-
-  /***********************************
-  * SECTION: Network Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/   
-
-
-    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
-
-
-#define RT_COVERAGE_DEBUG
-
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
-#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+  #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -2014,9 +1912,9 @@ while the thought is in my head, can you also use the node discovery we did on t
   {
     "BusConfig":[
       {
-        "Name":"HUB75E P2.5 CHIP",
+        "Name":"HUB75E P2 Icicle",
         "BusType":"HUB75E",
-        "ColourOrder":"GBR",
+        "ColourOrder":"BGR",
         "Start":0,
         "Length":8192
       }
@@ -2035,47 +1933,61 @@ while the thought is in my head, can you also use the node discovery we did on t
     ],
     "Segments":[
       {
-        "PixelRange":[0,8192],
+        "Name":"Icicles 120x10",
+        "PixelRange":[0,120,0,10],
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects":{
-          "Function":"Spaceships",
+          "Function":"Snow Fall",
           "Speed":127,
           "Intensity":127,
           "Grouping":1,
           "RateMs":20
         },
         "BrightnessRGB":100
+      },
+      {
+        "Name":"Unused Right",
+        "PixelRange":[120,128,0,10],
+        "ColourPalette":"Black",
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":0,
+          "RateMs":10000
+        },
+        "BrightnessRGB":0
+      },
+      {
+        "Name":"Unused Bottom",
+        "PixelRange":[0,128,10,64],
+        "ColourPalette":"Black",
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":0,
+          "RateMs":10000
+        },
+        "BrightnessRGB":0
       }
     ],
-    "BrightnessRGB":100
+    "BrightnessRGB":30
   }
   )=====";
-      
+
   #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR "\""
     "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-#endif // END DEVICE
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 
 
