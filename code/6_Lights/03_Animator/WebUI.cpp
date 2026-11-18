@@ -573,6 +573,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
 
   if (!root["pd"].isNull())
   {
+    ALOG_INF(PSTR("Applying preset from 'pd' parameter"));
     const uint16_t appliedPreset = root[F("pd")] | 0;
 
     if (appliedPreset > PRESET_ID_NONE && appliedPreset < PRESET_ID_TEMP)
