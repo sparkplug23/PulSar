@@ -3937,6 +3937,8 @@ void mAnimatorLight::Segment::startTransition(uint16_t dur, bool segmentCopy) {
 
   // ALOG_INF(PSTR("TRANS START seg=%p dur=%u copy=%u active=%u existing=%u fx=%u"), this, dur, segmentCopy, isActive(), isInTransition(), effect_id);
 
+  if (oneshot_transition_time_ms > 0 && isInTransition()) return;
+
   if (dur == 0 || !isActive()) {
 
     // ALOG_ERR(PSTR("TRANS REJECTED seg=%p dur=%u active=%u"), this, dur, isActive());
@@ -4024,6 +4026,8 @@ void mAnimatorLight::Segment::startTransition(uint16_t dur, bool segmentCopy) {
 // }
 void mAnimatorLight::Segment::stopTransition()
 {
+  oneshot_transition_time_ms = 0;
+  
   if (_t == nullptr) // no ongoing transition
   {
     transition_owned_by_effect = false;

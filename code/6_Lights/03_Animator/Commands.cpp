@@ -322,12 +322,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
     {
       ALOG_WRN(PSTR("Deprecated: Override.Animation.TimeMs; use OneshotTransitionTimeMs"));
-
-      if(!obj["OneshotTransitionTimeMs"])
-      {
-        SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
-      }
-
       data_buffer.isserviced++;
     }
 
@@ -338,9 +332,19 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
   }
+  
   if(jtok = obj["OneshotTransitionTimeMs"])
   {
-    SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
+    const uint16_t duration = jtok.getInt();
+    Segment& seg = SEGMENT_I(segment_index);
+
+    if(duration > 0)
+    {
+      seg.oneshot_transition_time_ms = 0;
+      seg.startTransition(duration, true);
+      if(seg.isInTransition()) seg.oneshot_transition_time_ms = duration;
+    }
+
     data_buffer.isserviced++;
   }
 
