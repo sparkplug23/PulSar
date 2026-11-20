@@ -314,6 +314,38 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     return; 
   }
 
+  /****
+   * Oneshot transitions need to be set before modifying the setup, so states can be saved as part of transition mode
+   */  
+  if(jtok_sub = obj[PM_OVERRIDE])
+  {
+    if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
+    {
+      ALOG_WRN(PSTR("Deprecated: Override.Animation.TimeMs; use OneshotTransitionTimeMs"));
+
+      if(!obj["OneshotTransitionTimeMs"])
+      {
+        SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
+      }
+
+      data_buffer.isserviced++;
+    }
+
+    if(jtok = jtok_sub.getObject()["Animation_Off"].getObject()["TimeMs"])
+    {
+      SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_SVALUE_NVALUE_K("Animation_Off","TimeMs")), SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms);
+      data_buffer.isserviced++;
+    }
+  }
+  if(jtok = obj["OneshotTransitionTimeMs"])
+  {
+    SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
+    data_buffer.isserviced++;
+  }
+
+
+
   if (jtok = obj["ABLMax"])
   {
     uint16_t ma_max = jtok.getInt();
@@ -1956,32 +1988,6 @@ if (jtok_pwi && jtok_pwi.isArray())
   #endif // FIRMWARE_VERSION_MIN
   
 
-  if(jtok_sub = obj[PM_OVERRIDE])
-  {
-    if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
-    {
-      ALOG_WRN(PSTR("Deprecated: Override.Animation.TimeMs; use OneshotTransitionTimeMs"));
-
-      if(!obj["OneshotTransitionTimeMs"])
-      {
-        SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
-      }
-
-      data_buffer.isserviced++;
-    }
-
-    if(jtok = jtok_sub.getObject()["Animation_Off"].getObject()["TimeMs"])
-    {
-      SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms = jtok.getInt();
-      ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_SVALUE_NVALUE_K("Animation_Off","TimeMs")), SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms);
-      data_buffer.isserviced++;
-    }
-  }
-  if(jtok = obj["OneshotTransitionTimeMs"])
-  {
-    SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
-    data_buffer.isserviced++;
-  }
 
 
   if(jtok = obj["Preset"].getObject()["Load"]){
