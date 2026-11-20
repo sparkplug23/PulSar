@@ -4651,6 +4651,8 @@ name = nullptr;
     bool transition_owned_by_effect = false; // The currently active Segment transition was started by the effect itself.
     inline uint16_t startPeriodTransition(bool segmentCopy = true)
     {
+      if (oneshot_transition_time_ms > 0 && isInTransition()) return 0;
+
       const uint16_t transition_time_ms = static_cast<uint16_t>(
         (static_cast<uint32_t>(cycle_time__rate_ms) *
         static_cast<uint32_t>(255U - speed)) / 255U
