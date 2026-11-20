@@ -3713,6 +3713,8 @@ class Segment
       uint16_t cycle_time__rate_ms__save_state = 0;
       // uint16_t cycle_time__rate_ms = 1000;
     }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
+    uint16_t oneshot_transition_time_ms = 0;
+
 
     /**
      * @brief These should be moved elsewhere as the optional defaults for times, that are loaded into the above override when needed

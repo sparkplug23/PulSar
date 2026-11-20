@@ -1957,14 +1957,16 @@ if (jtok_pwi && jtok_pwi.isArray())
   
 
   if(jtok_sub = obj[PM_OVERRIDE])
-  {  
-
-    // Needs added into the new animation
-
-
+  {
     if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
     {
-      SEGMENT_I(segment_index).single_animation_override.time_ms = jtok.getInt();
+      ALOG_WRN(PSTR("Deprecated: Override.Animation.TimeMs; use OneshotTransitionTimeMs"));
+
+      if(!obj["OneshotTransitionTimeMs"])
+      {
+        SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
+      }
+
       data_buffer.isserviced++;
     }
 
@@ -1974,7 +1976,11 @@ if (jtok_pwi && jtok_pwi.isArray())
       ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_SVALUE_NVALUE_K("Animation_Off","TimeMs")), SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms);
       data_buffer.isserviced++;
     }
-
+  }
+  if(jtok = obj["OneshotTransitionTimeMs"])
+  {
+    SEGMENT_I(segment_index).oneshot_transition_time_ms = jtok.getInt();
+    data_buffer.isserviced++;
   }
 
 
