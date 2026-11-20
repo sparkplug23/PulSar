@@ -187,7 +187,7 @@ void mAnimatorLight::Handle_FileSave_Edits()
   // If nothing pending, bail early (paranoid guard; optional if caller already checks)
   if (!FileEditor::Check_AnyFilesEdited()) return;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__SCAN_PRESET_FILE_ON_UPDATE_FOR_PLAYLIST_TO_PRESET_LINKED_LIST
+  #if defined(ENABLE_DEVFEATURE_LIGHTS__PRESET_NAME_SCANNING) && defined(ENABLE_FEATURE_LIGHTS__SCAN_PRESET_FILE_ON_UPDATE_FOR_PLAYLIST_TO_PRESET_LINKED_LIST)
 
   if (FileEditor::Check_FileEditedIs(F("presets.json"))) {
     static bool use_new_parser = false;   // toggles each time

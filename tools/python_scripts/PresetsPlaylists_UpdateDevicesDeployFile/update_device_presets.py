@@ -19,10 +19,10 @@ import uuid
 # Each row: [device IP / hostname, source presets.json]
 # Reusing a source uploads the same timestamped contents to every matching device.
 device_presets = [
-    ["192.168.0.174", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],
-    ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],
+    # ["192.168.0.174", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],
+    # ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],
     # ["192.168.0.160", r"notes\PresetJsonFiles\Christmas2026_CO_2D\presets.json"],
-    # ["192.168.0.170", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Whitehall
+    ["192.168.0.170", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Whitehall
     # ["192.168.0.172", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows front
     # ["192.168.0.173", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows side
     # ["192.168.0.162", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Serial tester

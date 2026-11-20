@@ -2212,11 +2212,13 @@ if (jtok_pwi && jtok_pwi.isArray())
 
     }
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_NAME_SCANNING
     if(jtok = jObj_debug["PlaylistsPSFromPSN"])
-    { 
+    {
       ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()"));
       ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
     }
+    #endif
 
 
   } // end Debug options

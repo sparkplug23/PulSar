@@ -266,6 +266,7 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
 
   if (useEffectNames)
   {
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_NAME_SCANNING
     ALOG_INF(PSTR("Loading playlist via effect names (psen)"));
 
     for (const char* name : psen)
@@ -286,6 +287,11 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
       ALOG_INF(PSTR("Playlist: psen[%u] '%s' -> effect %u"), it, name, (unsigned)fx);
       it++;
     }
+    #else
+      ALOG_ERR(PSTR("Playlist: psen disabled"));
+      unloadPlaylist();
+      return -1;
+    #endif
   }
   else if (useEffectIndices)
   {
@@ -310,7 +316,7 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
   }
   else if (useNames)
   {
-    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
+    #if defined(ENABLE_DEVFEATURE_LIGHTS__PRESET_NAME_SCANNING) && defined(ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME)
 
     ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
 
@@ -928,7 +934,7 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
     return;
   }
 
-  
+
   JsonObject playlist = sObj.createNestedObject(F("playlist"));
   
   JsonArray ps = playlist.createNestedArray("ps");
