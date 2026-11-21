@@ -299,83 +299,72 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
  * transition duration is the static hold time.
  *
  * Palette and setting changes are blended by the segment transition system.
+ * Effect-owned transitions are started once per effect period, independently
+ * of live palette regeneration.
  *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
 {
   const uint16_t seglen = SEGLEN;
-
   if (seglen == 0) return;
+
+  // Effect-owned transition scheduling. RA controls cycle time, SX controls blend time.
+  // PalIX independently controls when the live palette is regenerated.
+  const uint32_t now_ms = millis();
+  const uint16_t period_ms = SEGMENT.cycle_time__rate_ms;
+
+  if (SEGMENT.call == 0) SEGMENT.step = now_ms + period_ms;
+  else if (period_ms > 0 && static_cast<int32_t>(now_ms - SEGMENT.step) >= 0)
+  {
+    if (!SEGMENT.isInTransition()) SEGMENT.startPeriodTransition(true);
+    SEGMENT.step = now_ms + period_ms;
+  }
 
   const uint8_t width_control = SEGMENT.custom1;
 
   // Minimum repeated gradient width is approximately 5% of the segment.
   uint16_t minimum_width = (seglen * 5U + 99U) / 100U;
-
   if (minimum_width < 1U) minimum_width = 1U;
   if (minimum_width > seglen) minimum_width = seglen;
 
   // C1 maps the gradient width from approximately 5% to the full segment.
-  uint16_t repeat_length =
-    minimum_width +
-    ((static_cast<uint32_t>(seglen - minimum_width) * width_control) / 255U);
-
+  uint16_t repeat_length = minimum_width + ((static_cast<uint32_t>(seglen - minimum_width) * width_control) / 255U);
   if (repeat_length < 1U) repeat_length = 1U;
   if (repeat_length > seglen) repeat_length = seglen;
 
-  const bool wrap_mode = SEGMENT.check1
-    ? PALETTE_WRAP_HARDEDGE
-    : PALETTE_WRAP_SMOOTH;
+  const bool wrap_mode = SEGMENT.check1 ? PALETTE_WRAP_HARDEDGE : PALETTE_WRAP_SMOOTH;
 
   for (uint16_t pixel = 0; pixel < seglen; ++pixel)
   {
     uint16_t palette_position;
 
-    if (repeat_length >= seglen)
-    {
-      // One gradient spans the complete segment.
-      palette_position = pixel;
-    }
-    else if (repeat_length == 1U)
-    {
-      palette_position = 0;
-    }
+    if (repeat_length >= seglen) palette_position = pixel;
+    else if (repeat_length == 1U) palette_position = 0;
     else
     {
-      // Scale the current position within the repeated gradient to the
-      // complete segment range expected by PALETTE_INDEX__IS_SEGLEN_RANGE.
+      // Scale repeated-gradient position into the full segment palette-index range.
       const uint16_t position_in_repeat = pixel % repeat_length;
-
-      palette_position = static_cast<uint16_t>(
-        (static_cast<uint32_t>(position_in_repeat) * (seglen - 1U)) /
-        (repeat_length - 1U)
-      );
+      palette_position = static_cast<uint16_t>((static_cast<uint32_t>(position_in_repeat) * (seglen - 1U)) / (repeat_length - 1U));
     }
 
-    const uint32_t colour = SEGMENT.GetPaletteColour(
-      palette_position,
-      PALETTE_INDEX__IS_SEGLEN_RANGE,
-      PALETTE_MODE__FORCE_GRADIENT,
-      wrap_mode
-    );
-
+    const uint32_t colour = SEGMENT.GetPaletteColour(palette_position, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__FORCE_GRADIENT, wrap_mode);
     SEGMENT.setPixelColor(pixel, colour);
   }
 }
 static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient@"                                    // Name
-"!,,Width,,,Hard edge,,,!,"                 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                            // ----------------------------------------- Sliders/SegCols
+"!,,Width,,,Hard edge,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                            // Sliders/SegCols
 "!,!,!,!,!"                                    // Segment Colour Names
-";"                                            // ----------------------------------------- SegCols/PalPicker
+";"                                            // SegCols/PalPicker
 "!"                                            // Palette picker (primary)
-";"                                            // ----------------------------------------- PalPicker/is1D2D
+";"                                            // PalPicker/is1D2D
 "1"                                            // Icon flags
-";"                                            // ----------------------------------------- is1D2D/Defaults
+";"                                            // is1D2D/Defaults
 "sx=127,"                                      // Transition occupies approximately half the effect period
 "c1=255,"                                      // Default gradient width: full segment
 "o1=0,"                                        // Smooth repeat boundary
 "ep=10000"                                     // Complete effect period
-;                                              // End
+;
 static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Displays the active palette as a continuous gradient.\n\r"
 "Discrete palettes are interpolated between their colour entries.\n\r"
@@ -9151,6 +9140,139 @@ static const char PM_EFFECT_DESCRI__TRICOLOR_WIPE[] PROGMEM =
 "Three-color wipe over a palette background.\n\r"
 "SX: Wipe speed\n\r"
 "Colors: C0,C1,C2";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Tri-Palette Wipe
+ *
+ * Wipes three colours across the segment in sequence, repeating continuously.
+ * Each complete wipe replaces the preceding colour across the segment.
+ *
+ * COLOUR SOURCES
+ *   - Slot 1 : Primary palette.
+ *   - Slot 2 : SEGCOLOR(0), or Palette2 when O2 is enabled.
+ *   - Slot 3 : SEGCOLOR(1), used as the third/background colour.
+ *
+ * O1 controls palette iteration:
+ *   - Disabled : Always use the first colour from each palette.
+ *   - Enabled  : Advance palette colour indices after each three-wipe cycle.
+ *
+ * O2 controls the secondary palette:
+ *   - Disabled : Slot 2 uses SEGCOLOR(0).
+ *   - Enabled  : Slot 2 uses Palette2.
+ *
+ * Discrete palettes iterate through their actual colour entries.
+ * CRGB16 palettes iterate through 16 evenly spaced palette positions.
+ * Primary and secondary palette indices wrap independently.
+ *
+ * SX controls the proportion of each effect period occupied by the wipe:
+ *   - 0   : Wipe occupies the complete period.
+ *   - 255 : Immediate replacement.
+ *   - 1..254 : Wipe followed by a static hold.
+ *
+ * EP defines the complete duration of one wipe. Three wipes form one
+ * complete colour cycle. PALIX remains independent for live palettes.
+ *
+ * STATE
+ *   - aux3 : Effect cycle start timestamp.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__TriPalette_Wipe()
+{
+  const uint16_t seglen = SEGLEN;
+  if (seglen == 0 || SEGMENT.palette_loaded == nullptr) return;
+
+  const bool cycle_palette_colours = SEGMENT.check1;
+  const bool use_palette2 = SEGMENT.check2;
+  if (use_palette2 && !SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id)) return;
+
+  const uint32_t now_ms = effect_start_time;
+  const uint32_t period_ms = max<uint32_t>(1UL, SEGMENT.get_effect_period());
+  if (SEGMENT.call == 0) SEGMENT.aux3 = now_ms;
+
+  // Calculate the current wipe phase and the palette cycle index.
+  const uint32_t elapsed_ms = now_ms - SEGMENT.aux3;
+  const uint32_t wipe_number = elapsed_ms / period_ms;
+  const uint8_t wipe_phase = static_cast<uint8_t>(wipe_number % 3U);
+  const uint32_t palette_cycle = cycle_palette_colours ? wipe_number / 3U : 0U;
+  const uint32_t within_ms = elapsed_ms % period_ms;
+
+  // SX determines the moving-wipe duration and the remaining static hold.
+  const uint32_t wipe_duration_ms = (period_ms * static_cast<uint32_t>(255U - SEGMENT.speed)) / 255U;
+  const uint16_t wipe_pixels = wipe_duration_ms == 0 ? seglen : static_cast<uint16_t>((static_cast<uint64_t>(min<uint32_t>(within_ms, wipe_duration_ms)) * seglen) / wipe_duration_ms);
+
+  // Select a palette colour by index, using 16 samples for CRGB16 palettes.
+  const auto sample_primary = [&](uint32_t cycle) -> uint32_t
+  {
+    const bool crgb16 = SEGMENT.palette_loaded->runtime_type == mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
+    const uint16_t count = crgb16 ? 16U : max<uint16_t>(1U, SEGMENT.palette_loaded->colours_in_palette);
+    const uint16_t index = static_cast<uint16_t>(cycle % count);
+    if (crgb16) return SEGMENT.GetPaletteColour(static_cast<uint16_t>((static_cast<uint32_t>(index) * 255U) / (count - 1U)), PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
+    return SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__FORCE_DISCRETE, PALETTE_WRAP_HARDEDGE);
+  };
+
+  const auto sample_secondary = [&](uint32_t cycle) -> uint32_t
+  {
+    if (!use_palette2) return SEGCOLOR(0);
+    const bool crgb16 = SEGMENT.palette2_loaded->runtime_type == mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
+    const uint16_t count = crgb16 ? 16U : max<uint16_t>(1U, SEGMENT.palette2_loaded->colours_in_palette);
+    const uint16_t index = static_cast<uint16_t>(cycle % count);
+    if (crgb16) return SEGMENT.GetPalette2Colour(static_cast<uint16_t>((static_cast<uint32_t>(index) * 255U) / (count - 1U)), PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
+    return SEGMENT.GetPalette2Colour(index, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__FORCE_DISCRETE, PALETTE_WRAP_HARDEDGE);
+  };
+
+  // Resolve the previous and incoming colours for this wipe.
+  uint32_t previous_colour;
+  uint32_t incoming_colour;
+
+  switch (wipe_phase)
+  {
+    case 0:
+      previous_colour = SEGCOLOR(1);
+      incoming_colour = sample_primary(palette_cycle);
+      break;
+
+    case 1:
+      previous_colour = sample_primary(palette_cycle);
+      incoming_colour = sample_secondary(palette_cycle);
+      break;
+
+    default:
+      previous_colour = sample_secondary(palette_cycle);
+      incoming_colour = SEGCOLOR(1);
+      break;
+  }
+
+  // Paint the incoming colour progressively from the start of the segment.
+  for (uint16_t pixel = 0; pixel < seglen; ++pixel) SEGMENT.setPixelColor(pixel, pixel < wipe_pixels ? incoming_colour : previous_colour);
+}
+
+static const char PM_EFFECT_CONFIG__TRIPALETTE_WIPE[] PROGMEM =
+"Tri-Palette Wipe@"                             // Name
+"Wipe Speed,!,,,,Cycle Colours,Use Palette2,,!," // 10 fields after '@': 1sx,2ix,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
+"Slot 2,Background"                             // Segment Colour Names
+";"
+"!"                                             // Primary palette picker
+";"
+"1p"                                            // 1D icon, dual palette
+";"
+"paln=IceCream Floats,"
+"pal2=Cold White,"
+"sx=0,"
+"o1=1,"
+"o2=0,"
+"ep=3000"
+;
+
+static const char PM_EFFECT_DESCRI__TRIPALETTE_WIPE[] PROGMEM =
+"Three sequential wipes using palette and segment colours.\n\r"
+"Slot 1: Primary palette\n\r"
+"Slot 2: SEGCOLOR(0), or Palette2 when enabled\n\r"
+"Slot 3: SEGCOLOR(1), background colour\n\r"
+"O1: Cycle palette colours after each three-wipe sequence\n\r"
+"O2: Enable Palette2 for slot 2\n\r"
+"SX: Proportion of EP spent wiping\n\r"
+"EP: Complete duration of each wipe";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -38070,6 +38192,14 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__TRICOLOR_WIPE,
             #endif
             Effect_DevStage::Release);
+
+  addEffect(EFFECTS_FUNCTION__TRIPALETTE_WIPE__ID,
+          &mAnimatorLight::EffectAnim__TriPalette_Wipe,
+          PM_EFFECT_CONFIG__TRIPALETTE_WIPE,
+          #ifdef ENABLE_EFFECT_DESCRIPTIONS
+          PM_EFFECT_DESCRI__TRIPALETTE_WIPE,
+          #endif
+          Effect_DevStage::Beta);
   /**
    * Wipe/Sweep/Runners 
    **/

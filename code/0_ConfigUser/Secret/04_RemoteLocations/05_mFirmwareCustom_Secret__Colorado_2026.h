@@ -663,6 +663,15 @@ while the thought is in my head, can you also use the node discovery we did on t
   // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
   // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
+  
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
 
   // =========================================================
   // Lighting: 100 WS2812 LEDs, GPIO13
@@ -893,8 +902,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define DEVICENAME_ROOMHINT_CTR "Colorado"
 
 
-  // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
-  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
+  
 
 
   // =========================================================

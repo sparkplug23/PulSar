@@ -1451,6 +1451,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Colour_Sweep_Palette();
     void EffectAnim__Dynamic();
     void EffectAnim__TriColour_Wipe();
+    void EffectAnim__TriPalette_Wipe();
     void EffectAnim__Android();
     void EffectAnim__Base_RunningWaves(bool saw, bool dual=false);
     void EffectAnim__Running_Colour();
@@ -1985,6 +1986,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__PERCENT__ID,
       EFFECTS_FUNCTION__RANDOM_COLOR__ID,       
       EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
+      EFFECTS_FUNCTION__TRIPALETTE_WIPE__ID,
       /**
        * Wipe/Sweep/Runners 
        **/
