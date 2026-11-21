@@ -501,14 +501,25 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
 
   const uint32_t now_ms = millis();
 
-  // Seed exactly once after load/reset
-  if (live_palette.timing1 == 0) {
+  // Seed immediately on initial load; transition only on subsequent refreshes.
+  if (live_palette.timing1 == 0)
+  {
     live_palette.timing1 = now_ms;
-    // fallthrough: generate immediately on first call
-  } else {
+  }
+  else
+  {
     const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
-    // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),live_palette.intensity,new_colour_rate_ms);
     if ((now_ms - live_palette.timing1) < new_colour_rate_ms) return;
+
+    // Avoid restarting or replacing a transition that is still running.
+    if (isInTransition()) return;
+
+    // Begin transition before replacing the current live palette.
+    if (!preview_mode && palette_container == palette_loaded && pid == palette_id)
+    {
+      startPeriodTransition(false);
+    }
+
     live_palette.timing1 = now_ms;
   }
 
@@ -1408,10 +1419,11 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
 
   if (palette_id != palette_loaded->loaded_palette_id) LoadPalette(palette_id);
 
-  if (
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
-    (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
-  ) LoadPalette(palette_id);
+  // Handled by Update_LivePalettes()
+  // if (
+  //   (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
+  //   (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  // ) LoadPalette(palette_id);
 
   DEBUG_LINE_HERE_TRACE
 
