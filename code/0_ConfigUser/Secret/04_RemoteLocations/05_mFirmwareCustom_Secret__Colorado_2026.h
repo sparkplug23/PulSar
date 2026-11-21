@@ -661,7 +661,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 
 // making show as physically there, or, in test in full compile method
   // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
-  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
 
   // =========================================================
@@ -774,7 +774,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #endif
 
   
-  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
       #define USE_LIGHTING_TEMPLATE
 
@@ -824,6 +824,59 @@ while the thought is in my head, can you also use the node discovery we did on t
 
   #endif
 
+  
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_1000LEDS
+
+      #define USE_LIGHTING_TEMPLATE
+      DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+      R"=====(
+      {
+        "BusConfig":[      
+          {
+            "Pin":13,
+            "ColourOrder":"GBR",
+            "BusType":"WS2812_RGB",
+            "Start":0,
+            "Length":1000
+          }
+        ],
+        "Segments":[
+          {
+            "Name":"Bus 1",
+            "PixelRange": [
+              0,
+              1000
+            ],
+            "ColourPalette":"Snowy 02",
+            "ColourType":3,
+            "Effects": {
+              "Function":"Static",
+              "Speed":255,
+              "Intensity":127,
+              "Grouping":1,
+              "RateMs": 20
+            },
+            "BrightnessRGB": 100
+          }
+        ],
+        "BrightnessRGB": 100
+      }
+      )=====";
+      
+      #define USE_MODULE_TEMPLATE
+      DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+      "{"
+        "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+        "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+        "\"" D_GPIO_NUMBER "\":{"
+          "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+        "},"
+        "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+        "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+      "}";
+
+  #endif
+
 #endif
 
 
@@ -841,7 +894,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 
 
   // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
-  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
 
   // =========================================================
@@ -1061,7 +1114,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #endif
 
   
-  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
       #define USE_LIGHTING_TEMPLATE
 
@@ -1129,7 +1182,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define DEVICENAME_ROOMHINT_CTR "Colorado"
 
 // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
-  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
 
   // =========================================================
@@ -1220,7 +1273,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #endif
 
   
-  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
       #define USE_LIGHTING_TEMPLATE
 
@@ -1287,7 +1340,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define DEVICENAME_ROOMHINT_CTR "Colorado"
 
 // #define FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
-  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  // #define FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
 
   // =========================================================
@@ -1378,7 +1431,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   #endif
 
   
-  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST1
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
       #define USE_LIGHTING_TEMPLATE
 
@@ -1425,6 +1478,58 @@ while the thought is in my head, can you also use the node discovery we did on t
         "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
       "}";
 
+
+  #endif
+  
+  #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_1000LEDS
+
+      #define USE_LIGHTING_TEMPLATE
+      DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+      R"=====(
+      {
+        "BusConfig":[      
+          {
+            "Pin":13,
+            "ColourOrder":"GBR",
+            "BusType":"WS2812_RGB",
+            "Start":0,
+            "Length":1000
+          }
+        ],
+        "Segments":[
+          {
+            "Name":"Bus 1",
+            "PixelRange": [
+              0,
+              1000
+            ],
+            "ColourPalette":"Snowy 02",
+            "ColourType":3,
+            "Effects": {
+              "Function":"Static",
+              "Speed":255,
+              "Intensity":127,
+              "Grouping":1,
+              "RateMs": 20
+            },
+            "BrightnessRGB": 100
+          }
+        ],
+        "BrightnessRGB": 100
+      }
+      )=====";
+      
+      #define USE_MODULE_TEMPLATE
+      DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+      "{"
+        "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+        "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+        "\"" D_GPIO_NUMBER "\":{"
+          "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+        "},"
+        "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+        "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+      "}";
 
   #endif
 
