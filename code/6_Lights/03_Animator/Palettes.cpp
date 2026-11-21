@@ -501,7 +501,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
 
   const uint32_t now_ms = millis();
 
-  // Seed immediately on initial load; transition only on subsequent refreshes.
+  // Seed exactly once after load/reset
   if (live_palette.timing1 == 0)
   {
     live_palette.timing1 = now_ms;
@@ -510,16 +510,6 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
   {
     const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
     if ((now_ms - live_palette.timing1) < new_colour_rate_ms) return;
-
-    // Avoid restarting or replacing a transition that is still running.
-    if (isInTransition()) return;
-
-    // Begin transition before replacing the current live palette.
-    if (!preview_mode && palette_container == palette_loaded && pid == palette_id)
-    {
-      startPeriodTransition(false);
-    }
-
     live_palette.timing1 = now_ms;
   }
 
