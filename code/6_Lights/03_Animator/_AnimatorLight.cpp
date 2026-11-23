@@ -1307,20 +1307,31 @@ uint16_t mAnimatorLight::approximateKelvinFromRGB(uint32_t rgb) {
  *
  * @returns Packed RGBW colour.
  */
+// uint32_t mAnimatorLight::Segment::color_from_palette_wled(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri)
+// {
+//   uint32_t color = getCurrentColor(mcol);
+//   if ((palette_id == 0 && mcol < NUM_COLORS) || !_isRGB) return color_fade(color, pbri, true);
+//   uint16_t palette_index = i;
+//   if (mapping) palette_index = min((i * 255U) / vLength(), 255U);
+//   TBlendType blend = NOBLEND;
+//   if (tkr_anim->paletteBlend == 0) blend = moving ? LINEARBLEND : LINEARBLEND_NOWRAP;
+//   if (tkr_anim->paletteBlend == 1) blend = LINEARBLEND;
+//   if (tkr_anim->paletteBlend == 2) blend = LINEARBLEND_NOWRAP;
+//   uint32_t palcol = tkr_anim->ColorFromPalette_wled(pSEGPALETTE, palette_index, pbri, blend);
+//   return RGBW32(R(palcol), G(palcol), B(palcol), W(color));
+// }
 uint32_t mAnimatorLight::Segment::color_from_palette_wled(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri)
 {
-  uint32_t color = getCurrentColor(mcol);
-  if ((palette_id == 0 && mcol < NUM_COLORS) || !_isRGB) return color_fade(color, pbri, true);
+  const bool use_segment_colour = (palette_id == 0 && mcol < NUM_COLORS);
+  if (use_segment_colour) return color_fade(getCurrentColor(mcol), pbri, true);
   uint16_t palette_index = i;
   if (mapping) palette_index = min((i * 255U) / vLength(), 255U);
   TBlendType blend = NOBLEND;
   if (tkr_anim->paletteBlend == 0) blend = moving ? LINEARBLEND : LINEARBLEND_NOWRAP;
   if (tkr_anim->paletteBlend == 1) blend = LINEARBLEND;
   if (tkr_anim->paletteBlend == 2) blend = LINEARBLEND_NOWRAP;
-  uint32_t palcol = tkr_anim->ColorFromPalette_wled(pSEGPALETTE, palette_index, pbri, blend);
-  return RGBW32(R(palcol), G(palcol), B(palcol), W(color));
+  return tkr_anim->ColorFromPalette_wled(pSEGPALETTE, palette_index, pbri, blend);
 }
-
 
 
 void mAnimatorLight::Init_Segments()
