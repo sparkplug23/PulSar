@@ -268,7 +268,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   // Lighting: 100 WS2812 LEDs, GPIO13
   // =========================================================
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
 
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
@@ -428,7 +429,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   // Lighting: 100 WS2812 LEDs, GPIO13
   // =========================================================
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
 
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
@@ -591,8 +593,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   // Lighting: 100 WS2812 LEDs, GPIO13
   // =========================================================
 
-  #define USE_LIGHTING_TEMPLATE
-
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -680,6 +682,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -785,8 +788,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
-
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
       R"=====(
       {
@@ -836,6 +839,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_1000LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -951,6 +955,7 @@ while the thought is in my head, can you also use the node discovery we did on t
        * @brief tree physical wiring connections
        * 16 outputs
        */
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -1126,6 +1131,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
 
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -1203,6 +1209,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -1286,8 +1293,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
-
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
       R"=====(
       {
@@ -1362,6 +1369,7 @@ while the thought is in my head, can you also use the node discovery we did on t
 
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_DEPLOYED
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -1445,6 +1453,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_100LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
 
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -1495,6 +1504,7 @@ while the thought is in my head, can you also use the node discovery we did on t
   
   #ifdef FIRMWARE_DEVBUILD___LIGHTING_TEST_1000LEDS
 
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
       #define USE_LIGHTING_TEMPLATE
       DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
       R"=====(
@@ -1783,7 +1793,8 @@ while the thought is in my head, can you also use the node discovery we did on t
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -1867,7 +1878,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -1949,7 +1961,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -2023,7 +2036,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
   #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -2329,7 +2343,8 @@ while the thought is in my head, can you also use the node discovery we did on t
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
-    #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
     R"=====(
     {
@@ -2395,7 +2410,8 @@ while the thought is in my head, can you also use the node discovery we did on t
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
-    #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
     R"=====(
     {
@@ -2505,7 +2521,8 @@ while the thought is in my head, can you also use the node discovery we did on t
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
 
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -2617,7 +2634,8 @@ while the thought is in my head, can you also use the node discovery we did on t
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
-    #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
     R"=====(
     {
@@ -2709,7 +2727,8 @@ while the thought is in my head, can you also use the node discovery we did on t
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
 
-    #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
     R"=====(
     {
@@ -2802,7 +2821,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   /***********************************
    * SECTION: Lighting Template
   ************************************/
-  #define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
@@ -3052,7 +3072,8 @@ while the thought is in my head, can you also use the node discovery we did on t
   #define MAX_LED_MEMORY 64000*5
 
 
-#define USE_LIGHTING_TEMPLATE
+      #define USE_LIGHTING_TEMPLATE__OVERRIDE
+      #define USE_LIGHTING_TEMPLATE
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
 R"=====(
 {
