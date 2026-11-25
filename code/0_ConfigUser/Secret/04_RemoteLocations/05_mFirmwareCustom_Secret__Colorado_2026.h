@@ -868,6 +868,7 @@ while the thought is in my head, can you also use the node discovery we did on t
             "BrightnessRGB": 100
           }
         ],
+        "Preset":{"Load":20207},
         "BrightnessRGB": 100
       }
       )=====";
@@ -1089,7 +1090,8 @@ while the thought is in my head, can you also use the node discovery we did on t
           "BrightnessCCT": 0
         },
         "BrightnessRGB": 100,
-        "BrightnessCCT": 0
+        "BrightnessCCT": 0,
+        "Preset":{"Load":20207}
       }
       )=====";
 
@@ -1153,7 +1155,8 @@ while the thought is in my head, can you also use the node discovery we did on t
             "BrightnessRGB":100
           }
         ],
-        "BrightnessRGB":100
+        "BrightnessRGB":100,
+        "Preset":{"Load":20207}
       }
       )=====";
 
@@ -1312,7 +1315,8 @@ while the thought is in my head, can you also use the node discovery we did on t
             "BrightnessRGB":100
           }
         ],
-        "BrightnessRGB":100
+        "BrightnessRGB":100,
+        "Preset":{"Load":20207}
       }
       )=====";
 
@@ -3038,164 +3042,58 @@ while the thought is in my head, can you also use the node discovery we did on t
   //   "BrightnessRGB":100
   // }
   // )=====";
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "n":"L1",
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":250
-      },
-      {
-        "n":"L2",
-        "Pin":18,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":250,
-        "Length":250
-      },
-      {
-        "n":"L3",
-        "Pin":16,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":500,
-        "Length":250
-      },
-      {
-        "n":"L4",
-        "Pin":17,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":750,
-        "Length":250
-      },
-      {
-        "n":"L5",
-        "Pin":19,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1000,
-        "Length":200
-      },
-      {
-        "n":"L6",
-        "Pin":21,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1200,
-        "Length":200
-      },
-      {
-        "n":"L7",
-        "Pin":22,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1400,
-        "Length":200
-      },
-      {
-        "n":"L8",
-        "Pin":23,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1600,
-        "Length":200
-      },
-      {
-        "n":"R1",
-        "Pin":13,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1800,
-        "Length":200
-      },
-      {
-        "n":"R2",
-        "Pin":12,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2000,
-        "Length":200
-      },
-      {
-        "n":"R3",
-        "Pin":14,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2200,
-        "Length":200
-      },
-      {
-        "n":"R4",
-        "Pin":27,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2400,
-        "Length":200
-      },
-      {
-        "n":"R5",
-        "Pin":26,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2600,
-        "Length":200
-      },
-      {
-        "n":"R6",
-        "Pin":32,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2800,
-        "Length":200
-      },
-      {
-        "n":"R7",
-        "Pin":32,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2800,
-        "Length":200
-      },
-      {
-        "n":"R8",
-        "Pin":32,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2800,
-        "Length":200
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        3000
-      ],
-      "ColourPalette":"Snowy 02",
-      "Palette2":"Cold White",
-      "Effects": {
-        "Function":"Static",
-        "Intensity":1,
-        "Speed":255,
-        "Grouping":1,
-        "Decimate":4,
-        "Custom1":255,
-        "Custom2":220,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
+  
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
+
+  // #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+
+
+#define USE_LIGHTING_TEMPLATE
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+R"=====(
+{
+  "BusConfig":[
+    {"n":"L1","Pin":4,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":0,"Length":250},
+    {"n":"L2","Pin":5,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":250,"Length":250},
+    {"n":"L3","Pin":6,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":500,"Length":250},
+    {"n":"L4","Pin":7,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":750,"Length":250},
+    {"n":"L5","Pin":15,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":1000,"Length":200},
+    {"n":"L6","Pin":16,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":1200,"Length":200},
+    {"n":"L7","Pin":17,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":1400,"Length":200},
+    {"n":"L8","Pin":18,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":1600,"Length":200},
+    {"n":"R1","Pin":8,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":1800,"Length":200},
+    {"n":"R2","Pin":3,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":2000,"Length":200},
+    {"n":"R3","Pin":9,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":2200,"Length":200},
+    {"n":"R4","Pin":10,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":2400,"Length":200},
+    {"n":"R5","Pin":11,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":2600,"Length":200},
+    {"n":"R6","Pin":12,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":2800,"Length":200},
+    {"n":"R7","Pin":13,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":3000,"Length":500},
+    {"n":"R8","Pin":14,"ColourOrder":"RGB","BusType":"WS2812_RGB","Start":3500,"Length":500}
+  ],
+  "Segments":[{
+    "PixelRange":[0,4000],
+    "ColourPalette":"Snowy 02",
+    "Palette2":"Cold White",
+    "Effects":{
+      "Function":"Static",
+      "Intensity":1,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":4,
+      "Custom1":255,
+      "Custom2":220,
+      "RateMs":1000
     },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
-  }
-  )=====";
+    "BrightnessRGB":100
+  }],
+  "Preset":{"Load":20207},
+  "BrightnessRGB":100
+}
+)=====";
 
   // lets make the last 2 pins, be much larger out. 500 each? with power injection
   // Cut into 4 sections, then connect two, and power inject in between with T junctions.

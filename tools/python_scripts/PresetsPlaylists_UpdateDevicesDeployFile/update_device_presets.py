@@ -23,10 +23,10 @@ device_presets = [
     # ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],
     # ["192.168.0.160", r"notes\PresetJsonFiles\Christmas2026_CO_2D\presets.json"],
     ["192.168.0.170", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Whitehall
-    # ["192.168.0.172", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows front
-    # ["192.168.0.173", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows side
+    ["192.168.0.172", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows front
+    ["192.168.0.173", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Meadows side
     # ["192.168.0.162", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # Serial tester
-    # ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # S3 serial tester
+    ["192.168.0.168", r"notes\PresetJsonFiles\Christmas2026_CO_1D\presets.json"],  # S3 serial tester
 ]
 filesystem_path = "/presets.json"
 
